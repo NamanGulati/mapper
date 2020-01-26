@@ -23,6 +23,7 @@
 #include <vector> 
 #include "m1.h"
 #include "StreetsDatabaseAPI.h"
+#include <math.h>
 
 
 // load_map will be called with the name of the file that stores the "layer-2"
@@ -84,7 +85,16 @@ void close_map() {
     
 }
 
-double find_distance_between_two_points(std::pair<LatLon, LatLon> points){return 0;}
+double find_distance_between_two_points(std::pair<LatLon, LatLon> points){
+    double lon1 = points.first.lon()*DEGREE_TO_RADIAN;
+    double lon2 = points.second.lon()*DEGREE_TO_RADIAN;
+    double lat1 = points.first.lat()*DEGREE_TO_RADIAN;
+    double lat2 = points.second.lat()*DEGREE_TO_RADIAN;
+    double lat_avg = (lat1 + lat2)/2;
+    double x1 = lon1*cos(lat_avg);
+    double x2 = lon2*cos(lat_avg);
+    return EARTH_RADIUS_METERS*sqrt(pow(lat2-lat1, 2) + pow(x2-x1, 2));
+}
 double find_street_segment_length(int street_segment_id){return 0;}
 double find_street_segment_travel_time(int street_segment_id){return 0;}
 int find_closest_intersection(LatLon my_position){return 0;}
