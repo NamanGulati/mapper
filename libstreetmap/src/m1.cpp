@@ -44,7 +44,7 @@ bool load_map(std::string map_streets_database_filename) {
     //Load your map related data structures here
     //
 
-    
+    //hello    
 
     load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
