@@ -58,8 +58,7 @@ bool load_map(std::string map_streets_database_filename) {
     int nStreetSegments = getNumStreetSegments();
     for(int i=0;i<nStreetSegments;i++){
         struct InfoStreetSegment sgmt = getInfoStreetSegment(i);
-        std::vector<InfoStreetSegment> segments = streets[sgmt.streetID];
-        segments.push_back(sgmt);
+        streets[sgmt.streetID].push_back(sgmt);
         
     }
     int nIntersections=getNumIntersections();
@@ -72,7 +71,7 @@ bool load_map(std::string map_streets_database_filename) {
         intersections.push_back(segmentsAtIntersection);
     }
     
-    
+    std::cout<<streets.size()<<std::endl;
     
     load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
