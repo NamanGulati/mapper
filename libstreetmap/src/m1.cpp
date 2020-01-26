@@ -80,6 +80,10 @@ bool load_map(std::string map_streets_database_filename) {
     return load_successful;
 }
 
+//Requires “OSM-DatabaseAPI.h", do last
+double find_way_length(OSMID way_id){
+    
+}
 void close_map() {
     //Clean-up your map related data structures here
     
