@@ -85,3 +85,17 @@ void close_map() {
     
 }
 
+double find_distance_between_two_points(std::pair<LatLon, LatLon> points){return 0;}
+double find_street_segment_length(int street_segment_id){return 0;}
+double find_street_segment_travel_time(int street_segment_id){return 0;}
+int find_closest_intersection(LatLon my_position){return 0;}
+std::vector<int> find_street_segments_of_intersection(int intersection_id){return nullptr;}
+std::vector<std::string> find_street_names_of_intersection(int intersection_id){return nullptr;}
+bool are_directly_connected(std::pair<int, int> intersection_ids){return false;}
+std::vector<int> find_adjacent_intersections(int intersection_id){return nullptr;}
+std::vector<int> find_street_segments_of_street(int street_id){return nullptr;}
+std::vector<int> find_intersections_of_street(int street_id){return nullptr;}
+std::vector<int> find_intersections_of_two_streets(std::pair<int, int> street_ids){return nullptr;}
+std::vector<int> find_street_ids_from_partial_street_name(std::string street_prefix){return nullptr;}
+double find_feature_area(int feature_id){return 0;}
+double find_way_length(OSMID way_id){return 0;}
