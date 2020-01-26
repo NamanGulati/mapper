@@ -19,6 +19,8 @@
  * SOFTWARE.
  */
 #include <iostream>
+#include <map>
+#include <vector> 
 #include "m1.h"
 #include "StreetsDatabaseAPI.h"
 
@@ -34,18 +36,44 @@
 // name of the ".osm.bin" file that matches your map -- just change 
 // ".streets" to ".osm" in the map_streets_database_filename to get the proper
 // name.
+std::map<StreetIndex,std::vector<InfoStreetSegment>> streets;
+std::vector<std::vector<InfoStreetSegment>> intersections;
+
+
 bool load_map(std::string map_streets_database_filename) {
     bool load_successful = false; //Indicates whether the map has loaded 
                                   //successfully
 
     std::cout << "load_map: " << map_streets_database_filename << std::endl;
-
+    loadStreetsDatabaseBIN(map_streets_database_filename);
     //
     //Load your map related data structures here
     //
-
-    //hello    
-
+    /*
+     * Data needed:
+     * Streets      map: StreetIndex(name) -> vector(segments)
+     * Intersection
+     */
+    
+    int nStreetSegments = getNumStreetSegments();
+    for(int i=0;i<nStreetSegments;i++){
+        struct InfoStreetSegment sgmt = getInfoStreetSegment(i);
+        std::vector<InfoStreetSegment> segments = streets[sgmt.streetID];
+        segments.push_back(sgmt);
+        
+    }
+    int nIntersections=getNumIntersections();
+    for(int i = 0;i<nIntersections;i++){
+        int nSegs = getIntersectionStreetSegmentCount(i);
+        std::vector<InfoStreetSegment> segmentsAtIntersection;
+        for(int j=0;j<nSegs;j++){
+            segmentsAtIntersection.push_back(getInfoStreetSegment(getIntersectionStreetSegment(i,j)));
+        }
+        intersections.push_back(segmentsAtIntersection);
+    }
+    
+    
+    
     load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
 
@@ -56,3 +84,4 @@ void close_map() {
     //Clean-up your map related data structures here
     
 }
+
