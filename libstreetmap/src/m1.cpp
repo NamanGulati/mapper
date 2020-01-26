@@ -95,7 +95,32 @@ double find_distance_between_two_points(std::pair<LatLon, LatLon> points){
     double x2 = lon2*cos(lat_avg);
     return EARTH_RADIUS_METERS*sqrt(pow(lat2-lat1, 2) + pow(x2-x1, 2));
 }
-double find_street_segment_length(int street_segment_id){return 0;}
+double find_street_segment_length(int street_segment_id){
+    double length = 0;
+    InfoStreetSegment seg = getInfoStreetSegment(street_segment_id);
+    std::pair <LatLon, LatLon> points;
+    
+    if (seg.curvePointCount != 0){
+        points.first = getIntersectionPosition(seg.from);
+        points.second = getStreetSegmentCurvePoint(1,seg.curvePointCount);
+        length += find_distance_between_two_points(points);
+        for (int x = 2; x < seg.curvePointCount; x ++){
+            points.first = getStreetSegmentCurvePoint(x,seg.curvePointCount);
+            points.second = getStreetSegmentCurvePoint(x + 1,seg.curvePointCount);
+            length += find_distance_between_two_points(points);
+        }
+        points.first = getStreetSegmentCurvePoint(seg.curvePointCount,seg.curvePointCount);
+        points.second = getIntersectionPosition(seg.to);
+        length += find_distance_between_two_points(points);
+    }
+    else{
+        points.first = getIntersectionPosition(seg.from);
+        points.second = getIntersectionPosition(seg.to);
+        length += find_distance_between_two_points(points);
+    }
+    
+    return length;
+}
 double find_street_segment_travel_time(int street_segment_id){return 0;}
 int find_closest_intersection(LatLon my_position){return 0;}
 std::vector<int> find_street_segments_of_intersection(int intersection_id){return std::vector<int>();}
