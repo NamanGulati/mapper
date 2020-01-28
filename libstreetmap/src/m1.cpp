@@ -111,7 +111,7 @@ double find_distance_between_two_points(std::pair<LatLon, LatLon> points){//nayf
     return EARTH_RADIUS_METERS*sqrt(pow(lat2-lat1, 2) + pow(x2-x1, 2));
 }
 
-double find_street_segment_length(int street_segment_id){ //rob
+double find_street_segment_length(int street_segment_id){
     double length = 0;
     InfoStreetSegment seg = getInfoStreetSegment(street_segment_id);
     std::pair <LatLon, LatLon> points;
@@ -136,11 +136,12 @@ double find_street_segment_length(int street_segment_id){ //rob
     }
     
     return length;
-}
+}//rob
 
-double find_street_segment_travel_time(int street_segment_id){//rob
+double find_street_segment_travel_time(int street_segment_id){
     return find_street_segment_length(street_segment_id)/getInfoStreetSegment(street_segment_id).speedLimit;
-}
+}//rob
+
 int find_closest_intersection(LatLon my_position){return 0;}//nathan
 std::vector<int> find_street_segments_of_intersection(int intersection_id){
     std::vector<StreetSegmentData> segs = intersections[intersection_id];
@@ -150,6 +151,7 @@ std::vector<int> find_street_segments_of_intersection(int intersection_id){
     }
     return segIds;
 }//naman
+
 std::vector<std::string> find_street_names_of_intersection(int intersection_id){
     std::vector<StreetSegmentData> segs = intersections[intersection_id];
     std::vector<std::string> streetNames;
@@ -158,6 +160,7 @@ std::vector<std::string> find_street_names_of_intersection(int intersection_id){
     }
     return streetNames;
 }//naman
+
 bool are_directly_connected(std::pair<int, int> intersection_ids){
     std::vector<StreetSegmentData> adjoiningSegments=intersections[intersection_ids.first];
     for(int i=0;i<adjoiningSegments.size();i++){
@@ -166,8 +169,13 @@ bool are_directly_connected(std::pair<int, int> intersection_ids){
     }
     return false;    
 }//naman
-std::vector<int> find_adjacent_intersections(int intersection_id){return std::vector<int>();}//rob
+
+std::vector<int> find_adjacent_intersections(int intersection_id){
+    return std::vector<int>();
+}//rob
+
 std::vector<int> find_street_segments_of_street(int street_id){return std::vector<int>();}//nathan
+
 std::vector<int> find_intersections_of_street(int street_id){
     std::vector<StreetSegmentData> segments = streets[street_id];
     std::set<int> streetIntersections;
@@ -178,9 +186,13 @@ std::vector<int> find_intersections_of_street(int street_id){
     return std::vector<int> (streetIntersections.begin(),streetIntersections.end());
     
 }//naman
+
 std::vector<int> find_intersections_of_two_streets(std::pair<int, int> street_ids){return std::vector<int>();}//rob
+
 std::vector<int> find_street_ids_from_partial_street_name(std::string street_prefix){return std::vector<int>();}//rob
+
 double find_feature_area(int feature_id){return 0;}//Nathan
+
 double find_way_length(OSMID way_id){
     int nWays = getNumberOfWays();
     const OSMWay * targetWay;
