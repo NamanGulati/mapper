@@ -186,7 +186,9 @@ std::vector<int> find_adjacent_intersections(int intersection_id){
     return std::vector<int>();
 }//rob
 
-std::vector<int> find_street_segments_of_street(int street_id){return std::vector<int>();}//nathan
+std::vector<int> find_street_segments_of_street(int street_id){
+    return streets[street_id];
+}//nathan
 
 std::vector<int> find_intersections_of_street(int street_id){
     std::vector<StreetSegmentData> segments = streets[street_id];
