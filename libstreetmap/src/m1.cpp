@@ -142,7 +142,19 @@ double find_street_segment_travel_time(int street_segment_id){
     return find_street_segment_length(street_segment_id)/getInfoStreetSegment(street_segment_id).speedLimit;
 }//rob
 
-int find_closest_intersection(LatLon my_position){return 0;}//nathan
+int find_closest_intersection(LatLon my_position){
+    double min = 10000000000;
+    int curr;
+    for(int i = 0; i < getNumIntersections(); i++){
+        double dist = find_distance_between_two_points(std::pair<LatLon, LatLon>(my_position, getIntersectionPosition(i)));
+        if(dist < min){
+            min = dist;
+            curr = i;
+        }
+    }
+    return curr;
+}//nathan
+
 std::vector<int> find_street_segments_of_intersection(int intersection_id){
     std::vector<StreetSegmentData> segs = intersections[intersection_id];
     std::vector<int> segIds;
