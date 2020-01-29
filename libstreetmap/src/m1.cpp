@@ -187,21 +187,23 @@ std::vector<int> find_adjacent_intersections(int intersection_id){
     std::vector<IntersectionIndex> intersects;
     std::map<IntersectionIndex,bool> visited;
     for (int x = 0; x < segs.size(); x ++){
-        if (!visited.at(x)){
-            visited.insert(std::pair<int,bool>(x,1));
-            if (segs[x].segInfo.from != intersection_id){
+        if (!visited.at(segs[x].segInfo.from) && !visited.at(segs[x].segInfo.to)){
+            if (segs[x].segInfo.oneWay){
+                if (segs[x].segInfo.to != intersection_id){
+                    intersects.push_back(segs[x].segInfo.to);
+                    visited.insert(std::pair<int,bool>(segs[x].segInfo.to,1));
+                }
+            }
+            else if (segs[x].segInfo.from != intersection_id){
                 intersects.push_back(segs[x].segInfo.from);
+                visited.insert(std::pair<int,bool>(segs[x].segInfo.from,1));
             }
             else{
                 intersects.push_back(segs[x].segInfo.to);
-            }
-            
+                visited.insert(std::pair<int,bool>(segs[x].segInfo.to,1));
+            }     
         }
-        else if (segs[x].segInfo.oneWay){
-            if (segs[x].segInfo.to != intersection_id){
-                intersects.push_back(segs[x].segInfo.to);
-            }
-        }
+        
     }
     
     return intersects;
@@ -222,7 +224,10 @@ std::vector<int> find_intersections_of_street(int street_id){
     
 }//naman
 
-std::vector<int> find_intersections_of_two_streets(std::pair<int, int> street_ids){return std::vector<int>();}//rob
+std::vector<int> find_intersections_of_two_streets(std::pair<int, int> street_ids){
+    
+    return std::vector<int>();
+}//rob
 
 std::vector<int> find_street_ids_from_partial_street_name(std::string street_prefix){return std::vector<int>();}//rob
 
