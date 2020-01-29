@@ -183,11 +183,32 @@ bool are_directly_connected(std::pair<int, int> intersection_ids){
 }//naman
 
 std::vector<int> find_adjacent_intersections(int intersection_id){
-    return std::vector<int>();
+    std::vector<StreetSegmentData> segs = intersections[intersection_id];
+    std::vector<IntersectionIndex> intersects;
+    std::map<IntersectionIndex,bool> visited;
+    for (int x = 0; x < segs.size(); x ++){
+        if (!visited.at(x)){
+            visited.insert(std::pair<int,bool>(x,1));
+            if (segs[x].segInfo.from != intersection_id){
+                intersects.push_back(segs[x].segInfo.from);
+            }
+            else{
+                intersects.push_back(segs[x].segInfo.to);
+            }
+            
+        }
+        else if (segs[x].segInfo.oneWay){
+            if (segs[x].segInfo.to != intersection_id){
+                intersects.push_back(segs[x].segInfo.to);
+            }
+        }
+    }
+    
+    return intersects;
 }//rob
 
 std::vector<int> find_street_segments_of_street(int street_id){
-    return streets[street_id];
+    return std::vector<int>();
 }//nathan
 
 std::vector<int> find_intersections_of_street(int street_id){
