@@ -210,7 +210,12 @@ std::vector<int> find_adjacent_intersections(int intersection_id){
 }//rob
 
 std::vector<int> find_street_segments_of_street(int street_id){
-    return std::vector<int>();
+    std::vector<StreetSegmentData> segments = streets[street_id];
+    std::vector<int> segIds;
+    for(int i=0;i<segments.size();i++){
+        segIds.push_back(segments[i].segId);
+    }
+    return segIds;
 }//nathan
 
 std::vector<int> find_intersections_of_street(int street_id){
