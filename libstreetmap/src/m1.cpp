@@ -26,6 +26,7 @@
 #include <math.h>
 #include <set>
 #include "OSMDatabaseAPI.h"
+#include "helpers.h"
 
 // load_map will be called with the name of the file that stores the "layer-2"
 // map data (the street and intersection data that is higher-level than the
@@ -44,10 +45,6 @@ struct StreetSegmentData{
     StreetSegmentIndex segId;
 };
 
-struct Cartesian{
-    double xCoord;
-    double yCoord;
-};
 
 std::map<StreetIndex,std::vector<StreetSegmentData>> streets;
 std::vector<std::vector<StreetSegmentData>> intersections;
@@ -92,7 +89,6 @@ bool load_map(std::string map_streets_database_filename) {
         intersections.push_back(segmentsAtIntersection);
     }
     
-    std::cout<<streets.size()<<std::endl;
     
     load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
@@ -295,18 +291,3 @@ double find_way_length(OSMID way_id){
             
 }//naman
 
-std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){
-    
-    std::pair<Cartesian, Cartesian> convertedPoints;
-    double lon1 = points.first.lon()*DEGREE_TO_RADIAN;
-    double lon2 = points.second.lon()*DEGREE_TO_RADIAN;
-    double lat1 = points.first.lat()*DEGREE_TO_RADIAN;
-    double lat2 = points.second.lat()*DEGREE_TO_RADIAN;
-    double lat_avg = (lat1 + lat2)/2;
-    convertedPoints.first.xCoord = lon1*cos(lat_avg);
-    convertedPoints.second.xCoord = lon2*cos(lat_avg);
-    convertedPoints.first.yCoord = lat1;
-    convertedPoints.second.yCoord = lat2;
-    
-    return convertedPoints; 
-}
