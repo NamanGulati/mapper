@@ -235,7 +235,17 @@ std::vector<int> find_intersections_of_two_streets(std::pair<int, int> street_id
     return commonIntersections;
 }//rob
 
-std::vector<int> find_street_ids_from_partial_street_name(std::string street_prefix){return std::vector<int>();}//rob
+std::vector<int> find_street_ids_from_partial_street_name(std::string street_prefix){
+    std::vector<int> streetsFromPartial;
+    std::string name;
+    for (int x = 0; x < streets.size(); x ++ ){
+        name = getStreetName(x);
+        if (name.find(street_prefix)){
+            streetsFromPartial.push_back(x);
+        }
+    }
+    return streetsFromPartial;
+}//rob
 
 double find_feature_area(int feature_id){
     if((getFeaturePoint(0, feature_id).lat() != getFeaturePoint(getFeaturePointCount(feature_id)-1, feature_id).lat()) 
