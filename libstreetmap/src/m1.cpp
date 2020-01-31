@@ -143,7 +143,7 @@ double find_street_segment_length(int street_segment_id){
 }//rob
 
 double find_street_segment_travel_time(int street_segment_id){
-    return find_street_segment_length(street_segment_id)/getInfoStreetSegment(street_segment_id).speedLimit;
+    return (find_street_segment_length(street_segment_id)/getInfoStreetSegment(street_segment_id).speedLimit)*3.6;
 }//rob
 
 int find_closest_intersection(LatLon my_position){
