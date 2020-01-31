@@ -44,9 +44,14 @@ struct StreetSegmentData{
     StreetSegmentIndex segId;
 };
 
+struct Cartesian{
+    double xCoord;
+    double yCoord;
+};
+
 std::map<StreetIndex,std::vector<StreetSegmentData>> streets;
 std::vector<std::vector<StreetSegmentData>> intersections;
-
+std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points);
 
 bool load_map(std::string map_streets_database_filename) {
     bool load_successful = false; //Indicates whether the map has loaded 
@@ -101,14 +106,17 @@ void close_map() {
 }
 
 double find_distance_between_two_points(std::pair<LatLon, LatLon> points){//nayfon
-    double lon1 = points.first.lon()*DEGREE_TO_RADIAN;
-    double lon2 = points.second.lon()*DEGREE_TO_RADIAN;
-    double lat1 = points.first.lat()*DEGREE_TO_RADIAN;
-    double lat2 = points.second.lat()*DEGREE_TO_RADIAN;
-    double lat_avg = (lat1 + lat2)/2;
-    double x1 = lon1*cos(lat_avg);
-    double x2 = lon2*cos(lat_avg);
-    return EARTH_RADIUS_METERS*sqrt(pow(lat2-lat1, 2) + pow(x2-x1, 2));
+//    double lon1 = points.first.lon()*DEGREE_TO_RADIAN;
+//    double lon2 = points.second.lon()*DEGREE_TO_RADIAN;
+//    double lat1 = points.first.lat()*DEGREE_TO_RADIAN;
+//    double lat2 = points.second.lat()*DEGREE_TO_RADIAN;
+//    double lat_avg = (lat1 + lat2)/2;
+//    double x1 = lon1*cos(lat_avg);
+//    double x2 = lon2*cos(lat_avg);
+//    return EARTH_RADIUS_METERS*sqrt(pow(lat2-lat1, 2) + pow(x2-x1, 2));
+    std::pair<Cartesian, Cartesian> convertedPoints = convertLatLonToCartesian(points);
+    return EARTH_RADIUS_METERS*sqrt(pow((convertedPoints.second.yCoord - convertedPoints.first.yCoord),2) 
+            + pow((convertedPoints.second.xCoord - convertedPoints.first.xCoord),2));
 }
 
 double find_street_segment_length(int street_segment_id){
@@ -236,7 +244,20 @@ std::vector<int> find_intersections_of_two_streets(std::pair<int, int> street_id
 
 std::vector<int> find_street_ids_from_partial_street_name(std::string street_prefix){return std::vector<int>();}//rob
 
-double find_feature_area(int feature_id){return 0;}//Nathan
+double find_feature_area(int feature_id){
+    if(getFeaturePoint(0, feature_id).lat() == getFeaturePoint(getFeaturePointCount(feature_id)-1, feature_id).lat() 
+            && getFeaturePoint(0, feature_id).lon() == getFeaturePoint(getFeaturePointCount(feature_id)-1, feature_id).lon())
+        return 0;
+    
+    double area = 0;
+    int j = getFeaturePointCount(feature_id) - 1;
+    for(int i = 0; i < getFeaturePointCount(feature_id); i++){
+        std::pair<Cartesian, Cartesian> points = convertLatLonToCartesian(std::pair<LatLon, LatLon> (getFeaturePoint(i, feature_id), getFeaturePoint(j, feature_id)));
+        area += (points.second.xCoord + points.first.xCoord)*(points.second.yCoord - points.first.yCoord);
+        j = i;
+    }
+    return abs(area/2);
+}//Nathan
 
 double find_way_length(OSMID way_id){
     int nWays = getNumberOfWays();
@@ -268,3 +289,19 @@ double find_way_length(OSMID way_id){
     
             
 }//naman
+
+std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){
+    
+    std::pair<Cartesian, Cartesian> convertedPoints;
+    double lon1 = points.first.lon()*DEGREE_TO_RADIAN;
+    double lon2 = points.second.lon()*DEGREE_TO_RADIAN;
+    double lat1 = points.first.lat()*DEGREE_TO_RADIAN;
+    double lat2 = points.second.lat()*DEGREE_TO_RADIAN;
+    double lat_avg = (lat1 + lat2)/2;
+    convertedPoints.first.xCoord = lon1*cos(lat_avg);
+    convertedPoints.second.xCoord = lon2*cos(lat_avg);
+    convertedPoints.first.yCoord = lat1;
+    convertedPoints.second.yCoord = lat2;
+    
+    return convertedPoints; 
+}
