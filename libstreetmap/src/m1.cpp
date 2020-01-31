@@ -122,14 +122,14 @@ double find_street_segment_length(int street_segment_id){
     
     if (seg.curvePointCount != 0){
         points.first = getIntersectionPosition(seg.from);
-        points.second = getStreetSegmentCurvePoint(1,seg.curvePointCount);
+        points.second = getStreetSegmentCurvePoint(0,street_segment_id);
         length += find_distance_between_two_points(points);
-        for (int x = 2; x < seg.curvePointCount; x ++){
-            points.first = getStreetSegmentCurvePoint(x,seg.curvePointCount);
-            points.second = getStreetSegmentCurvePoint(x + 1,seg.curvePointCount);
+        for (int x = 0; x < (seg.curvePointCount-1); x ++){
+            points.first = getStreetSegmentCurvePoint(x,street_segment_id);
+            points.second = getStreetSegmentCurvePoint(x + 1,street_segment_id);
             length += find_distance_between_two_points(points);
         }
-        points.first = getStreetSegmentCurvePoint(seg.curvePointCount,seg.curvePointCount);
+        points.first = getStreetSegmentCurvePoint(seg.curvePointCount - 1,street_segment_id);
         points.second = getIntersectionPosition(seg.to);
         length += find_distance_between_two_points(points);
     }
