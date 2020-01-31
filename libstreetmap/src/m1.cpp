@@ -238,8 +238,13 @@ std::vector<int> find_intersections_of_street(int street_id){
 }//naman
 
 std::vector<int> find_intersections_of_two_streets(std::pair<int, int> street_ids){
+    std::vector<int> street1 = find_intersections_of_street(street_ids.first);
+    std::vector<int> street2 = find_intersections_of_street(street_ids.second);
+    std::vector<int> commonIntersections; 
     
-    return std::vector<int>();
+    std::set_intersection(street1.begin(), street1.end(), street2.begin(), street2.end(), commonIntersections.begin());
+    
+    return commonIntersections;
 }//rob
 
 std::vector<int> find_street_ids_from_partial_street_name(std::string street_prefix){return std::vector<int>();}//rob
