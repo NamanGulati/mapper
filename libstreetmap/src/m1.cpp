@@ -250,13 +250,16 @@ std::vector<int> find_intersections_of_two_streets(std::pair<int, int> street_id
 
 std::vector<int> find_street_ids_from_partial_street_name(std::string street_prefix){
     std::vector<int> streetsFromPartial;
-    std::string name;
+    std::string name, searchParam;
+    searchParam = removeSpaceAndConcat(street_prefix);
     for (int x = 0; x < streets.size(); x ++ ){
-        name = getStreetName(x);
-        if (name.find(street_prefix)){
+        name = removeSpaceAndConcat(getStreetName(x));
+        std::size_t foundLoc = name.find(searchParam);
+        if (foundLoc != std::string::npos && foundLoc == 0){
             streetsFromPartial.push_back(x);
         }
     }
+    std::sort(streetsFromPartial.begin(), streetsFromPartial.end());
     return streetsFromPartial;
 }//rob
 
