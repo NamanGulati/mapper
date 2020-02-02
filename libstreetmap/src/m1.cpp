@@ -195,10 +195,10 @@ bool are_directly_connected(std::pair<int, int> intersection_ids){
 std::vector<int> find_adjacent_intersections(int intersection_id){
     std::vector<StreetSegmentIndex> segs = intersections[intersection_id];
     std::vector<IntersectionIndex> intersects;
-    std::map<IntersectionIndex,bool> visited;
+    std::unordered_map<IntersectionIndex,bool> visited;
     for (int x = 0; x < segs.size(); x ++){
         struct InfoStreetSegment segment = getInfoStreetSegment(segs[x]);
-        if (!visited.at(segment.from) && !visited.at(segment.to)){
+        if (!visited.count(segment.from) && !visited.count(segment.to)){
             if (segment.oneWay){
                 if (segment.to != intersection_id){
                     intersects.push_back(segment.to);
