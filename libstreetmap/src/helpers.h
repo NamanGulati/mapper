@@ -12,6 +12,7 @@
  */
 
 #include "StreetsDatabaseAPI.h"
+#include "OSMDatabaseAPI.h"
 #include <cmath>
 
 #ifndef HELPERS_H
@@ -22,6 +23,9 @@ struct Cartesian{
 };
 
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points);
+bool compareOSMID(OSMID id1, OSMID id2);
+const OSMWay* getWayFromOSMID(OSMID way_id);
+const OSMNode* getNodeFromOSMID(OSMID node_id);
 
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){
     
@@ -38,7 +42,32 @@ std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatL
     
     return convertedPoints; 
 }
+bool compareOSMID(OSMID id1, OSMID id2){
+ return id1<id2;   
+}
+const OSMWay* getWayFromOSMID(OSMID way_id){
+    int nWays = getNumberOfWays();
+    if(nWays==0) return 0;
+    const OSMWay * targetWay;
+    for(int i =0;i<nWays;i++){
+        const OSMWay * temp = getWayByIndex(i);
+        if(temp->id()==way_id){
+            targetWay=temp;
+            break;
+        }
+    }
+    return targetWay;
+}
 
+const OSMNode* getNodeFromOSMID(OSMID node_id){
+    int nNodes=getNumberOfNodes();
+    for(int i=0;i<nNodes;i++){
+        const OSMNode* temp = getNodeByIndex(i);
+        if(temp->id()==node_id)
+            return temp;
+    }
+    return nullptr;
+}
 
 #endif /* HELPERS_H */
 

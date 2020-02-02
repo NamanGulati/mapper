@@ -47,8 +47,8 @@ struct StreetSegmentData{
 
 
 std::map<StreetIndex,std::vector<StreetSegmentData>> streets;
-std::vector<std::vector<StreetSegmentData>> intersections;
-std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points);
+std::map<int,std::vector<StreetSegmentData>> intersections;
+//std::map<OSMID,std::vector<const OSMNode *>> osmNodeStore;
 
 bool load_map(std::string map_streets_database_filename) {
     bool load_successful = false; //Indicates whether the map has loaded 
@@ -60,12 +60,6 @@ bool load_map(std::string map_streets_database_filename) {
     
     loadOSMDatabaseBIN(map_streets_database_filename.replace(index,8,".osm"));
     //Load your map related data structures here
-    //
-    /*
-     * Data needed:
-     * Streets      map: StreetIndex(name) -> vector(segments)
-     * Intersection
-     */
     
     int nStreetSegments = getNumStreetSegments();
     for(int i=0;i<nStreetSegments;i++){
@@ -74,21 +68,36 @@ bool load_map(std::string map_streets_database_filename) {
         segDataWrapper.segId=i;
         segDataWrapper.segInfo=sgmt;
         streets[sgmt.streetID].push_back(segDataWrapper);
-        
-    }
-    int nIntersections=getNumIntersections();
-    for(int i = 0;i<nIntersections;i++){
-        int nSegs = getIntersectionStreetSegmentCount(i);
-        std::vector<StreetSegmentData> segmentsAtIntersection;
-        for(int j=0;j<nSegs;j++){
-            struct StreetSegmentData segData;
-            segData.segId=getIntersectionStreetSegment(i,j);
-            segData.segInfo=getInfoStreetSegment(segData.segId);
-            segmentsAtIntersection.push_back(segData);
-        }
-        intersections.push_back(segmentsAtIntersection);
     }
     
+    int nIntersections=getNumIntersections();
+    for(int i = 0;i<nIntersections;i++){
+        //int nSegs = getIntersectionStreetSegmentCount(i);
+        std::vector<StreetSegmentData> segmentsAtIntersection;
+        for(int j=0;j<getIntersectionStreetSegmentCount(i);j++){
+            struct StreetSegmentData segData;
+            segData.segId=getIntersectionStreetSegment(i,j);
+            segData.segInfo=getInfoStreetSegment(getIntersectionStreetSegment(i,j));
+            segmentsAtIntersection.push_back(segData);
+        }
+        intersections[i]=(segmentsAtIntersection);
+    }
+    
+   /* int nWays = getNumberOfWays();
+    for(int i =0;i<nWays;i++){
+        const OSMWay * temp = getWayByIndex(i);
+        std::vector<OSMID> nodeIds = getWayMembers(temp);
+        int nNodes = getNumberOfNodes();
+        for(int j=0;j<nodeIds.size();j++){
+            for(int k=0;k<nNodes;k++){
+                const OSMNode * temp = getNodeByIndex(k);
+                if(temp->id()==nodeIds[j]){
+                    osmNodeStore[temp->id()].push_back(temp);
+                    break;
+                }
+            }
+        }
+    }*/
     
     load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
@@ -98,6 +107,10 @@ bool load_map(std::string map_streets_database_filename) {
 
 void close_map() {
     //Clean-up your map related data structures here
+    closeStreetDatabase();
+    closeOSMDatabase();
+    streets.clear();
+    intersections.clear();
     
 }
 
@@ -267,8 +280,11 @@ double find_feature_area(int feature_id){
     return abs(area/2.0)*EARTH_RADIUS_METERS*EARTH_RADIUS_METERS;
 }//Nathan
 
+
+
 double find_way_length(OSMID way_id){
-    int nWays = getNumberOfWays();
+    /*int nWays = getNumberOfWays();
+    if(nWays==0) return 0;
     const OSMWay * targetWay;
     for(int i =0;i<nWays;i++){
         const OSMWay * temp = getWayByIndex(i);
@@ -276,25 +292,26 @@ double find_way_length(OSMID way_id){
             targetWay=temp;
             break;
         }
-    }
+    }*/
+    const OSMWay* targetWay = getWayFromOSMID(way_id);
     std::vector<OSMID> nodeIds = getWayMembers(targetWay);
-    std::vector<const OSMNode*>nodes;
+    /*std::vector<const OSMNode*>nodes;
+    std::sort(nodeIds.begin(),nodeIds.end(),compareOSMID);
     int nNodes = getNumberOfNodes();
-    for(int i =0;i<nNodes;i++){
-        const OSMNode * temp = getNodeByIndex(i);
-        for(int j=0;j<nodeIds.size();j++){
-            if(temp->id()==nodeIds[j]){
+    for(int i=0;i<nodeIds.size();i++){
+        for(int j=0;j<nNodes;j++){
+            const OSMNode * temp = getNodeByIndex(j);
+            if(temp->id()==nodeIds[i]){
                 nodes.push_back(temp);
                 break;
             }
         }
     }
+    */
     double wayLength=0;
-    for(int i=0;i<nodes.size()-1;i++){
-        wayLength+=find_distance_between_two_points(std::pair<LatLon,LatLon>(getNodeCoords(nodes[i]),getNodeCoords(nodes[i+1])));
+    for(int i=0;i<nodeIds.size()-1;i++){
+        wayLength+=find_distance_between_two_points(std::pair<LatLon,LatLon>(getNodeCoords(getNodeFromOSMID(nodeIds[i])),getNodeCoords(getNodeFromOSMID(nodeIds[i+1]))));
     }
     return wayLength;
-    
-            
 }//naman
 
