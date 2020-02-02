@@ -46,6 +46,7 @@ struct StreetSegmentData{
     StreetSegmentIndex segId;
 };
 
+//Nathan is broken
 
 //std::unordered_map<StreetIndex, std::vector<StreetSegmentIndex>> streetSegs; //map holds a vector of street segments corresponding to a street id
 std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streets;
