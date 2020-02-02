@@ -210,7 +210,7 @@ std::vector<int> find_adjacent_intersections(int intersection_id){
         }
         
     }
-    
+    std::sort(intersects.begin(), intersects.end());
     return intersects;
 }//rob
 
