@@ -7,3 +7,5 @@ mapper
 libstreetmap.a
 test_libstreetmap
 **/.nfs*
+.vscode
+.vscode/*
