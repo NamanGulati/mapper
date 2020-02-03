@@ -55,7 +55,7 @@ std::unordered_map<StreetIndex, std::set<IntersectionIndex>> streetIntersections
 std::unordered_map<OSMID,const OSMWay *> ways;
 std::unordered_map<OSMID,const OSMNode*> nodes;
 std::vector<std::pair<std::string, int>> streetNames;
-std::vector<int> speedLim;
+std::vector<float> speedLim;
 std::vector<double> segLen;
 
 bool load_map(std::string map_streets_database_filename) {
@@ -127,10 +127,6 @@ bool load_map(std::string map_streets_database_filename) {
         nameIndexes.first = removeSpaceAndConcat(getStreetName(x));
         nameIndexes.second = x;
         streetNames.push_back(nameIndexes);
-//        std::size_t foundLoc = name.find(searchParam);
-//        if (foundLoc != std::string::npos && foundLoc == 0){
-//            streetsFromPartial.push_back(x);
-//        }
     }
     std::sort(streetNames.begin(), streetNames.end(), pairCompare);
 
@@ -165,6 +161,7 @@ void close_map() {
     nodes.clear();
     streetNames.clear();
     segLen.clear();
+    speedLim.clear();
 }
 
 double find_distance_between_two_points(std::pair<LatLon, LatLon> points){//nathan
@@ -174,35 +171,10 @@ double find_distance_between_two_points(std::pair<LatLon, LatLon> points){//nath
 }
 
 double find_street_segment_length(int street_segment_id){
-   /* double length = 0;
-    InfoStreetSegment seg = getInfoStreetSegment(street_segment_id);
-    std::pair <LatLon, LatLon> points;
-    
-    if (seg.curvePointCount != 0){
-        points.first = getIntersectionPosition(seg.from);
-        points.second = getStreetSegmentCurvePoint(0,street_segment_id);
-        length += find_distance_between_two_points(points);
-        for (int x = 0; x < (seg.curvePointCount-1); x ++){
-            points.first = getStreetSegmentCurvePoint(x,street_segment_id);
-            points.second = getStreetSegmentCurvePoint(x + 1,street_segment_id);
-            length += find_distance_between_two_points(points);
-        }
-        points.first = getStreetSegmentCurvePoint(seg.curvePointCount - 1,street_segment_id);
-        points.second = getIntersectionPosition(seg.to);
-        length += find_distance_between_two_points(points);
-    }
-    else{
-        points.first = getIntersectionPosition(seg.from);
-        points.second = getIntersectionPosition(seg.to);
-        length += find_distance_between_two_points(points);
-    }
-    
-    return length;*/
     return segLen[street_segment_id];
 }//rob
 
 double find_street_segment_travel_time(int street_segment_id){
-    // return (find_street_segment_length(street_segment_id)/getInfoStreetSegment(street_segment_id).speedLimit)*3.6;
     return (find_street_segment_length(street_segment_id)/speedLim[street_segment_id])*3.6;
 }//rob
 
@@ -297,8 +269,6 @@ std::vector<int> find_street_ids_from_partial_street_name(std::string street_pre
     int l = 0;
     int r = streetNames.size() - 1;
     
-    
-    
     while (l != r - 1) { 
         int mid = (l+r)/ 2; 
   
@@ -325,7 +295,6 @@ std::vector<int> find_street_ids_from_partial_street_name(std::string street_pre
             break;
         iterate ++;
     }
-    //std::sort(streetsFromPartial.begin(), streetsFromPartial.end());
     return streetsFromPartial;
 }//rob
 
