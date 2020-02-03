@@ -49,7 +49,7 @@ struct StreetSegmentData{
 
 std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streetSegsVectors;
 std::unordered_map<IntersectionIndex,std::vector<StreetSegmentIndex>> streetIntersectionsVectors;
-std::unordered_map<IntersectionIndex,std::vector<StreetSegmentIndex>> intersections;
+std::vector<std::vector<StreetSegmentIndex>> intersections;
 std::unordered_map<StreetIndex, std::set<StreetSegmentIndex>> streetSegs; //unordered map holds a vector of street segments corresponding to a street id
 std::unordered_map<StreetIndex, std::set<IntersectionIndex>> streetIntersections; //unordered map holds a set of intersections corresponding to a street id
 std::unordered_map<OSMID,const OSMWay *> ways;
@@ -94,7 +94,7 @@ bool load_map(std::string map_streets_database_filename) {
           
             segmentsAtIntersection.push_back(getIntersectionStreetSegment(i,j));
         }
-        intersections[i]=(segmentsAtIntersection);
+        intersections.push_back(segmentsAtIntersection);
     }
     
     
