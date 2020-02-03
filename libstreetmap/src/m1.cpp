@@ -118,7 +118,8 @@ void close_map() {
     streetSegs.clear();
     streetSegsVector.clear();
     intersections.clear();
-    
+    ways.clear();
+    nodes.clear();
 }
 
 double find_distance_between_two_points(std::pair<LatLon, LatLon> points){//nayfon
