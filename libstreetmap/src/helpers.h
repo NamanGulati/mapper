@@ -47,30 +47,6 @@ std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatL
 bool compareOSMID(OSMID id1, OSMID id2){
  return id1<id2;   
 }
-const OSMWay* getWayFromOSMID(OSMID way_id){
-    int nWays = getNumberOfWays();
-    if(nWays==0) return 0;
-    const OSMWay * targetWay;
-    for(int i =0;i<nWays;i++){
-        const OSMWay * temp = getWayByIndex(i);
-        if(temp->id()==way_id){
-            targetWay=temp;
-            break;
-        }
-    }
-    return targetWay;
-}
-
-
-const OSMNode* getNodeFromOSMID(OSMID node_id){
-    int nNodes=getNumberOfNodes();
-    for(int i=0;i<nNodes;i++){
-        const OSMNode* temp = getNodeByIndex(i);
-        if(temp->id()==node_id)
-            return temp;
-    }
-    return nullptr;
-}
 
 std::string removeSpaceAndConcat(std::string remove){
     std::string newString = "";
