@@ -53,7 +53,8 @@ std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streets;
 std::unordered_map<int,std::vector<StreetSegmentIndex>> intersections;
 std::unordered_map<StreetIndex, std::set<StreetSegmentIndex>> streetSegs; //map holds a vector of street segments corresponding to a street id
 std::unordered_map<StreetIndex, std::set<IntersectionIndex>> streetIntersections; //map holds a set of intersections corresponding to a street id
-//std::map<OSMID,std::vector<const OSMNode *>> osmNodeStore;
+std::unordered_map<OSMID,const OSMWay *> ways;
+std::unordered_map<OSMID,const OSMNode*> nodes;
 
 bool load_map(std::string map_streets_database_filename) {
     bool load_successful = false; //Indicates whether the map has loaded 
@@ -85,7 +86,18 @@ bool load_map(std::string map_streets_database_filename) {
         intersections[i]=(segmentsAtIntersection);
     }
 
+    int nWays = getNumberOfWays();
+    for(int i=0;i<nWays;i++){
+        const OSMWay * temp = getWayByIndex(i);
+        ways[temp->id()]=temp;
+    }
     
+    int nNodes=getNumberOfNodes();
+    for(int i=0;i<nNodes;i++){
+        const OSMNode* temp = getNodeByIndex(i);
+        nodes[temp->id()] = temp;
+    }
+
     load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
 
@@ -286,21 +298,12 @@ double find_feature_area(int feature_id){
 
 
 double find_way_length(OSMID way_id){
-    /*int nWays = getNumberOfWays();
-    if(nWays==0) return 0;
-    const OSMWay * targetWay;
-    for(int i =0;i<nWays;i++){
-        const OSMWay * temp = getWayByIndex(i);
-        if(temp->id()==way_id){
-            targetWay=temp;
-            break;
-        }
-    }*/
-    const OSMWay* targetWay = getWayFromOSMID(way_id);
+
+    const OSMWay* targetWay = ways[way_id];
     std::vector<OSMID> nodeIds = getWayMembers(targetWay);
     double wayLength=0;
     for(int i=0;i<nodeIds.size()-1;i++){
-        wayLength+=find_distance_between_two_points(std::pair<LatLon,LatLon>(getNodeCoords(getNodeFromOSMID(nodeIds[i])),getNodeCoords(getNodeFromOSMID(nodeIds[i+1]))));
+        wayLength+=find_distance_between_two_points(std::pair<LatLon,LatLon>(getNodeCoords(nodes[nodeIds[i]]),getNodeCoords(nodes[nodeIds[i+1]])));
     }
     return wayLength;
 }//naman
