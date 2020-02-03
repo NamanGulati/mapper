@@ -49,7 +49,8 @@ struct StreetSegmentData{
 //Nathan is broken
 
 //std::unordered_map<StreetIndex, std::vector<StreetSegmentIndex>> streetSegs; //map holds a vector of street segments corresponding to a street id
-std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streets;
+std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streetSegsVector;
+std::unordered_map<IntersectionIndex,std::vector<StreetSegmentIndex>> streetIntersectionsVector;
 std::unordered_map<int,std::vector<StreetSegmentIndex>> intersections;
 std::unordered_map<StreetIndex, std::set<StreetSegmentIndex>> streetSegs; //map holds a vector of street segments corresponding to a street id
 std::unordered_map<StreetIndex, std::set<IntersectionIndex>> streetIntersections; //map holds a set of intersections corresponding to a street id
@@ -66,15 +67,20 @@ bool load_map(std::string map_streets_database_filename) {
     
     loadOSMDatabaseBIN(map_streets_database_filename.replace(index,8,".osm"));
     //Load your map related data structures here
+ 
+    
     int nStreetSegments = getNumStreetSegments();
     for(int i=0;i<nStreetSegments;i++){
         struct InfoStreetSegment sgmt = getInfoStreetSegment(i);
-        streets[sgmt.streetID].push_back(i);
+        streetSegsVector[sgmt.streetID].push_back(i);
         streetSegs[sgmt.streetID].insert(i);
         streetIntersections[sgmt.streetID].insert(sgmt.from);
         streetIntersections[sgmt.streetID].insert(sgmt.to);
     }
-
+    
+    for(int i = 0; i < streetIntersections.size(); i++)
+        (streetIntersectionsVector[i]).assign(streetIntersections[i].begin(), streetIntersections[i].end());
+    
 
     int nIntersections=getNumIntersections();
     for(int i = 0;i<nIntersections;i++){
@@ -110,7 +116,7 @@ void close_map() {
     closeOSMDatabase();
     streetIntersections.clear();
     streetSegs.clear();
-    streets.clear();
+    streetSegsVector.clear();
     intersections.clear();
     
 }
@@ -217,31 +223,13 @@ std::vector<int> find_adjacent_intersections(int intersection_id){
 }//rob
 
 std::vector<int> find_street_segments_of_street(int street_id){
-//    std::vector<StreetSegmentData> segments = streets[street_id];
-//    std::vector<int> segIds;
-//    for(int i=0;i<segments.size();i++){
-//        segIds.push_back(segments[i].segId);
-//    }
-//    return segIds;
-//<<<<<<< Updated upstream
-//    return streets[street_id];
-//}//nathan
-//
-//std::vector<int> find_intersections_of_street(int street_id){
-//    std::vector<StreetSegmentIndex> segments = streets[street_id];
-//    std::set<int> streetIntersections;
-//    for(int i=0;i<segments.size();i++){
-//        streetIntersections.insert(getInfoStreetSegment(segments[i]).from);
-//        streetIntersections.insert(getInfoStreetSegment(segments[i]).to);
-//    }
-//    return std::vector<int> (streetIntersections.begin(),streetIntersections.end());
-//    return streets[street_id];
-//=======
-    return std::vector<int> (streetSegs[street_id].begin(),streetSegs[street_id].end());
+//    return std::vector<int> (streetSegs[street_id].begin(),streetSegs[street_id].end());
+    return streetSegsVector[street_id];
 }//nathan
 
 std::vector<int> find_intersections_of_street(int street_id){
-    return std::vector<int> (streetIntersections[street_id].begin(),streetIntersections[street_id].end());
+//    return std::vector<int> (streetIntersections[street_id].begin(),streetIntersections[street_id].end());
+    return streetIntersectionsVector[street_id];
 }//naman
 
 std::vector<int> find_intersections_of_two_streets(std::pair<int, int> street_ids){
