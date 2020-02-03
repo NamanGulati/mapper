@@ -305,7 +305,7 @@ std::vector<int> find_street_ids_from_partial_street_name(std::string street_pre
             break;
         iterate ++;
     }
-    std::sort(streetsFromPartial.begin(), streetsFromPartial.end());
+    //std::sort(streetsFromPartial.begin(), streetsFromPartial.end());
     return streetsFromPartial;
 }//rob
 
