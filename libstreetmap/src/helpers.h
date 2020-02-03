@@ -27,6 +27,7 @@ bool compareOSMID(OSMID id1, OSMID id2);
 const OSMWay* getWayFromOSMID(OSMID way_id);
 const OSMNode* getNodeFromOSMID(OSMID node_id);
 std::string removeSpaceAndConcat(std::string remove);
+bool pairCompare(std::pair<std::string, int>, std::pair<std::string, int>);
 
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){
     
@@ -78,6 +79,10 @@ std::string removeSpaceAndConcat(std::string remove){
         newString.push_back(tolower(remove[x]));
     }
     return newString;
+} 
+
+bool pairCompare(std::pair<std::string, int> item1, std::pair<std::string, int> item2){
+    return item1.first < item2.first;
 }
 
 #endif /* HELPERS_H */
