@@ -55,6 +55,8 @@ std::unordered_map<StreetIndex, std::set<IntersectionIndex>> streetIntersections
 std::unordered_map<OSMID,const OSMWay *> ways;
 std::unordered_map<OSMID,const OSMNode*> nodes;
 std::vector<std::pair<std::string, int>> streetNames;
+std::vector<int> speedLim;
+std::vector<double> segLen;
 
 bool load_map(std::string map_streets_database_filename) {
     bool load_successful = false; //Indicates whether the map has loaded 
@@ -72,7 +74,6 @@ bool load_map(std::string map_streets_database_filename) {
     
     std::cout << "load_map: " << map_streets_database_filename << std::endl;
     //Load your map related data structures here
- 
     
     int nStreetSegments = getNumStreetSegments();
     for(int i=0;i<nStreetSegments;i++){
@@ -81,12 +82,36 @@ bool load_map(std::string map_streets_database_filename) {
         streetSegs[sgmt.streetID].insert(i);
         streetIntersections[sgmt.streetID].insert(sgmt.from);
         streetIntersections[sgmt.streetID].insert(sgmt.to);
+        speedLim.push_back(sgmt.speedLimit);
+
+        double length = 0;
+        std::pair <LatLon, LatLon> pointsL;
+        
+        if (sgmt.curvePointCount != 0){
+            pointsL.first = getIntersectionPosition(sgmt.from);
+            pointsL.second = getStreetSegmentCurvePoint(0,i);
+            length += find_distance_between_two_points(pointsL);
+            for (int x = 0; x < (sgmt.curvePointCount-1); x ++){
+                pointsL.first = getStreetSegmentCurvePoint(x,i);
+                pointsL.second = getStreetSegmentCurvePoint(x + 1,i);
+                length += find_distance_between_two_points(pointsL);
+            }
+            pointsL.first = getStreetSegmentCurvePoint(sgmt.curvePointCount - 1,i);
+            pointsL.second = getIntersectionPosition(sgmt.to);
+            length += find_distance_between_two_points(pointsL);
+        }
+        else{
+            pointsL.first = getIntersectionPosition(sgmt.from);
+            pointsL.second = getIntersectionPosition(sgmt.to);
+            length += find_distance_between_two_points(pointsL);
+        }
+        segLen.push_back(length);
+
     }
     
     for(int i = 0; i < streetIntersections.size(); i++)
         (streetIntersectionsVectors[i]).assign(streetIntersections[i].begin(), streetIntersections[i].end());
     
-
     int nIntersections=getNumIntersections();
     for(int i = 0;i<nIntersections;i++){
         std::vector<StreetSegmentIndex> segmentsAtIntersection;
@@ -96,7 +121,6 @@ bool load_map(std::string map_streets_database_filename) {
         }
         intersections.push_back(segmentsAtIntersection);
     }
-    
     
     std::pair<std::string, int> nameIndexes;
     for (int x = 0; x < getNumStreets(); x ++ ){
@@ -140,7 +164,7 @@ void close_map() {
     ways.clear();
     nodes.clear();
     streetNames.clear();
-
+    segLen.clear();
 }
 
 double find_distance_between_two_points(std::pair<LatLon, LatLon> points){//nathan
@@ -150,7 +174,7 @@ double find_distance_between_two_points(std::pair<LatLon, LatLon> points){//nath
 }
 
 double find_street_segment_length(int street_segment_id){
-    double length = 0;
+   /* double length = 0;
     InfoStreetSegment seg = getInfoStreetSegment(street_segment_id);
     std::pair <LatLon, LatLon> points;
     
@@ -173,11 +197,13 @@ double find_street_segment_length(int street_segment_id){
         length += find_distance_between_two_points(points);
     }
     
-    return length;
+    return length;*/
+    return segLen[street_segment_id];
 }//rob
 
 double find_street_segment_travel_time(int street_segment_id){
-    return (find_street_segment_length(street_segment_id)/getInfoStreetSegment(street_segment_id).speedLimit)*3.6;
+    // return (find_street_segment_length(street_segment_id)/getInfoStreetSegment(street_segment_id).speedLimit)*3.6;
+    return (find_street_segment_length(street_segment_id)/speedLim[street_segment_id])*3.6;
 }//rob
 
 int find_closest_intersection(LatLon my_position){
@@ -245,12 +271,10 @@ std::vector<int> find_adjacent_intersections(int intersection_id){
 }//rob
 
 std::vector<int> find_street_segments_of_street(int street_id){
-//    return std::vector<int> (streetSegs[street_id].begin(),streetSegs[street_id].end());
     return streetSegsVectors[street_id];
 }//nathan
 
 std::vector<int> find_intersections_of_street(int street_id){
-//    return std::vector<int> (streetIntersections[street_id].begin(),streetIntersections[street_id].end());
     return streetIntersectionsVectors[street_id];
 }//naman
 
@@ -258,16 +282,12 @@ std::vector<int> find_intersections_of_two_streets(std::pair<int, int> street_id
     std::vector<int> intersections1 (find_intersections_of_street(street_ids.first));
     std::vector<int> intersections2 (find_intersections_of_street(street_ids.second));
     std::vector<int> commonIntersections; 
-    
-//    std::sort(intersections1.begin(), intersections1.end());
-//    std::sort(intersections2.begin(), intersections2.end());
-    
+
     std::set_intersection(intersections1.begin(), intersections1.end(), 
                             intersections2.begin(), intersections2.end(),
                             std::back_inserter(commonIntersections));
     
     return commonIntersections;
-//    return std::vector<int> (commonIntersections.begin(),commonIntersections.end());
 }//nathan
 
 std::vector<int> find_street_ids_from_partial_street_name(std::string street_prefix){
