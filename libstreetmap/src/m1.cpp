@@ -225,7 +225,7 @@ bool are_directly_connected(std::pair<int, int> intersection_ids){
     //with the second intersection
     for(int i=0;i<adjoiningSegments.size();i++){
         struct InfoStreetSegment segment=getInfoStreetSegment(adjoiningSegments[i]);
-        if(segment.from==intersection_ids.second||segment.to==intersection_ids.second)
+        if((segment.from==intersection_ids.second&&!segment.oneWay)||segment.to==intersection_ids.second)
             return true;
     }
     return false;    
@@ -282,6 +282,8 @@ std::vector<int> find_intersections_of_two_streets(std::pair<int, int> street_id
 }//nathan
 
 std::vector<int> find_street_ids_from_partial_street_name(std::string street_prefix){
+    if(street_prefix.length()==0)
+        return std::vector<int>();
     std::vector<int> streetsFromPartial; 
     std::string name, searchParam;
     searchParam = removeSpaceAndConcat(street_prefix);
