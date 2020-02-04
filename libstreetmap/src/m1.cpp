@@ -41,23 +41,22 @@
 // ".streets" to ".osm" in the map_streets_database_filename to get the proper
 // name.
 
+struct StreetSegmentData{
+    struct InfoStreetSegment segInfo;
+    StreetSegmentIndex segId;
+};
 
 
-std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streetSegsVectors; //unordered map holding vectors of street segments for each street
-std::unordered_map<StreetIndex, std::set<IntersectionIndex>> streetIntersections; //unordered map holds a set of intersections corresponding to a street id
-std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streetIntersectionsVectors; //unordered map that holds data in streetIntersections as a vector
-std::vector<std::vector<StreetSegmentIndex>> intersections; //a vector that holds a vector to street segments at an intersection at intersectionIndex in the vector
-std::unordered_map<OSMID,const OSMWay *> ways; //unerdered map that holds all OSMWay* with their OSMID as keys
-std::unordered_map<OSMID,const OSMNode*> nodes; //unerdered map that holds all OSMNode* with their OSMID as keys
-std::vector<std::pair<std::string, int>> streetNames; 
-std::vector<float> speedLim; // a vector that holds speed limit of a street segment at index=StreetSegmentIndex
-std::vector<double> segLen; // a vector that holds length of a street segment at index=StreetSegmentIndex
+std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streetSegsVectors; //holds a vector of street segments corresponding to a street id
+std::unordered_map<StreetIndex,std::vector<IntersectionIndex>> streetIntersectionsVectors; //holds a vector of intersections corresponding to streets
+std::vector<std::vector<StreetSegmentIndex>> intersections; //holds street segments corresponding to intersections
+std::unordered_map<StreetIndex, std::set<IntersectionIndex>> streetIntersections; //holds a set of intersections corresponding to a street id
+std::unordered_map<OSMID,const OSMWay *> ways;
+std::unordered_map<OSMID,const OSMNode*> nodes;
+std::vector<std::pair<std::string, int>> streetNames;
+std::vector<float> speedLim; //holds speed limits corresponding to street ids
+std::vector<double> segLen;
 
-/**
- * Loading above data structures by pulling data from StreetsDatabaseAPI and OSMDatabaseAPI
- * 
- * @return bool if all data was loaded sucessfully
- */ 
 bool load_map(std::string map_streets_database_filename) {
     bool load_successful = false; //Indicates whether the map has loaded 
                                   //successfully
@@ -73,11 +72,7 @@ bool load_map(std::string map_streets_database_filename) {
         return false;
     
     std::cout << "load_map: " << map_streets_database_filename << std::endl;
-
-    /**
-     * Loading of streetSegsVectors,streetIntersections,
-     *              speedLim,segLen,streetIntersectionsVectors
-     **/
+    //Load your map related data structures here
     
     int nStreetSegments = getNumStreetSegments();
     for(int i=0;i<nStreetSegments;i++){
@@ -115,10 +110,6 @@ bool load_map(std::string map_streets_database_filename) {
     for(int i = 0; i < streetIntersections.size(); i++)
         (streetIntersectionsVectors[i]).assign(streetIntersections[i].begin(), streetIntersections[i].end());
     
-
-    /**
-     * Loading of intersections
-     **/
     int nIntersections=getNumIntersections();
     for(int i = 0;i<nIntersections;i++){
         std::vector<StreetSegmentIndex> segmentsAtIntersection;
@@ -129,9 +120,6 @@ bool load_map(std::string map_streets_database_filename) {
         intersections.push_back(segmentsAtIntersection);
     }
     
-    /**
-     * Loading of streetNames
-     **/
     std::pair<std::string, int> nameIndexes;
     for (int x = 0; x < getNumStreets(); x ++ ){
         nameIndexes.first = removeSpaceAndConcat(getStreetName(x));
@@ -140,9 +128,6 @@ bool load_map(std::string map_streets_database_filename) {
     }
     std::sort(streetNames.begin(), streetNames.end(), pairCompare);
 
-    /**
-     * Loading of ways and nodes
-     **/
     int nWays = getNumberOfWays();
     for(int i=0;i<nWays;i++){
         const OSMWay * temp = getWayByIndex(i);
@@ -155,15 +140,14 @@ bool load_map(std::string map_streets_database_filename) {
         nodes[temp->id()] = temp;
     }
 
-    load_successful = true;
+    load_successful = true; //Make sure this is updated to reflect whether
+                            //loading the map succeeded or failed
 
     return load_successful;
 }
 
-/**
- * clear all data loaded in load_map
- **/
 void close_map() {
+    //Clean-up your map related data structures here
     closeStreetDatabase();
     closeOSMDatabase();
     streetIntersections.clear();
@@ -177,11 +161,12 @@ void close_map() {
     speedLim.clear();
 }
 
-double find_distance_between_two_points(std::pair<LatLon, LatLon> points){//nathan
+//finds the distance between two given LatLon points by converting them to Cartesian and using pythagoras' theorem
+double find_distance_between_two_points(std::pair<LatLon, LatLon> points){
     std::pair<Cartesian, Cartesian> convertedPoints = convertLatLonToCartesian(points);
     return EARTH_RADIUS_METERS*sqrt(pow((convertedPoints.second.yCoord - convertedPoints.first.yCoord),2) 
             + pow((convertedPoints.second.xCoord - convertedPoints.first.xCoord),2));
-}
+}//nathan
 
 double find_street_segment_length(int street_segment_id){
     return segLen[street_segment_id];
@@ -191,6 +176,7 @@ double find_street_segment_travel_time(int street_segment_id){
     return (find_street_segment_length(street_segment_id)/speedLim[street_segment_id])*3.6;
 }//rob
 
+//determines the closest intersection to a given point on the map by finding the minimum distance to an intersection 
 int find_closest_intersection(LatLon my_position){
     double min = 10000000000;
     int curr = 0;
@@ -210,18 +196,15 @@ std::vector<int> find_street_segments_of_intersection(int intersection_id){
 
 std::vector<std::string> find_street_names_of_intersection(int intersection_id){
     std::vector<StreetSegmentIndex> segs = intersections[intersection_id];
-    std::vector<std::string> streetNamesLocal;
+    std::vector<std::string> streetNamesL;
     for(int i=0;i<segs.size();i++){
-        streetNamesLocal.push_back(getStreetName(getInfoStreetSegment(segs[i]).streetID));
+        streetNamesL.push_back(getStreetName(getInfoStreetSegment(segs[i]).streetID));
     }
-    return streetNamesLocal;
+    return streetNamesL;
 }//naman
 
 bool are_directly_connected(std::pair<int, int> intersection_ids){
     std::vector<StreetSegmentIndex> adjoiningSegments=intersections[intersection_ids.first];
-
-    //checking if each of the segments at the first intersection connect
-    //with the second intersection
     for(int i=0;i<adjoiningSegments.size();i++){
         struct InfoStreetSegment segment=getInfoStreetSegment(adjoiningSegments[i]);
         if(segment.from==intersection_ids.second||segment.to==intersection_ids.second)
@@ -258,6 +241,7 @@ std::vector<int> find_adjacent_intersections(int intersection_id){
     return intersects;
 }//rob
 
+//returns the segments of a street from data initialized in load map
 std::vector<int> find_street_segments_of_street(int street_id){
     return streetSegsVectors[street_id];
 }//nathan
@@ -266,6 +250,7 @@ std::vector<int> find_intersections_of_street(int street_id){
     return streetIntersectionsVectors[street_id];
 }//naman
 
+//finds the common intersections of two streets by calling on the above function and finding the intersection of the vectors
 std::vector<int> find_intersections_of_two_streets(std::pair<int, int> street_ids){
     std::vector<int> intersections1 (find_intersections_of_street(street_ids.first));
     std::vector<int> intersections2 (find_intersections_of_street(street_ids.second));
@@ -314,6 +299,7 @@ std::vector<int> find_street_ids_from_partial_street_name(std::string street_pre
     return streetsFromPartial;
 }//rob
 
+//determines the area of a feature by converting to Cartesian and using the shoelace algorithm, returns 0 if the feature is not a closed polygon
 double find_feature_area(int feature_id){
     if((getFeaturePoint(0, feature_id).lat() != getFeaturePoint(getFeaturePointCount(feature_id)-1, feature_id).lat()) 
             || (getFeaturePoint(0, feature_id).lon() != getFeaturePoint(getFeaturePointCount(feature_id)-1, feature_id).lon())){
@@ -337,6 +323,7 @@ double find_feature_area(int feature_id){
 
 
 double find_way_length(OSMID way_id){
+
     const OSMWay* targetWay = ways[way_id];
     std::vector<OSMID> nodeIds = getWayMembers(targetWay);
     double wayLength=0;

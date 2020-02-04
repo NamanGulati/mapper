@@ -29,6 +29,7 @@ const OSMNode* getNodeFromOSMID(OSMID node_id);
 std::string removeSpaceAndConcat(std::string remove);
 bool pairCompare(std::pair<std::string, int>, std::pair<std::string, int>);
 
+//converts a pair of LatLon points to a pair of Cartesian points
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){
     
     std::pair<Cartesian, Cartesian> convertedPoints;
