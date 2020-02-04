@@ -126,7 +126,7 @@ bool load_map(std::string map_streets_database_filename) {
         nameIndexes.second = x;
         streetNames.push_back(nameIndexes);
     }
-    std::sort(streetNames.begin(), streetNames.end(), pairCompare);
+    std::sort(streetNames.begin(), streetNames.end(), pairCompareStringInt);
 
     int nWays = getNumberOfWays();
     for(int i=0;i<nWays;i++){
@@ -270,6 +270,7 @@ std::vector<int> find_street_ids_from_partial_street_name(std::string street_pre
     int l = 0;
     int r = streetNames.size() - 1;
     
+    //Binary Searches through the vector of street names to find the first occurrence of a matching street
     while (l != r - 1) { 
         int mid = (l+r)/ 2; 
   
@@ -279,6 +280,7 @@ std::vector<int> find_street_ids_from_partial_street_name(std::string street_pre
             r = mid;
     } 
     
+    //Corner case where either the first element or second last element of the vector are the first matching street
     int iterate = r;
     name = streetNames[l].first;
     std::size_t foundLoc = name.find(searchParam);
@@ -286,6 +288,7 @@ std::vector<int> find_street_ids_from_partial_street_name(std::string street_pre
         streetsFromPartial.push_back(streetNames[l].second);
     }
     
+    //Loop from the first occurrence until the street doesn't match
     while(iterate < streetNames.size()){
         name = streetNames[iterate].first;
         foundLoc = name.find(searchParam);

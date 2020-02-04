@@ -27,7 +27,7 @@ bool compareOSMID(OSMID id1, OSMID id2);
 const OSMWay* getWayFromOSMID(OSMID way_id);
 const OSMNode* getNodeFromOSMID(OSMID node_id);
 std::string removeSpaceAndConcat(std::string remove);
-bool pairCompare(std::pair<std::string, int>, std::pair<std::string, int>);
+bool pairCompareStringInt(std::pair<std::string, int>, std::pair<std::string, int>);
 
 //converts a pair of LatLon points to a pair of Cartesian points
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){
@@ -49,6 +49,7 @@ bool compareOSMID(OSMID id1, OSMID id2){
  return id1<id2;   
 }
 
+//Used to format strings for comparison in the finding street index from partial name function
 std::string removeSpaceAndConcat(std::string remove){
     std::string newString = "";
     remove.erase(std::remove_if(remove.begin(), remove.end(), isspace), remove.end());
@@ -58,7 +59,8 @@ std::string removeSpaceAndConcat(std::string remove){
     return newString;
 } 
 
-bool pairCompare(std::pair<std::string, int> item1, std::pair<std::string, int> item2){
+//Used for the sort function to sort a vector of pairs
+bool pairCompareStringInt(std::pair<std::string, int> item1, std::pair<std::string, int> item2){
     return item1.first < item2.first;
 }
 
