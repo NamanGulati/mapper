@@ -9,3 +9,9 @@ test_libstreetmap
 **/.nfs*
 .vscode
 .vscode/*
+nbproject
+.nbproject_*
+build
+mapper
+libstreetmap.a
+test_libstreetmap
