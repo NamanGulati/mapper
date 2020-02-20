@@ -21,11 +21,25 @@
 
 void draw_main_canvas (ezgl::renderer *g);
 
+struct intersection_data {
+    LatLon position;
+    std::string name;
+};
+
+std::vector<intersection_data> intersectionsData;
+
 void draw_map () {
     ezgl::application::settings settings;
     settings.main_ui_resource = "libstreetmap/resources/main.ui";
     settings.window_identifier = "MainWindow";
     settings.canvas_identifier = "MainCanvas";
+    
+    intersectionsData.resize(getNumIntersections());
+    
+    for(int i = 0; i < getNumIntersections(); i++){
+        intersectionsData[i].position = getIntersectionPosition(i);
+        intersectionsData[i].name = getIntersectionName(i);
+    }
     
     float max_lat, min_lat, max_lon, min_lon;
     
@@ -45,10 +59,10 @@ void draw_map () {
 }
 
 void draw_main_canvas (ezgl::renderer *g) {
-    
-    for(int i = 0; i < intersections.size(); i++){
-        float x = x_from_lon(intersections[i].position.lon());
-        float y = y_from_lat(intersections[i].position.at());
+                      
+    for(int i = 0; i < intersectionsData.size(); i++){
+        float x = x_from_lon(intersectionsData[i].position.lon());
+        float y = y_from_lat(intersectionsData[i].position.lat());
         
         float width = 0.001;
         float height = width;
