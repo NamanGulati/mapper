@@ -28,6 +28,11 @@ const OSMWay* getWayFromOSMID(OSMID way_id);
 const OSMNode* getNodeFromOSMID(OSMID node_id);
 std::string removeSpaceAndConcat(std::string remove);
 bool pairCompareStringInt(std::pair<std::string, int>, std::pair<std::string, int>);
+void getBounds(float &minLon, float &maxLon, float &minLat, float &maxLat);
+float x_from_lon(float lon);
+float y_from_lat(float lat);
+float lon_from_x(float x);
+float lat_from_y(float y);
 
 //converts a pair of LatLon points to a pair of Cartesian points
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){
@@ -45,6 +50,38 @@ std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatL
     
     return convertedPoints; 
 }
+
+void getBounds(float &minLon, float &maxLon, float &minLat, float &maxLat){
+    float currLon, currLat;
+    minLon = getIntersectionPosition(0).lon();
+    maxLon = minLon;
+    minLat = getIntersectionPosition(0).lat();
+    maxLat = minLat;    
+    
+    for(int i = 1; i < getNumIntersections(); i++){
+        currLon = getIntersectionPosition(i).lon();
+        currLat = getIntersectionPosition(i).lat();
+        
+        if(currLon < minLon)
+            minLon = currLon;
+        
+        else if(currLon > maxLon)
+            maxLon = currLon;
+        
+        if(currLat < minLat)
+            minLat = currLat;
+        
+        else if(currLat > maxLat)
+            maxLat = currLat;
+    }
+
+    
+}
+float x_from_lon(float lon){
+    return lon*DEGREE_TO_RADIAN*cos(lat_avg);
+}
+
+
 bool compareOSMID(OSMID id1, OSMID id2){
  return id1<id2;   
 }
