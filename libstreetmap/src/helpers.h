@@ -14,6 +14,7 @@
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
 #include "m1.h"
+#include "globals.h"
 #include <cmath>
 #include <math.h>
 
@@ -35,7 +36,6 @@ float x_from_lon(float lon);
 float y_from_lat(float lat);
 float lon_from_x(float x);
 float lat_from_y(float y);
-float lat_avg;
 
 //converts a pair of LatLon points to a pair of Cartesian points
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){

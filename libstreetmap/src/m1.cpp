@@ -42,15 +42,7 @@
 // name.
 
 
-std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streetSegsVectors; //unordered map holding vectors of street segments for each street
-std::unordered_map<StreetIndex, std::set<IntersectionIndex>> streetIntersections; //unordered map holds a set of intersections corresponding to a street id
-std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streetIntersectionsVectors; //unordered map that holds data in streetIntersections as a vector
-std::vector<std::vector<StreetSegmentIndex>> intersections; //a vector that holds a vector to street segments at an intersection at intersectionIndex in the vector
-std::unordered_map<OSMID,const OSMWay *> ways; //unordered map that holds all OSMWay* with their OSMID as keys
-std::unordered_map<OSMID,const OSMNode*> nodes; //unordered map that holds all OSMNode* with their OSMID as keys
-std::vector<std::pair<std::string, int>> streetNames; 
-std::vector<float> speedLim; // a vector that holds speed limit of a street segment at index=StreetSegmentIndex
-std::vector<double> segLen; // a vector that holds length of a street segment at index=StreetSegmentIndex
+
 
 
 /**

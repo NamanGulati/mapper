@@ -5,6 +5,7 @@
  */
 
 #include "m2.h"
+#include "globals.h"
 #include "ezgl/application.hpp"
 #include "ezgl/graphics.hpp"
 #include "helpers.h"
