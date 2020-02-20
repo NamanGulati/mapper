@@ -13,7 +13,9 @@
 
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
+#include "m1.h"
 #include <cmath>
+#include <math.h>
 
 #ifndef HELPERS_H
 #define HELPERS_H
@@ -33,6 +35,7 @@ float x_from_lon(float lon);
 float y_from_lat(float lat);
 float lon_from_x(float x);
 float lat_from_y(float y);
+float lat_avg;
 
 //converts a pair of LatLon points to a pair of Cartesian points
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){
@@ -42,13 +45,29 @@ std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatL
     double lon2 = points.second.lon()*DEGREE_TO_RADIAN;
     double lat1 = points.first.lat()*DEGREE_TO_RADIAN;
     double lat2 = points.second.lat()*DEGREE_TO_RADIAN;
-    double lat_avg = (lat1 + lat2)/2;
+//    double lat_avg = (lat1 + lat2)/2;
     convertedPoints.first.xCoord = lon1*cos(lat_avg);
     convertedPoints.second.xCoord = lon2*cos(lat_avg);
     convertedPoints.first.yCoord = lat1;
     convertedPoints.second.yCoord = lat2;
     
     return convertedPoints; 
+}
+
+float x_from_lon(float lon){
+    return lon*DEGREE_TO_RADIAN*cos(lat_avg);
+}
+
+float y_from_lat(float lat){
+    return lat*DEGREE_TO_RADIAN;
+}
+
+float lon_from_x(float x){
+    return x/DEGREE_TO_RADIAN/cos(lat_avg);
+}
+
+float lat_from_y(float y){
+    return y/DEGREE_TO_RADIAN;
 }
 
 void getBounds(float &minLon, float &maxLon, float &minLat, float &maxLat){
@@ -76,9 +95,6 @@ void getBounds(float &minLon, float &maxLon, float &minLat, float &maxLat){
     }
 
     
-}
-float x_from_lon(float lon){
-    return lon*DEGREE_TO_RADIAN*cos(lat_avg);
 }
 
 
