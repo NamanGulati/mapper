@@ -42,6 +42,7 @@ float lat_from_y(float y){
 }
 
 void getBounds(float &minLon, float &maxLon, float &minLat, float &maxLat){
+    
     float currLon, currLat;
     minLon = getIntersectionPosition(0).lon();
     maxLon = minLon;

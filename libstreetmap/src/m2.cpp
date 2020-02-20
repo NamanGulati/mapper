@@ -27,7 +27,8 @@ struct intersection_data {
 };
 
 std::vector<intersection_data> intersectionsData;
-
+float max_lat, min_lat, max_lon, min_lon;
+    
 void draw_map () {
     ezgl::application::settings settings;
     settings.main_ui_resource = "libstreetmap/resources/main.ui";
@@ -41,15 +42,12 @@ void draw_map () {
         intersectionsData[i].name = getIntersectionName(i);
     }
     
-    float max_lat, min_lat, max_lon, min_lon;
-    
     getBounds(min_lon, max_lon, min_lat, max_lat);    
     lat_avg = (min_lat + max_lat)/2;
      
     ezgl::application application(settings);
-    
-    ezgl::rectangle  initial_world({min_lon,min_lat},
-                                   {max_lon,max_lat});
+  
+    ezgl::rectangle  initial_world({x_from_lon(min_lon),y_from_lat(min_lat)},{x_from_lon(max_lon),y_from_lat(max_lat)});
     
     application.add_canvas("MainCanvas",
                             draw_main_canvas,
@@ -59,7 +57,9 @@ void draw_map () {
 }
 
 void draw_main_canvas (ezgl::renderer *g) {
-                      
+    
+    g->draw_rectangle({x_from_lon(min_lon),y_from_lat(min_lat)},{x_from_lon(max_lon),y_from_lat(max_lat)});
+    
     for(int i = 0; i < intersectionsData.size(); i++){
         float x = x_from_lon(intersectionsData[i].position.lon());
         float y = y_from_lat(intersectionsData[i].position.lat());
