@@ -131,7 +131,10 @@ bool load_map(std::string map_streets_database_filename) {
             }
                 
         }
-        
+        for(int j=0;j<sgmt.curvePointCount;j++){
+            dat.curvePts.push_back(getStreetSegmentCurvePoint(j,i));
+        }
+
 
         double length = 0;
         std::pair <LatLon, LatLon> pointsL;

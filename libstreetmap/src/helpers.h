@@ -16,6 +16,7 @@
 
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
+#include <vector>
 
 struct Cartesian{
     double xCoord;
@@ -43,6 +44,14 @@ struct StreetSegmentData{
     int idx;
     const OSMWay* way;
     StreetType type;
+    std::vector<LatLon> curvePts;
+};
+
+struct FeatureData{
+    std::string name;
+    FeatureType type;
+    OSMID id;
+    std::vector<LatLon> points;
 };
 
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points);
