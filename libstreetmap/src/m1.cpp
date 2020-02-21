@@ -43,16 +43,18 @@
 // name.
 
 std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streetSegsVectors; //unordered map holding vectors of street segments for each street
+std::unordered_map<StreetIndex,std::vector<StreetSegmentData>> streetSegData; //unordered map holding vectors of street segments for each street
 std::unordered_map<StreetIndex, std::set<IntersectionIndex>> streetIntersections; //unordered map holds a set of intersections corresponding to a street id
-std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streetIntersectionsVectors; //unordered map that holds data in streetIntersections as a vector
+std::unordered_map<StreetIndex,std::vector<IntersectionIndex>> streetIntersectionsVectors; //unordered map that holds data in streetIntersections as a vector
+std::vector<intersection_data> intersectionsData; //unordered map that holds data in intersection_data as a vector
 std::vector<std::vector<StreetSegmentIndex>> intersections; //a vector that holds a vector to street segments at an intersection at intersectionIndex in the vector
 std::unordered_map<OSMID,const OSMWay *> ways; //unordered map that holds all OSMWay* with their OSMID as keys
 std::unordered_map<OSMID,const OSMNode*> nodes; //unordered map that holds all OSMNode* with their OSMID as keys
 std::vector<std::pair<std::string, int>> streetNames; 
 std::vector<float> speedLim; // a vector that holds speed limit of a street segment at index=StreetSegmentIndex
 std::vector<double> segLen; // a vector that holds length of a street segment at index=StreetSegmentIndex
-float lat_avg; //average latitude of current map
 
+float lat_avg; //average latitude of current map
 /**
  * Loading above data structures by pulling data from StreetsDatabaseAPI and OSMDatabaseAPI
  * 
@@ -74,6 +76,23 @@ bool load_map(std::string map_streets_database_filename) {
     
     std::cout << "load_map: " << map_streets_database_filename << std::endl;
     
+
+    /**
+     * Loading of ways and nodes
+     **/
+    int nWays = getNumberOfWays();
+    for(int i=0;i<nWays;i++){
+        const OSMWay * temp = getWayByIndex(i);
+        ways[temp->id()]=temp;
+    }
+    
+    int nNodes=getNumberOfNodes();
+    for(int i=0;i<nNodes;i++){
+        const OSMNode* temp = getNodeByIndex(i);
+        nodes[temp->id()] = temp;
+    }
+
+
     /**
      * Loading of streetSegsVectors,streetIntersections,
      *              speedLim,segLen,streetIntersectionsVectors
@@ -85,6 +104,34 @@ bool load_map(std::string map_streets_database_filename) {
         streetIntersections[sgmt.streetID].insert(sgmt.from);
         streetIntersections[sgmt.streetID].insert(sgmt.to);
         speedLim.push_back(sgmt.speedLimit);
+        StreetSegmentData dat;
+        dat.info=sgmt;
+        dat.idx=i;
+        dat.way=ways[sgmt.wayOSMID];
+        
+        int tags = getTagCount(dat.way);
+        for(int j=0;j<tags;j++){
+            std::pair<std::string,std::string> wayTag = getTagPair(dat.way,j);
+            if(wayTag.first=="highway"){
+                if(wayTag.second=="secondary"||wayTag.second=="tertiary"){
+                    dat.type=StreetType::CITY_ROAD;
+                }  
+                else if(wayTag.second=="motorway"||wayTag.second=="trunk"){
+                    dat.type=StreetType::EXPRESSWAY;
+                }       
+                else if(wayTag.second=="primary"){
+                    dat.type=StreetType::SMALL_HIGHWAY;
+                }         
+                else if(wayTag.second=="residential"){
+                    dat.type=StreetType::RESIDENTIAL;
+                }
+                else{
+                    dat.type=StreetType::OTHER;
+                }
+            }
+                
+        }
+        
 
         double length = 0;
         std::pair <LatLon, LatLon> pointsL;
@@ -118,10 +165,16 @@ bool load_map(std::string map_streets_database_filename) {
      * Loading of intersections
      **/
     int nIntersections=getNumIntersections();
+    intersectionsData.resize(nIntersections);
     for(int i = 0;i<nIntersections;i++){
         std::vector<StreetSegmentIndex> segmentsAtIntersection;
+        intersection_data dt;
+        dt.position=getIntersectionPosition(i);
+        dt.name = getIntersectionName(i);
+        dt.idx = i;
+        //intersectionsData[i]=dt;
         for(int j=0;j<getIntersectionStreetSegmentCount(i);j++){
-          
+            
             segmentsAtIntersection.push_back(getIntersectionStreetSegment(i,j));
         }
         intersections.push_back(segmentsAtIntersection);
@@ -138,21 +191,7 @@ bool load_map(std::string map_streets_database_filename) {
     }
     std::sort(streetNames.begin(), streetNames.end(), pairCompareStringInt);
 
-    /**
-     * Loading of ways and nodes
-     **/
-    int nWays = getNumberOfWays();
-    for(int i=0;i<nWays;i++){
-        const OSMWay * temp = getWayByIndex(i);
-        ways[temp->id()]=temp;
-    }
     
-    int nNodes=getNumberOfNodes();
-    for(int i=0;i<nNodes;i++){
-        const OSMNode* temp = getNodeByIndex(i);
-        nodes[temp->id()] = temp;
-    }
-
     load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
 

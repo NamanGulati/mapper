@@ -21,12 +21,9 @@
 
 void draw_main_canvas (ezgl::renderer *g);
 
-struct intersection_data {
-    LatLon position;
-    std::string name;
-};
 
-std::vector<intersection_data> intersectionsData;
+
+//std::vector<intersection_data> intersectionsData;
 float max_lat, min_lat, max_lon, min_lon;
     
 void draw_map () {
@@ -69,4 +66,5 @@ void draw_main_canvas (ezgl::renderer *g) {
         
         g->fill_rectangle({x,y},{x + width, y + height});
     }
+
 }

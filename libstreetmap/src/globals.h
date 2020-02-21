@@ -20,7 +20,9 @@
 #include <unordered_set>
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
+#include "helpers.h"
 
+extern std::unordered_map<StreetIndex,std::vector<StreetSegmentData>> streetSegData; //unordered map holding vectors of street segments for each street
 
 extern std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streetSegsVectors; //unordered map holding vectors of street segments for each street
 
@@ -41,6 +43,9 @@ extern std::vector<float> speedLim; // a vector that holds speed limit of a stre
 extern std::vector<double> segLen; // a vector that holds length of a street segment at index=StreetSegmentIndex
 
 extern float lat_avg; //average latitude of current map
+
+extern std::vector<intersection_data> intersectionsData; //unordered map that holds data in intersection_data as a vector
+
 
 #endif /* GLOBALS_H */
 

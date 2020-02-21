@@ -22,6 +22,28 @@ struct Cartesian{
     double yCoord;
 };
 
+struct intersection_data {
+        LatLon position;
+        std::string name;
+        IntersectionIndex idx;
+        bool isHighlighted=false;
+};
+
+
+enum StreetType{
+    CITY_ROAD, //secondary,tertiary 
+    EXPRESSWAY, //motorway, trunk
+    SMALL_HIGHWAY, //primary
+    RESIDENTIAL, //residential,
+    OTHER
+};
+
+struct StreetSegmentData{
+    InfoStreetSegment info;
+    int idx;
+    const OSMWay* way;
+    StreetType type;
+};
 
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points);
 bool compareOSMID(OSMID id1, OSMID id2);
