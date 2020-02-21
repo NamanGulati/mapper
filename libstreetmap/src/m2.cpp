@@ -43,11 +43,11 @@ void draw_map () {
     }
     
     getBounds(min_lon, max_lon, min_lat, max_lat);    
-    lat_avg = (min_lat + max_lat)/2;
+    lat_avg = DEGREE_TO_RADIAN*(min_lat + max_lat)/2;
      
     ezgl::application application(settings);
   
-    ezgl::rectangle  initial_world({x_from_lon(min_lon),y_from_lat(min_lat)},{x_from_lon(max_lon),y_from_lat(max_lat)});
+    ezgl::rectangle initial_world({x_from_lon(min_lon),y_from_lat(min_lat)},{x_from_lon(max_lon),y_from_lat(max_lat)});
     
     application.add_canvas("MainCanvas",
                             draw_main_canvas,
@@ -64,7 +64,7 @@ void draw_main_canvas (ezgl::renderer *g) {
         float x = x_from_lon(intersectionsData[i].position.lon());
         float y = y_from_lat(intersectionsData[i].position.lat());
         
-        float width = 0.001;
+        float width = 0.00002;
         float height = width;
         
         g->fill_rectangle({x,y},{x + width, y + height});

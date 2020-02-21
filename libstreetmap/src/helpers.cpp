@@ -6,7 +6,7 @@
 #include "helpers.h"
 #include "globals.h"
 #include "m1.h"
-#include <math.h>
+#include <cmath>
 
 //converts a pair of LatLon points to a pair of Cartesian points
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){
