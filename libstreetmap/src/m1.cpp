@@ -43,7 +43,7 @@
 // name.
 
 std::unordered_map<StreetIndex,std::vector<StreetSegmentIndex>> streetSegsVectors; //unordered map holding vectors of street segments for each street
-std::unordered_map<StreetIndex,std::vector<StreetSegmentData>> streetSegData; //unordered map holding vectors of street segments for each street
+std::unordered_map<StreetIndex,std::vector<StreetSegmentData>> streetSegData; //unordered map holding vectors of data on street segments for each street
 std::unordered_map<StreetIndex, std::set<IntersectionIndex>> streetIntersections; //unordered map holds a set of intersections corresponding to a street id
 std::unordered_map<StreetIndex,std::vector<IntersectionIndex>> streetIntersectionsVectors; //unordered map that holds data in streetIntersections as a vector
 std::vector<intersection_data> intersectionsData; //unordered map that holds data in intersection_data as a vector
@@ -53,10 +53,10 @@ std::unordered_map<OSMID,const OSMNode*> nodes; //unordered map that holds all O
 std::vector<std::pair<std::string, int>> streetNames; 
 std::vector<float> speedLim; // a vector that holds speed limit of a street segment at index=StreetSegmentIndex
 std::vector<double> segLen; // a vector that holds length of a street segment at index=StreetSegmentIndex
-std::vector<FeatureData> featureData;
-
-
+std::vector<FeatureData> featureData; //vector of all natural features on the map
+std::vector<POIData> pois; //vector of all points of interest on the map
 float lat_avg; //average latitude of current map
+
 /**
  * Loading above data structures by pulling data from StreetsDatabaseAPI and OSMDatabaseAPI
  * 
@@ -208,6 +208,14 @@ bool load_map(std::string map_streets_database_filename) {
         featureData.push_back(fd);
     }
 
+    for(int i=0;i<getNumPointsOfInterest();i++){
+        POIData poi;
+        poi.type=getPointOfInterestType(i);
+        poi.name = getPointOfInterestName(i);
+        poi.position=getPointOfInterestPosition(i);
+        poi.node=nodes[getPointOfInterestOSMNodeID(i)];
+        pois.push_back(poi);
+    }
     load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
 

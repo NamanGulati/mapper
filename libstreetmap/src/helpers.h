@@ -54,6 +54,13 @@ struct FeatureData{
     std::vector<LatLon> points;
 };
 
+struct POIData{
+    std::string type;
+    std::string name;
+    LatLon position;
+    const OSMNode * node;
+};
+
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points);
 bool compareOSMID(OSMID id1, OSMID id2);
 const OSMWay* getWayFromOSMID(OSMID way_id);

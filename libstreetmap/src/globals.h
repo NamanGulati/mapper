@@ -48,6 +48,7 @@ extern std::vector<intersection_data> intersectionsData; //unordered map that ho
 
 extern std::vector<FeatureData> featureData;
 
+extern std::vector<POIData> pois;
 
 #endif /* GLOBALS_H */
 
