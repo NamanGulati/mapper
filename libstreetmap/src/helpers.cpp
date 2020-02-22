@@ -5,6 +5,7 @@
  */
 #include "helpers.h"
 #include "globals.h"
+#include "ezgl/point.hpp"
 #include "m1.h"
 #include <cmath>
 
@@ -23,6 +24,17 @@ std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatL
     convertedPoints.second.yCoord = lat2;
     
     return convertedPoints; 
+}
+
+ezgl::point2d LatLonTo2d(LatLon point){
+    
+
+    double lon= point.lon()*DEGREE_TO_RADIAN;
+    double lat = point.lat()*DEGREE_TO_RADIAN;
+    double x = lon*cos(lat_avg);
+    double y = lat;
+    
+    return ezgl::point2d(x,y); 
 }
 
 float x_from_lon(float lon){

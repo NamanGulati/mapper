@@ -16,6 +16,7 @@
 
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
+#include "ezgl/point.hpp"
 #include <vector>
 
 struct Cartesian{
@@ -62,6 +63,7 @@ struct POIData{
 };
 
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points);
+ezgl::point2d LatLonTo2d(LatLon point);
 bool compareOSMID(OSMID id1, OSMID id2);
 const OSMWay* getWayFromOSMID(OSMID way_id);
 const OSMNode* getNodeFromOSMID(OSMID node_id);
