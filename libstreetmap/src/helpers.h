@@ -51,7 +51,7 @@ struct StreetSegmentData{
 struct FeatureData{
     std::string name;
     FeatureType type;
-    
+    bool isClosed;
     std::vector<LatLon> points;
 };
 

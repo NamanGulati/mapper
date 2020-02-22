@@ -202,10 +202,17 @@ bool load_map(std::string map_streets_database_filename) {
         FeatureData fd;
         fd.name=getFeatureName(i);
         fd.type=getFeatureType(i);
-        std::vector<LatLon> points;
+//        std::vector<LatLon> points;
         for(int j=0;j<getFeaturePointCount(i);j++){
-            points.push_back(getFeaturePoint(j,i));
+            fd.points.push_back(getFeaturePoint(j,i));
         }
+        if((getFeaturePoint(0, i).lat() != getFeaturePoint(getFeaturePointCount(i)-1, i).lat()) 
+            || (getFeaturePoint(0, i).lon() != getFeaturePoint(getFeaturePointCount(i)-1, i).lon())){
+        fd.isClosed = false;
+        }
+        else
+            fd.isClosed = true;
+        
         featureData.push_back(fd);
     }
 
