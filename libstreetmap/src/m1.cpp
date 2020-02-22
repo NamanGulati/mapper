@@ -137,7 +137,7 @@ bool load_map(std::string map_streets_database_filename) {
             dat.curvePts.push_back(getStreetSegmentCurvePoint(j,i));
         }
 
-
+        streetSegData[sgmt.streetID].push_back(dat);
         double length = 0;
         std::pair <LatLon, LatLon> pointsL;
         

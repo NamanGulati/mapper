@@ -27,6 +27,7 @@ void draw_main_canvas (ezgl::renderer *g);
 float max_lat, min_lat, max_lon, min_lon;
     
 void draw_map () {
+    std::cout<<"size:"<<streetSegData.size()<<std::endl;
     ezgl::application::settings settings;
     settings.main_ui_resource = "libstreetmap/resources/main.ui";
     settings.window_identifier = "MainWindow";
