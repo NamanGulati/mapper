@@ -202,7 +202,7 @@ bool load_map(std::string map_streets_database_filename) {
         fd.name=getFeatureName(i);
         fd.type=getFeatureType(i);
         std::vector<LatLon> points;
-        for(int j=0;i<getFeaturePointCount(i);j++){
+        for(int j=0;j<getFeaturePointCount(i);j++){
             points.push_back(getFeaturePoint(j,i));
         }
         featureData.push_back(fd);
