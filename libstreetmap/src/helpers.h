@@ -50,7 +50,7 @@ struct StreetSegmentData{
 struct FeatureData{
     std::string name;
     FeatureType type;
-    OSMID id;
+    
     std::vector<LatLon> points;
 };
 

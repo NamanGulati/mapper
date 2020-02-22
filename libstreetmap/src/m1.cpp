@@ -53,6 +53,8 @@ std::unordered_map<OSMID,const OSMNode*> nodes; //unordered map that holds all O
 std::vector<std::pair<std::string, int>> streetNames; 
 std::vector<float> speedLim; // a vector that holds speed limit of a street segment at index=StreetSegmentIndex
 std::vector<double> segLen; // a vector that holds length of a street segment at index=StreetSegmentIndex
+std::vector<FeatureData> featureData;
+
 
 float lat_avg; //average latitude of current map
 /**
@@ -195,6 +197,17 @@ bool load_map(std::string map_streets_database_filename) {
     std::sort(streetNames.begin(), streetNames.end(), pairCompareStringInt);
 
     
+    for(int i=0;i<getNumFeatures();i++){
+        FeatureData fd;
+        fd.name=getFeatureName(i);
+        fd.type=getFeatureType(i);
+        std::vector<LatLon> points;
+        for(int j=0;i<getFeaturePointCount(i);j++){
+            points.push_back(getFeaturePoint(j,i));
+        }
+        featureData.push_back(fd);
+    }
+
     load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
 

@@ -46,6 +46,8 @@ extern float lat_avg; //average latitude of current map
 
 extern std::vector<intersection_data> intersectionsData; //unordered map that holds data in intersection_data as a vector
 
+extern std::vector<FeatureData> featureData;
+
 
 #endif /* GLOBALS_H */
 
