@@ -8,6 +8,7 @@
 #include "ezgl/point.hpp"
 #include "m1.h"
 #include <cmath>
+#include <boost/algorithm/string.hpp>
 
 //converts a pair of LatLon points to a pair of Cartesian points
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){
@@ -99,4 +100,16 @@ std::string removeSpaceAndConcat(std::string remove){
 //Used for the sort function to sort a vector of pairs
 bool pairCompareStringInt(std::pair<std::string, int> item1, std::pair<std::string, int> item2){
     return item1.first < item2.first;
+}
+
+std::vector<std::string> parse2Streets(std::string s){
+    std::vector<std::string> the2Streets;
+    if (s.find("and") != std::string::npos){
+        boost::split(the2Streets, s, boost::is_any_of("and"));
+    }
+    else if(s.find("&") != std::string::npos){
+        boost::split(the2Streets, s, boost::is_any_of("&"));
+    }
+    
+    return the2Streets;
 }

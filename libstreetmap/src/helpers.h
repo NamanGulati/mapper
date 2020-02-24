@@ -74,6 +74,7 @@ float x_from_lon(float lon);
 float y_from_lat(float lat);
 float lon_from_x(float x);
 float lat_from_y(float y);
+std::vector<std::string> parse2Streets(std::string s);
 
 #endif /* HELPERS_H */
 
