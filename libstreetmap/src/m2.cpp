@@ -21,14 +21,16 @@
 
 
 void draw_main_canvas (ezgl::renderer *g);
+void onClick(ezgl::application *app, GdkEventButton *event, double x, double y);
 
-float max_lat, min_lat, max_lon, min_lon;
+
     
 void draw_map () {
     ezgl::application::settings settings;
     settings.main_ui_resource = "libstreetmap/resources/main.ui";
     settings.window_identifier = "MainWindow";
     settings.canvas_identifier = "MainCanvas";
+    
     
     intersectionsData.resize(getNumIntersections());
     
@@ -37,8 +39,6 @@ void draw_map () {
         intersectionsData[i].name = getIntersectionName(i);
     }
     
-    getBounds(min_lon, max_lon, min_lat, max_lat);    
-    lat_avg = DEGREE_TO_RADIAN*(min_lat + max_lat)/2;
      
     ezgl::application application(settings);
   
@@ -48,8 +48,8 @@ void draw_map () {
                             draw_main_canvas,
                             initial_world);
     
-    
-    application.run(NULL, NULL, NULL, NULL);
+
+    application.run(NULL, onClick, NULL, NULL);
 }
 
 void draw_main_canvas (ezgl::renderer *g) {
@@ -122,9 +122,10 @@ void draw_main_canvas (ezgl::renderer *g) {
             g->set_color(230,216,173,255);
             
         
+        std::vector<ezgl::point2d> FDconvertedPoints=featureData[i].convertedPoints;
         if(featureData[i].points.size()>1&&featureData[i].isClosed){
-            std::transform(featureData[i].points.begin(), featureData[i].points.end(), std::back_inserter(convertedPoints), LatLonTo2d);
-            g->fill_poly(convertedPoints);
+            //std::transform(featureData[i].points.begin(), featureData[i].points.end(), std::back_inserter(convertedPoints), LatLonTo2d);
+            g->fill_poly(featureData[i].convertedPoints);
         }
 //        if(featureData[i].isClosed)
 //            g->fill_poly(convertedPoints);
@@ -134,9 +135,14 @@ void draw_main_canvas (ezgl::renderer *g) {
 //        }
     }
     
-    
+  
 }
 
-void findFeature(ezgl::application *app, GdkEventButton *event, double x, double y){
-    
+void onClick(ezgl::application *app, GdkEventButton *event, double x, double y){
+    LatLon clickPos(lon_from_x(x),lat_from_y(y));
+    IntersectionIndex intersection = find_closest_intersection(clickPos);
+    //if intersections are circles
+    //if(getIntersectionPosition())
+    std::cout<<getIntersectionName(intersection)<<std::endl;
+    intersectionsData[intersection].isHighlighted=true;
 }

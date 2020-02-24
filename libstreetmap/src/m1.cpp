@@ -56,6 +56,7 @@ std::vector<double> segLen; // a vector that holds length of a street segment at
 std::unordered_map<FeatureIndex, FeatureData> featureData; //vector of all natural features on the map
 std::vector<POIData> pois; //vector of all points of interest on the map
 float lat_avg; //average latitude of current map
+float max_lat, min_lat, max_lon, min_lon;
 
 /**
  * Loading above data structures by pulling data from StreetsDatabaseAPI and OSMDatabaseAPI
@@ -78,7 +79,8 @@ bool load_map(std::string map_streets_database_filename) {
     
     std::cout << "load_map: " << map_streets_database_filename << std::endl;
     
-
+    getBounds(min_lon, max_lon, min_lat, max_lat);    
+    lat_avg = DEGREE_TO_RADIAN*(min_lat + max_lat)/2;
     /**
      * Loading of ways and nodes
      **/
@@ -205,7 +207,7 @@ bool load_map(std::string map_streets_database_filename) {
 //        std::vector<LatLon> points;
         for(int j=0;j<getFeaturePointCount(i);j++){
             fd.points.push_back(getFeaturePoint(j,i));
-            fd.convertedPoints.insert(fd.convertedPoints.end(),LatLonTo2d(getFeaturePoint(j,i)));
+            fd.convertedPoints.push_back(LatLonTo2d(getFeaturePoint(j,i)));
         }
         if((getFeaturePoint(0, i).lat() != getFeaturePoint(getFeaturePointCount(i)-1, i).lat()) 
             || (getFeaturePoint(0, i).lon() != getFeaturePoint(getFeaturePointCount(i)-1, i).lon())){
@@ -265,7 +267,7 @@ double find_street_segment_travel_time(int street_segment_id){
 
 //determines the closest intersection to a given point on the map by finding the minimum distance to an intersection 
 int find_closest_intersection(LatLon my_position){
-    double min = 10000000000;
+    double min = 10000000000; //TODO: Replace with some constant thats a magic number
     int curr = 0;
     for(int i = 0; i < getNumIntersections(); i++){
         double dist = find_distance_between_two_points(std::pair<LatLon, LatLon>(my_position, getIntersectionPosition(i)));
