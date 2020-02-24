@@ -54,12 +54,14 @@ void draw_map () {
 
 void draw_main_canvas (ezgl::renderer *g) {
     
-    g->set_color(ezgl::DARK_SLATE_BLUE);
+    g->set_color(211,211,211,255);
+    g->fill_rectangle(g->get_visible_world());
+    g->set_color(ezgl::WHITE);
     for(size_t i = 0; i < intersectionsData.size(); i++){
         float x = x_from_lon(intersectionsData[i].position.lon());
         float y = y_from_lat(intersectionsData[i].position.lat());
         
-        float width = 0.00001;
+        float width = 0.000001;
         float height = width;
         
         if(intersectionsData[i].isHighlighted)  
@@ -71,14 +73,15 @@ void draw_main_canvas (ezgl::renderer *g) {
 
     for(size_t i = 0; i < streetSegData.size(); i++){
         
-        g->set_color(ezgl::GREY_75);
-        //g->set_line_width(0.1);
+        g->set_color(ezgl::WHITE);
         for(size_t j = 0; j < streetSegData[i].size(); j++){
             StreetSegmentData segDat=streetSegData[i][j];
                 if(segDat.type==StreetType::CITY_ROAD)
                     g->set_line_width(3);
-                else if(segDat.type==StreetType::EXPRESSWAY)
+                else if(segDat.type==StreetType::EXPRESSWAY){
                     g->set_line_width(7);
+                    g->set_color(ezgl::YELLOW);
+                }
                 else if(segDat.type==StreetType::RESIDENTIAL)
                     g->set_line_width(1);
                 else if(segDat.type==StreetType::SMALL_HIGHWAY)
@@ -106,13 +109,21 @@ void draw_main_canvas (ezgl::renderer *g) {
         if(g->get_visible_world().height() > 0.07) break;
         
         //std::transform(featureData[i].points.begin(), featureData[i].points.end(), std::back_inserter(convertedPoints), LatLonTo2d);
-        
-        g->set_color(ezgl::BLUE);
+        FeatureType fType = featureData[i].type;
+        if(fType == Lake || fType == River || fType == Stream)
+            g->set_color(149,217,255,255);
+        else if(fType == Greenspace || fType == Island)
+            g->set_color(149,235,100,255);
+        else if(fType == Park || fType == Golfcourse)
+            g->set_color(149,235,100,255);
+        else if(fType == Building)
+            g->set_color(ezgl::GREY_75);
+        else if(fType == Beach)
+            g->set_color(230,216,173,255);
+            
         
         if(featureData[i].points.size()>1&&featureData[i].isClosed){
-            std::cout << "fd: "<<featureData[i].convertedPoints.size() << std::endl;
             std::transform(featureData[i].points.begin(), featureData[i].points.end(), std::back_inserter(convertedPoints), LatLonTo2d);
-            std::cout << "cp: "<<convertedPoints.size() << std::endl;
             g->fill_poly(convertedPoints);
         }
 //        if(featureData[i].isClosed)
@@ -126,6 +137,6 @@ void draw_main_canvas (ezgl::renderer *g) {
     
 }
 
-void findFeatrure(ezgl::application *app, GdkEventButton *event, double x, double y){
+void findFeature(ezgl::application *app, GdkEventButton *event, double x, double y){
     
 }
