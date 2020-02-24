@@ -53,6 +53,7 @@ struct FeatureData{
     FeatureType type;
     bool isClosed;
     std::vector<LatLon> points;
+    std::vector<ezgl::point2d> convertedPoints;
 };
 
 struct POIData{
