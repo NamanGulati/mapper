@@ -57,6 +57,8 @@ std::unordered_map<FeatureIndex, FeatureData> featureData; //vector of all natur
 std::vector<POIData> pois; //vector of all points of interest on the map
 float lat_avg; //average latitude of current map
 float max_lat, min_lat, max_lon, min_lon;
+constexpr double LARGE_DIST= 10000000000;
+constexpr double KM_per_H_to_M_per_S = 3.6;
 /**
  * Loading above data structures by pulling data from StreetsDatabaseAPI and OSMDatabaseAPI
  * 
