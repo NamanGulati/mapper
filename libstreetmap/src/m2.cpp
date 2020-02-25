@@ -26,6 +26,7 @@
 
 void draw_main_canvas(ezgl::renderer *g);
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y);
+void onSearch(GtkWidget* widget, ezgl::application *application);
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData segDat);
 
 void draw_map()
@@ -133,6 +134,19 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
     //if(getIntersectionPosition())
     std::cout << getIntersectionName(intersection) << std::endl;
     intersectionsData[intersection].isHighlighted = true;
+}
+
+void onSearch(ezgl::application *application){
+    // Get the GtkEntry cast of GtkSearchEntry object
+    GtkEntry* search_entry = (GtkEntry *) application->get_object("SearchEntry");
+    
+    //Retrieve the text from the search entry
+    const char* text = gtk_entry_get_text(search_entry);
+    
+    // Update the status bar message
+    application->update_message("Searched");
+    // Redraw the graphics
+    application->refresh_drawing();
 }
 
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData segDat){
