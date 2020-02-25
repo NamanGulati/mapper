@@ -116,6 +116,7 @@ bool load_map(std::string map_streets_database_filename) {
         int tags = getTagCount(dat.way);
         for(int j=0;j<tags;j++){
             std::pair<std::string,std::string> wayTag = getTagPair(dat.way,j);
+
             if(wayTag.first=="highway"){
                 if(wayTag.second=="secondary"||wayTag.second=="tertiary"){
                     dat.type=StreetType::CITY_ROAD;
@@ -133,12 +134,18 @@ bool load_map(std::string map_streets_database_filename) {
                     dat.type=StreetType::OTHER;
                 }
             }
-                
+            else if(wayTag.first=="lanes"){
+                dat.lanes=std::stoi(wayTag.second);
+            }
+    
         }
+
+        dat.curvePts.push_back(getIntersectionPosition(sgmt.from));
         for(int j=0;j<sgmt.curvePointCount;j++){
             dat.curvePts.push_back(getStreetSegmentCurvePoint(j,i));
         }
-        
+        dat.curvePts.push_back(getIntersectionPosition(sgmt.to));
+
         streetSegData[sgmt.streetID].push_back(dat);
         
         double length = 0;

@@ -23,6 +23,8 @@
 
 #include "m1.h"
 #include "m2.h"
+#include "StreetsDatabaseAPI.h"
+#include "OSMDatabaseAPI.h"
 
 //Program exit codes
 constexpr int SUCCESS_EXIT_CODE = 0;        //Everyting went OK
@@ -65,7 +67,9 @@ int main(int argc, char** argv) {
     std::cout << "Successfully loaded map '" << map_path << "'\n";
 
     //You can now do something with the map data
-
+    int num = find_street_ids_from_partial_street_name("Panhellenic Dr")[0];
+    int seg = find_street_segments_of_street(num)[0];
+    std::cout<<"num: "<<num<<std::endl;
 
     //Clean-up the map data and related data structures
     draw_map();

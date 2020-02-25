@@ -45,6 +45,7 @@ struct StreetSegmentData{
     int idx;
     const OSMWay* way;
     StreetType type;
+    int lanes=-1;
     std::vector<LatLon> curvePts;
 };
 
