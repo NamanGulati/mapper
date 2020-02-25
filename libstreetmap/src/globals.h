@@ -52,5 +52,9 @@ extern std::vector<POIData> pois;
 
 extern float max_lat, min_lat, max_lon, min_lon;
 
+extern constexpr double LARGE_DIST= 10000000000;
+
+extern constexpr double KM_per_H_to_M_per_S = 3.6;
+
 #endif /* GLOBALS_H */
 

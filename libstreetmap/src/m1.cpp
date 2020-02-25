@@ -57,7 +57,6 @@ std::unordered_map<FeatureIndex, FeatureData> featureData; //vector of all natur
 std::vector<POIData> pois; //vector of all points of interest on the map
 float lat_avg; //average latitude of current map
 float max_lat, min_lat, max_lon, min_lon;
-
 /**
  * Loading above data structures by pulling data from StreetsDatabaseAPI and OSMDatabaseAPI
  * 
@@ -269,12 +268,12 @@ double find_street_segment_length(int street_segment_id){
 }//rob
 
 double find_street_segment_travel_time(int street_segment_id){
-    return (find_street_segment_length(street_segment_id)/speedLim[street_segment_id])*3.6;
+    return (find_street_segment_length(street_segment_id)/speedLim[street_segment_id])*KM_per_H_to_M_per_S;
 }//rob
 
 //determines the closest intersection to a given point on the map by finding the minimum distance to an intersection 
 int find_closest_intersection(LatLon my_position){
-    double min = 10000000000; //TODO: Replace with some constant thats a magic number
+    double min = LARGE_DIST; //TODO: Replace with some constant thats a magic number
     int curr = 0;
     for(int i = 0; i < getNumIntersections(); i++){
         double dist = find_distance_between_two_points(std::pair<LatLon, LatLon>(my_position, getIntersectionPosition(i)));
