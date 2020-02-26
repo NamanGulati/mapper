@@ -28,6 +28,7 @@ void draw_main_canvas(ezgl::renderer *g);
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y);
 void onSearch(GtkWidget* widget, ezgl::application *application);
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData segDat);
+void drawIntersection(ezgl::renderer * g, IntersectionIndex idx);
 
 void draw_map()
 {
@@ -60,18 +61,10 @@ void draw_main_canvas(ezgl::renderer *g)
     std::cout<<"area: "<<g->get_visible_world().area()<<std::endl;
     g->set_color(211, 211, 211, 255);
     g->fill_rectangle(g->get_visible_world());
-    g->set_color(ezgl::WHITE);
     for (size_t i = 0; i < intersectionsData.size(); i++)
     {
-        float x = x_from_lon(intersectionsData[i].position.lon());
-        float y = y_from_lat(intersectionsData[i].position.lat());
-
-        float width = 0.000001;
-        float height = width;
-
         if (intersectionsData[i].isHighlighted)
-            g->set_color(ezgl::RED);
-
+            drawIntersection(g, i);
         //g->fill_arc({x,y},width,0,360);
         //g->fill_rectangle({x,y},{x + width, y + height});
     }
@@ -128,12 +121,15 @@ void draw_main_canvas(ezgl::renderer *g)
 
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 {
-    LatLon clickPos(lon_from_x(x), lat_from_y(y));
+    LatLon clickPos(lat_from_y(y),lon_from_x(x));
     IntersectionIndex intersection = find_closest_intersection(clickPos);
     //if intersections are circles
     //if(getIntersectionPosition())
+    std::cout << "x: "<< x << "y: " << y << "intersection: " << intersection<< std::endl;
+    std::cout << "Lon: "<< clickPos.lon() << "Lat: " << clickPos.lat() << "intersectionLon: " << getIntersectionPosition(intersection).lon() << std::endl;
     std::cout << getIntersectionName(intersection) << std::endl;
     intersectionsData[intersection].isHighlighted = true;
+    app->refresh_drawing();
 }
 
 void onSearch(ezgl::application *application){
@@ -173,4 +169,19 @@ void drawStreetSegment(ezgl::renderer * g, StreetSegmentData segDat){
                 
                 g->draw_line(LatLonTo2d(segDat.curvePts[k]), LatLonTo2d(segDat.curvePts[k + 1]));
             }
+}
+
+void drawIntersection(ezgl::renderer * g, IntersectionIndex idx){
+    
+    float x = x_from_lon(intersectionsData[idx].position.lon());
+    float y = y_from_lat(intersectionsData[idx].position.lat());
+
+    float width = 0.000001;
+    float height = width;
+    
+    g->set_color(ezgl::RED);
+    //g->fill_rectangle({x,y},{x + width, y + height});
+    g->fill_arc(LatLonTo2d(intersectionsData[idx].position), g->get_visible_world().height()*0.01,0,360);
+    
+    
 }
