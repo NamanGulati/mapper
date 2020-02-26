@@ -57,7 +57,8 @@ void draw_map()
 }
 
 void draw_main_canvas(ezgl::renderer *g)
-{
+{   
+    
     std::cout<<"area: "<<g->get_visible_world().area()<<std::endl;
     g->set_color(211, 211, 211, 255);
     g->fill_rectangle(g->get_visible_world());
@@ -102,6 +103,7 @@ void draw_main_canvas(ezgl::renderer *g)
         //                g->draw_line(convertedPoints[j], convertedPoints[j+1]);
         //        }
     }
+    std::cout<<"ZoomLevel: "<<zoomLevel<<std::endl;
 
     for (size_t i = 0; i < streetSegData.size(); i++)
     {
@@ -110,9 +112,9 @@ void draw_main_canvas(ezgl::renderer *g)
         for (size_t j = 0; j < streetSegData[i].size(); j++)
         {
             StreetSegmentData segDat = streetSegData[i][j];
-            if(g->get_visible_world().contains(LatLonTo2d(segDat.curvePts[0]))||g->get_visible_world().contains(LatLonTo2d(segDat.curvePts[segDat.curvePts.size()-1]))){
+            //if(g->get_visible_world().contains(LatLonTo2d(segDat.curvePts[0]))||g->get_visible_world().contains(LatLonTo2d(segDat.curvePts[segDat.curvePts.size()-1]))){
                 drawStreetSegment(g,segDat);
-            }
+            //}
         }
     }
 
@@ -148,26 +150,45 @@ void onSearch(ezgl::application *application){
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData segDat){
             g->set_color(ezgl::WHITE);
             double area = g->get_visible_world().area();
-            if (segDat.type == StreetType::CITY_ROAD && area>SECONDARY_LEVEL_DRAW_LIM)
-                 return;
-            else if (segDat.type == StreetType::EXPRESSWAY)
-            {
-                 //g->set_line_width(20);
-                 g->set_line_width((segDat.lanes)*3);
-                 g->set_color(ezgl::YELLOW);
+            int lineWidth = 4;
+            if(segDat.type==StreetType::EXPRESSWAY){
+               lineWidth=(segDat.lanes!=-1?segDat.lanes:3)*zoomLevel;
+                //g->set_line_width(20);
+                g->set_color(ezgl::YELLOW);
             }
-            else if (segDat.type == StreetType::RESIDENTIAL&& area>TERTIARY_LEVEL_DRAW_LIM)
-                 return;
-            else if (segDat.type == StreetType::OTHER && area > TERTIARY_LEVEL_DRAW_LIM)
-                return;
-            else if(segDat.lanes!=-1)
-                g->set_line_width((segDat.lanes)*3);
-            else
-                g->set_line_width(3);
-            for (size_t k = 0; k < segDat.curvePts.size() - 1; k++)
-            {
+            else if(segDat.type == StreetType::CITY_ROAD){
+                if(zoomLevel<3)
+                    return;
                 
-                g->draw_line(LatLonTo2d(segDat.curvePts[k]), LatLonTo2d(segDat.curvePts[k + 1]));
+                lineWidth=(segDat.lanes!=-1?segDat.lanes:2)*(zoomLevel-2);
+            }
+            else {//if(segDat.type==StreetType::RESIDENTIAL){
+                if(zoomLevel<7)
+                    return;
+                lineWidth=(segDat.lanes!=-1?segDat.lanes:1)*(zoomLevel-6);
+            }
+
+
+
+            // if (segDat.type == StreetType::CITY_ROAD && area>SECONDARY_LEVEL_DRAW_LIM)
+            //      return;
+            // else if (segDat.type == StreetType::EXPRESSWAY)
+            // {
+                 
+            // }
+            // else if (segDat.type == StreetType::RESIDENTIAL&& area>TERTIARY_LEVEL_DRAW_LIM)
+            //      return;
+            // else if (segDat.type == StreetType::OTHER && area > TERTIARY_LEVEL_DRAW_LIM)
+            //     return;
+            // else if(segDat.lanes!=-1)
+            //     lineWidth = segDat.lanes*2*zoomlevel;//g->set_line_width((segDat.lanes)*3);
+
+            g->set_line_width(lineWidth);
+            g->set_line_cap(ezgl::line_cap::round);
+            for (size_t k = 0; k < segDat.curvePts.size() - 1; k++)
+            {   
+                //g->draw_line(LatLonTo2d(segDat.curvePts[k]), LatLonTo2d(segDat.curvePts[k + 1]));
+                g->draw_line(segDat.convertedCurvePoints[k],segDat.convertedCurvePoints[k+1]);
             }
 }
 

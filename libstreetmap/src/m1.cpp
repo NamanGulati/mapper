@@ -142,9 +142,12 @@ bool load_map(std::string map_streets_database_filename) {
         }
 
         dat.curvePts.push_back(getIntersectionPosition(sgmt.from));
+        dat.convertedCurvePoints.push_back(LatLonTo2d(getIntersectionPosition(sgmt.from)));
         for(int j=0;j<sgmt.curvePointCount;j++){
             dat.curvePts.push_back(getStreetSegmentCurvePoint(j,i));
+            dat.convertedCurvePoints.push_back(LatLonTo2d(getStreetSegmentCurvePoint(j,i)));
         }
+        dat.convertedCurvePoints.push_back(LatLonTo2d(getIntersectionPosition(sgmt.to)));
         dat.curvePts.push_back(getIntersectionPosition(sgmt.to));
 
         streetSegData[sgmt.streetID].push_back(dat);

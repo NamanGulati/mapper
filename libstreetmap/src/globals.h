@@ -51,6 +51,6 @@ extern std::unordered_map<FeatureIndex, FeatureData> featureData; //vector of al
 extern std::vector<POIData> pois;
 
 extern float max_lat, min_lat, max_lon, min_lon;
-
+extern int zoomLevel;
 #endif /* GLOBALS_H */
 

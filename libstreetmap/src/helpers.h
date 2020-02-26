@@ -47,6 +47,8 @@ struct StreetSegmentData{
     StreetType type;
     int lanes=-1;
     std::vector<LatLon> curvePts;
+    std::vector<ezgl::point2d> convertedCurvePoints;
+
 };
 
 struct FeatureData{

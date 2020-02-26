@@ -17,6 +17,9 @@
  */
 
 #include "ezgl/callback.hpp"
+#include "globals.h"
+
+int zoomLevel=1;
 
 namespace ezgl {
 
@@ -45,7 +48,7 @@ gboolean press_mouse(GtkWidget *, GdkEventButton *event, gpointer data)
 
   if(event->type == GDK_BUTTON_PRESS) {
 
-    // Check for left mouse press to support dragging
+    // Check for Middle mouse press to support dragging
     if(event->button == 1) {
       left_mouse_button_pressed = true;
       prev_x = event->x;
@@ -70,7 +73,7 @@ gboolean press_mouse(GtkWidget *, GdkEventButton *event, gpointer data)
 gboolean release_mouse(GtkWidget *, GdkEventButton *event, gpointer )
 {
   if(event->type == GDK_BUTTON_RELEASE) {
-    // Check for left mouse release to support dragging
+    // Check for Middle mouse release to support dragging
     if(event->button == 1) {
       left_mouse_button_pressed = false;
     }
@@ -85,7 +88,7 @@ gboolean move_mouse(GtkWidget *, GdkEventButton *event, gpointer data)
 
   if(event->type == GDK_MOTION_NOTIFY) {
 
-    // Check if the left mouse is pressed to support dragging
+    // Check if the middle mouse is pressed to support dragging
     if(left_mouse_button_pressed) {
       // drop this panning event if we have just served another one
       if(gtk_get_current_event_time() - last_panning_event_time < 100)
@@ -141,9 +144,11 @@ gboolean scroll_mouse(GtkWidget *, GdkEvent *event, gpointer data)
     if(scroll_event->direction == GDK_SCROLL_UP) {
       // Zoom in at the scroll point
       ezgl::zoom_in(canvas, scroll_point, 5.0 / 3.0);
+      zoomLevel++;
     } else if(scroll_event->direction == GDK_SCROLL_DOWN) {
       // Zoom out at the scroll point
       ezgl::zoom_out(canvas, scroll_point, 5.0 / 3.0);
+      zoomLevel--;
     } else if(scroll_event->direction == GDK_SCROLL_SMOOTH) {
       // Doesn't seem to be happening
     } // NOTE: We ignore scroll GDK_SCROLL_LEFT and GDK_SCROLL_RIGHT
@@ -153,7 +158,7 @@ gboolean scroll_mouse(GtkWidget *, GdkEvent *event, gpointer data)
 
 gboolean press_zoom_fit(GtkWidget *, gpointer data)
 {
-
+  zoomLevel=1;
   auto application = static_cast<ezgl::application *>(data);
 
   std::string main_canvas_id = application->get_main_canvas_id();
@@ -166,7 +171,7 @@ gboolean press_zoom_fit(GtkWidget *, gpointer data)
 
 gboolean press_zoom_in(GtkWidget *, gpointer data)
 {
-
+  zoomLevel++;
   auto application = static_cast<ezgl::application *>(data);
 
   std::string main_canvas_id = application->get_main_canvas_id();
@@ -179,7 +184,7 @@ gboolean press_zoom_in(GtkWidget *, gpointer data)
 
 gboolean press_zoom_out(GtkWidget *, gpointer data)
 {
-
+  zoomLevel--;
   auto application = static_cast<ezgl::application *>(data);
 
   std::string main_canvas_id = application->get_main_canvas_id();
