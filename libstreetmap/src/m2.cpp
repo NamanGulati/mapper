@@ -26,7 +26,8 @@
 
 void draw_main_canvas(ezgl::renderer *g);
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y);
-void onSearch(GtkWidget* widget, ezgl::application *application);
+void onSearch(GtkWidget *widget, ezgl::application *application);
+void onSetup(ezgl::application *app, bool new_window);
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData segDat);
 void drawIntersection(ezgl::renderer * g, IntersectionIndex idx);
 
@@ -53,7 +54,7 @@ void draw_map()
                            draw_main_canvas,
                            initial_world);
 
-    application.run(NULL, onClick, NULL, NULL);
+    application.run(onSetup, onClick, NULL, NULL);
 }
 
 void draw_main_canvas(ezgl::renderer *g)
@@ -121,6 +122,11 @@ void draw_main_canvas(ezgl::renderer *g)
     
 }
 
+void onSetup(ezgl::application *app, bool new_window){
+    GObject *searchEntry = app->get_object("SearchEntry");
+    g_signal_connect(searchEntry, "activate", G_CALLBACK(onSearch), app);
+}
+
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 {
     LatLon clickPos(lat_from_y(y),lon_from_x(x));
@@ -134,15 +140,16 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
     app->refresh_drawing();
 }
 
-void onSearch(ezgl::application *application){
+void onSearch(GtkWidget *widget, ezgl::application *application){
     // Get the GtkEntry cast of GtkSearchEntry object
-    GtkEntry* search_entry = (GtkEntry *) application->get_object("SearchEntry");
+    GtkEntry* search_entry = (GtkEntry *) widget;
+            //application->get_object("SearchEntry");
     
     //Retrieve the text from the search entry
     const char* text = gtk_entry_get_text(search_entry);
     
     // Update the status bar message
-    application->update_message("Searched");
+    application->update_message(text);
     // Redraw the graphics
     application->refresh_drawing();
 }
