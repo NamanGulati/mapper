@@ -30,6 +30,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application);
 void onSetup(ezgl::application *app, bool new_window);
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData segDat);
 void drawIntersection(ezgl::renderer * g, IntersectionIndex idx);
+void drawPOI(ezgl::renderer *g, POIIndex idx);
 
 void draw_map()
 {
@@ -63,13 +64,6 @@ void draw_main_canvas(ezgl::renderer *g)
     std::cout<<"area: "<<g->get_visible_world().area()<<std::endl;
     g->set_color(211, 211, 211, 255);
     g->fill_rectangle(g->get_visible_world());
-    for (size_t i = 0; i < intersectionsData.size(); i++)
-    {
-        if (intersectionsData[i].isHighlighted)
-            drawIntersection(g, i);
-        //g->fill_arc({x,y},width,0,360);
-        //g->fill_rectangle({x,y},{x + width, y + height});
-    }
 
     for (size_t i = 0; i < featureData.size(); i++)
     {
@@ -118,8 +112,22 @@ void draw_main_canvas(ezgl::renderer *g)
             //}
         }
     }
-
     
+    for (size_t i = 0; i < intersectionsData.size(); i++)
+    {
+        if (intersectionsData[i].isHighlighted)
+            drawIntersection(g, i);
+        //g->fill_arc({x,y},width,0,360);
+        //g->fill_rectangle({x,y},{x + width, y + height});
+    }
+    
+
+    if(zoomLevel > 10){
+        for(size_t k = 0; k < getNumPointsOfInterest(); k++){
+            //if(pois[k].)
+            drawPOI(g, k);
+        }
+    }
 }
 
 void onSetup(ezgl::application *app, bool new_window){
@@ -212,4 +220,11 @@ void drawIntersection(ezgl::renderer * g, IntersectionIndex idx){
     g->fill_arc(LatLonTo2d(intersectionsData[idx].position), g->get_visible_world().height()*0.01,0,360);
     
     
+}
+
+void drawPOI(ezgl::renderer *g, POIIndex idx){
+    ezgl::surface* iconSurface; 
+    iconSurface = g->load_png("libstreetmap/resources/small_image.png");
+    
+    g->draw_surface(iconSurface, LatLonTo2d(pois[idx].position));
 }

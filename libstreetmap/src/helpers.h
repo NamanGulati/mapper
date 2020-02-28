@@ -63,6 +63,7 @@ struct POIData{
     std::string type;
     std::string name;
     LatLon position;
+    //ezgl::point2d location;
     const OSMNode * node;
 };
 

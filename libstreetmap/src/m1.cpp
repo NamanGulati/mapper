@@ -235,6 +235,7 @@ bool load_map(std::string map_streets_database_filename) {
         poi.type=getPointOfInterestType(i);
         poi.name = getPointOfInterestName(i);
         poi.position=getPointOfInterestPosition(i);
+        //poi.location=LatLonTo2d(poi.position);
         poi.node=nodes[getPointOfInterestOSMNodeID(i)];
         pois.push_back(poi);
     }
