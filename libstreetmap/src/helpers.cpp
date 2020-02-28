@@ -102,13 +102,17 @@ bool pairCompareStringInt(std::pair<std::string, int> item1, std::pair<std::stri
     return item1.first < item2.first;
 }
 
-std::vector<std::string> parse2Streets(std::string s){
+std::vector<std::string> parse2Streets(std::string textInput){
     std::vector<std::string> the2Streets;
-    if (s.find("and") != std::string::npos){
-        boost::split(the2Streets, s, boost::is_any_of("and"));
+    std::string s1, s2, toDrop;
+    if (textInput.find("and") != std::string::npos){
+        the2Streets.push_back(textInput.substr(0, textInput.find("and")));
+        the2Streets.push_back(textInput.substr(textInput.find("and") + 3));
+        //boost::split(the2Streets, s, boost::is_any_of("/and"));
+        
     }
-    else if(s.find("&") != std::string::npos){
-        boost::split(the2Streets, s, boost::is_any_of("&"));
+    else if(textInput.find("&") != std::string::npos){
+        boost::split(the2Streets, textInput, boost::is_any_of("&"));
     }
     
     return the2Streets;

@@ -156,6 +156,10 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     //Retrieve the text from the search entry
     const char* text = gtk_entry_get_text(search_entry);
     
+    std::vector<std::string> searchStreets = parse2Streets(text);
+    
+    std::cout << searchStreets[0] << "," << searchStreets[1] << std::endl;
+    
     // Update the status bar message
     application->update_message(text);
     // Redraw the graphics
