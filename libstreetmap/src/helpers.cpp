@@ -165,10 +165,15 @@ std::vector<std::string> parse2Streets(std::string textInput){
     return the2Streets;
 }
 
+
 bool sortFeatures(FeatureData first, FeatureData second){
     return (first.area > second.area);
 }
 
+/**
+ * change application view to look onto specified intersection
+ * @param idx index of intersection
+ **/
 void zoomOnIntersection(ezgl::application *app, int idx){
     float x_2d = x_from_lon(getIntersectionPosition(idx).lon());
     float y_2d = y_from_lat(getIntersectionPosition(idx).lat());
@@ -179,6 +184,9 @@ void zoomOnIntersection(ezgl::application *app, int idx){
     ezgl::zoom_fit(canvas, region);
 }
 
+/**
+ * clear highlightes intersections
+ **/
 void clearHighlights(){
     if(highlighted.size() == 0)
         return;
@@ -199,6 +207,10 @@ std::string toLower(std::string s){
     return s;
 }
 
+/**
+ * format path from string entered in application search box
+ * @param s string entered in search box
+ **/
 std::string createMapPath(std::string s){
     std::string checker = removeSpaceAndConcatAndDash(s);
     std::cout << checker << std::endl;
@@ -226,8 +238,13 @@ void loadImages(ezgl::renderer *g){
     for(auto type: poiTypes)
         iconImgs.emplace(type, g->load_png(("libstreetmap/resources/Icons/"+type+"_icon.png").c_str()));
 }
+
+/**
+ * parse information received by API
+ * @param ss string stream of input
+ **/
 std::string parseTransitInfo(std::stringstream& ss){
-    char header[200];
+    char header[200];castToCharArray
     char result[300];
     std::string stopName="";
     std::getline(ss, stopName, '|');
@@ -250,6 +267,10 @@ std::string parseTransitInfo(std::stringstream& ss){
     return std::string(header)+"\n"+std::string(result);
 }
 
+/**
+ * load popup window with transit data
+ * @param transitInfo   information of transit
+**/
 void infoPopup(ezgl::application *app, std::vector<int> interId, std::string transitInfo){
     GObject *window;
     GtkWidget *content_area;

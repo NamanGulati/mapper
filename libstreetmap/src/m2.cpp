@@ -415,7 +415,6 @@ void drawPOI(ezgl::renderer *g, POIData p){
  * @param segDat data of street segment to render
  * @return boolean if the segment was actually drawn to screen (i.e. false if off screen)
  */
-
 bool drawStreetName(ezgl::renderer *g,StreetSegmentData segDat){
 
     std::string name = getStreetName(segDat.info.streetID);
