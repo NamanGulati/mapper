@@ -21,6 +21,8 @@
 #include <set>
 #include <unordered_set>
 #include "OSMDatabaseAPI.h"
+#include "transit.h"
+#include <sstream>
 
 
 #define  HIGH_LEVEL_DRAW_LIM  8.05723e-05 //expressway and small highway
@@ -174,6 +176,19 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
     //if(getIntersectionPosition())
     std::cout << "x: "<< x << "y: " << y << "intersection: " << idx << std::endl;
     std::cout << "Lon: "<< clickPos.lon() << "Lat: " << clickPos.lat() << "intersectionLon: " << getIntersectionPosition(idx).lon() << std::endl;
+    stringstream stream (curlData(clickPos));
+    std::string stopName="";
+    std::getline(ss, stopName, '|');
+    std::string mode="";
+    std::getline(ss, mode, '|');
+    std::string name="";
+    std::getline(ss, name, '|');
+    std::string agency="";
+    std::getline(ss, agency, '|');
+    std::string time="";
+    std::getline(ss, time, '|');
+
+
     std::cout << getIntersectionName(idx) << std::endl;
     intersectionsData[idx].isHighlighted = true;
     
