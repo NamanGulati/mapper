@@ -37,6 +37,10 @@ std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatL
     return convertedPoints; 
 }
 
+/**
+ * lat lon to xy conversion
+ * @param point input latlon
+ **/
 ezgl::point2d LatLonTo2d(LatLon point){
     
 
@@ -48,13 +52,24 @@ ezgl::point2d LatLonTo2d(LatLon point){
     return ezgl::point2d(x,y); 
 }
 
+/**
+ * x coordinate from longitude
+ * @param lon input longitude
+ * @return x coordinate based on world projection
+ **/
 float x_from_lon(float lon){
     return lon*DEGREE_TO_RADIAN*cos(lat_avg);
 }
 
+/**
+ * x coordinate from latitude
+ * @param lat input latitude
+ * @return y coordinate based on world projection
+ **/
 float y_from_lat(float lat){
     return lat*DEGREE_TO_RADIAN;
 }
+
 
 float lon_from_x(float x){
     return x/DEGREE_TO_RADIAN/cos(lat_avg);
@@ -64,6 +79,9 @@ float lat_from_y(float y){
     return y/DEGREE_TO_RADIAN;
 }
 
+/**
+ * get bounds of world
+ **/
 void getBounds(){
     
     float currLon, currLat;
@@ -125,6 +143,10 @@ bool pairCompareStringInt(std::pair<std::string, int> item1, std::pair<std::stri
     return item1.first < item2.first;
 }
 
+/**
+ * parse input entered into search box and extract 2 streets that make up the intersection
+ * @returns vector of identified streets
+ */
 std::vector<std::string> parse2Streets(std::string textInput){
     std::vector<std::string> the2Streets;
     std::string s1, s2, toDrop;

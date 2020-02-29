@@ -74,6 +74,9 @@ void draw_map()
     application.run(onSetup, onClick, NULL, NULL);
 }
 
+/**
+ * main rendering code that renders street segments, intersections, featues and POIS on map refresh
+ **/
 void draw_main_canvas(ezgl::renderer *g)
 {   
 //    if(iconImgs.empty())
@@ -167,6 +170,9 @@ void draw_main_canvas(ezgl::renderer *g)
     }
 }
 
+/**
+ * callback executed on application setup
+ **/
 void onSetup(ezgl::application *app, bool new_window){
     new_window;
     GObject *searchEntry = app->get_object("SearchEntry");
@@ -186,6 +192,12 @@ void onSetup(ezgl::application *app, bool new_window){
     }  
 }
 
+/**
+ * callback executed when user clicks on the map- looks for closest intersection to user's click
+ * and gets upcoming transit departures
+ * @param x x-coordinate of user click
+ * @param y y-coordinate of user click
+ **/
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 {
     if(event->button == 2)
@@ -209,6 +221,9 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
     app->refresh_drawing();
 }
 
+/**
+ * callback when user presses enter in search bar. looks and processes intersections or map names
+ **/
 void onSearch(GtkWidget *widget, ezgl::application *application){
     // Get the GtkEntry cast of GtkSearchEntry object
     GtkEntry* search_entry = (GtkEntry *) widget;
@@ -318,6 +333,12 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     
 }
 
+/**
+ * draw street segment onto screen by iterating through curve points and assigning
+ * different colours and widts to different road types
+ * @param g ezgl renderer
+ * @param segDat data of street segment to render
+ **/
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){
             g->set_color(ezgl::WHITE);
             double area = g->get_visible_world().area();
@@ -346,6 +367,11 @@ void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){
             }
 }
 
+/**
+ * draw intersection onto screen
+ * @param g ezgl renderer
+ * @param idx intersection id of intersection to render
+ **/
 void drawIntersection(ezgl::renderer * g, IntersectionIndex idx){
     
     float x = x_from_lon(intersectionsData[idx].position.lon());
@@ -361,11 +387,17 @@ void drawIntersection(ezgl::renderer * g, IntersectionIndex idx){
     
 }
 
+/**
+ * Renderes POI onto screen
+ * 
+ * @param g ezgl renderer
+ * @param p data of POI to render
+ **/
 void drawPOI(ezgl::renderer *g, POIData p){
     
     auto find = iconImgs.find(p.type);
     ezgl::surface* iconSurface;
-    
+   
     if(find == iconImgs.end())
         return;
     else
@@ -375,6 +407,15 @@ void drawPOI(ezgl::renderer *g, POIData p){
     
     g->draw_surface(iconSurface, LatLonTo2d(p.position));
 }
+
+/**
+ * Renders Street Name text onto screen
+ * 
+ * @param g ezgl renderer
+ * @param segDat data of street segment to render
+ * @return boolean if the segment was actually drawn to screen (i.e. false if off screen)
+ */
+
 bool drawStreetName(ezgl::renderer *g,StreetSegmentData segDat){
 
     std::string name = getStreetName(segDat.info.streetID);
@@ -429,6 +470,11 @@ void getDiff(float &diffX, float &diffY){
     if(min_y < 0 && max_y > 0)
         diffY = max_y - min_y;
 }
+
+/**
+ * @param g ezgl renderer
+ * @param idx index of poi to render
+ **/
 void drawPOIText(ezgl::renderer * g,POIIndex idx){
     g->set_color(ezgl::BLACK);
     g->set_text_rotation(0);
