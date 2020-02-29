@@ -6,6 +6,9 @@
 
 #include "m2.h"
 #include "globals.h"
+#include "ezgl/control.hpp"
+#include "ezgl/camera.hpp"
+#include "ezgl/canvas.hpp"
 #include "ezgl/application.hpp"
 #include "ezgl/graphics.hpp"
 #include "helpers.h"
@@ -31,6 +34,7 @@ void onSetup(ezgl::application *app, bool new_window);
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData segDat);
 void drawIntersection(ezgl::renderer * g, IntersectionIndex idx);
 void drawPOI(ezgl::renderer *g, POIIndex idx);
+ezgl::surface* iconSurface;
 
 void draw_map()
 {
@@ -38,7 +42,7 @@ void draw_map()
     settings.main_ui_resource = "libstreetmap/resources/main.ui";
     settings.window_identifier = "MainWindow";
     settings.canvas_identifier = "MainCanvas";
-
+        
     intersectionsData.resize(getNumIntersections());
 
     for (int i = 0; i < getNumIntersections(); i++)
@@ -60,7 +64,9 @@ void draw_map()
 
 void draw_main_canvas(ezgl::renderer *g)
 {   
-    
+    if(iconSurface == NULL)
+        iconSurface = g->load_png("libstreetmap/resources/small_image.png");
+
     std::cout<<"area: "<<g->get_visible_world().area()<<std::endl;
     g->set_color(211, 211, 211, 255);
     g->fill_rectangle(g->get_visible_world());
@@ -91,6 +97,11 @@ void draw_main_canvas(ezgl::renderer *g)
         {
             g->fill_poly(featureData[i].convertedPoints);
         }
+//        else if(zoomLevel > 5){
+//            for(size_t p; p < featureData[i].convertedPoints.size()-1; p++)
+//                g->draw_line(featureData[i].convertedPoints[p],featureData[i].convertedPoints[p+1]);
+//        }
+
         //        if(featureData[i].isClosed)
         //            g->fill_poly(convertedPoints);
         //        else{
@@ -145,6 +156,13 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
     std::cout << "Lon: "<< clickPos.lon() << "Lat: " << clickPos.lat() << "intersectionLon: " << getIntersectionPosition(intersection).lon() << std::endl;
     std::cout << getIntersectionName(intersection) << std::endl;
     intersectionsData[intersection].isHighlighted = true;
+    
+    ezgl::rectangle region({(x-0.0001), (y-0.0001)}, {(x+0.0001), (y+0.0001)});
+    
+    std::string main_canvas_id = app->get_main_canvas_id();
+    auto canvas = app->get_canvas(main_canvas_id);
+    ezgl::zoom_fit(canvas, region);
+    
     app->refresh_drawing();
 }
 
@@ -264,8 +282,5 @@ void drawIntersection(ezgl::renderer * g, IntersectionIndex idx){
 }
 
 void drawPOI(ezgl::renderer *g, POIIndex idx){
-    ezgl::surface* iconSurface; 
-    iconSurface = g->load_png("libstreetmap/resources/small_image.png");
-    
     g->draw_surface(iconSurface, LatLonTo2d(pois[idx].position));
 }

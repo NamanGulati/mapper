@@ -53,7 +53,7 @@ std::unordered_map<OSMID,const OSMNode*> nodes; //unordered map that holds all O
 std::vector<std::pair<std::string, int>> streetNames; 
 std::vector<float> speedLim; // a vector that holds speed limit of a street segment at index=StreetSegmentIndex
 std::vector<double> segLen; // a vector that holds length of a street segment at index=StreetSegmentIndex
-std::unordered_map<FeatureIndex, FeatureData> featureData; //vector of all natural features on the map
+std::vector<FeatureData> featureData; //vector of all natural features on the map
 std::vector<POIData> pois; //vector of all points of interest on the map
 float lat_avg; //average latitude of current map
 float max_lat, min_lat, max_lon, min_lon;
@@ -215,6 +215,7 @@ bool load_map(std::string map_streets_database_filename) {
         FeatureData fd;
         fd.name=getFeatureName(i);
         fd.type=getFeatureType(i);
+        fd.area=find_feature_area(i);
 //        std::vector<LatLon> points;
         for(int j=0;j<getFeaturePointCount(i);j++){
             fd.points.push_back(getFeaturePoint(j,i));
@@ -227,9 +228,11 @@ bool load_map(std::string map_streets_database_filename) {
         else
             fd.isClosed = true;
         
-        featureData[i]=(fd);
+        featureData.push_back(fd);
     }
 
+    std::sort(featureData.begin(), featureData.end(), sortFeatures);
+    
     for(int i=0;i<getNumPointsOfInterest();i++){
         POIData poi;
         poi.type=getPointOfInterestType(i);
