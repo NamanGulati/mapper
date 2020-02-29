@@ -143,7 +143,7 @@ bool load_map(std::string map_streets_database_filename) {
                     dat.type=StreetType::OTHER;
                 }
             }
-            else if(wayTag.first=="lanes"){
+            else if(wayTag.first=="lanes"){                
                 dat.lanes=std::stoi(wayTag.second);       
             }
     

@@ -135,7 +135,7 @@ bool sortFeatures(FeatureData first, FeatureData second){
 void zoomOnIntersection(ezgl::application *app, int idx){
     float x_2d = x_from_lon(getIntersectionPosition(idx).lon());
     float y_2d = y_from_lat(getIntersectionPosition(idx).lat());
-    ezgl::rectangle region({x_2d-diff_x/500, y_2d-diff_y/500}, {x_2d+diff_x/500, y_2d+diff_y/500});
+    ezgl::rectangle region({x_2d-diff_x/1000, y_2d-diff_y/1000}, {x_2d+diff_x/1000, y_2d+diff_y/1000});
     zoomLevel = 9;
     std::string main_canvas_id = app->get_main_canvas_id();
     auto canvas = app->get_canvas(main_canvas_id);
@@ -143,6 +143,8 @@ void zoomOnIntersection(ezgl::application *app, int idx){
 }
 
 void clearHighlights(){
+    if(highlighted.size() == 0)
+        return;
     for(int i = 0; i < highlighted.size(); i++){
         intersectionsData[highlighted[i]].isHighlighted = false;
     }

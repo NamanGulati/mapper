@@ -88,7 +88,6 @@ float lat_from_y(float y);
 std::vector<std::string> parse2Streets(std::string s);
 bool sortFeatures(FeatureData first, FeatureData second);
 void zoomOnIntersection(ezgl::application *app, int idx);
-bool sortStreets(std::vector<StreetSegmentData> first, std::vector<StreetSegmentData> second);
 void clearHighlights();
 char * castToCharArray(std::string s);
 std::string toLower(std::string s);

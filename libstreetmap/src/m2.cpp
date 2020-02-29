@@ -197,7 +197,7 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
     //if(getIntersectionPosition())
     std::cout << "x: "<< x << "y: " << y << "intersection: " << idx << std::endl;
     std::cout << "Lon: "<< clickPos.lon() << "Lat: " << clickPos.lat() << "intersectionLon: " << getIntersectionPosition(idx).lon() << std::endl;
-    stringstream stream (curlData(clickPos));
+    std::stringstream ss (curlData(clickPos));
     std::string stopName="";
     std::getline(ss, stopName, '|');
     std::string mode="";
@@ -208,7 +208,7 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
     std::getline(ss, agency, '|');
     std::string time="";
     std::getline(ss, time, '|');
-
+    std::cout << stopName << " " << mode << " " << name << " " << agency << " " << time << " " << std::endl;
 
     std::cout << getIntersectionName(idx) << std::endl;
     clearHighlights();
@@ -270,8 +270,8 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         intersectionsData[foundIntersects[x]].isHighlighted = true;
         highlighted.push_back(foundIntersects[x]);
     }
-
-    zoomOnIntersection(application, foundIntersects[0]);
+    if(!foundIntersects.empty())
+        zoomOnIntersection(application, foundIntersects[0]);
     
     // Update the status bar message
     application->update_message(text);
@@ -310,8 +310,6 @@ void onLoadMap(GtkWidget* widget, ezgl::application* application){
         intersectionsData[i].position = getIntersectionPosition(i);
         intersectionsData[i].name = getIntersectionName(i);
     }
-    
-    
     
     ezgl::rectangle new_world({min_x, min_y},{max_x, max_y});
     zoomLevel = 1;
