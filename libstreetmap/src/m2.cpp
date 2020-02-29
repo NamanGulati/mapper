@@ -55,8 +55,6 @@ void draw_map()
         
     intersectionsData.resize(getNumIntersections());
     
-//    diff_x = abs(abs(max_x) - abs(min_x));
-//    diff_y = abs(abs(max_y) - abs(min_y));
     getDiff(diff_x, diff_y);
     
     for (int i = 0; i < getNumIntersections(); i++)
@@ -78,9 +76,14 @@ void draw_map()
 
 void draw_main_canvas(ezgl::renderer *g)
 {   
+//    if(iconImgs.empty())
+//        loadImages(g);
     if(iconImgs.empty())
-        loadImages(g);
-
+        for(auto type: poiTypes)
+            iconImgs.emplace(type, g->load_png(("libstreetmap/resources/Icons/"+type+"_icon.png").c_str()));
+    
+    //iconSurface = g->load_png("libstreetmap/resources/Icons/construction_icon.png");
+    //iconSurface = g->load_png("libstreetmap/resources/small_image.png");
     std::cout<<"area: "<<g->get_visible_world().area()<<std::endl;
     g->set_color(211, 211, 211, 255);
     g->fill_rectangle(g->get_visible_world());
@@ -373,13 +376,13 @@ void drawIntersection(ezgl::renderer * g, IntersectionIndex idx){
 
 void drawPOI(ezgl::renderer *g, POIIndex idx){
     
-//    auto find = iconImgs.find(getPointOfInterestType(idx));
-//    ezgl::surface* iconSurface;
-//    
-//    if(find == iconImgs.end())
-//        return;
-//    else
-//        iconSurface = find->second;
+    auto find = iconImgs.find(getPointOfInterestType(idx));
+    ezgl::surface* iconSurface;
+    
+    if(find == iconImgs.end())
+        return;
+    else
+        iconSurface = find->second;
     
     g->draw_surface(iconSurface, LatLonTo2d(pois[idx].position));
 }
