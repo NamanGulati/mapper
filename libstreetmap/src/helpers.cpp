@@ -121,7 +121,16 @@ std::string removeSpaceAndConcat(std::string remove){
         newString.push_back(tolower(remove[x]));
     }
     return newString;
-} 
+}
+
+std::string removeSpaceAndConcatAndDash(std::string remove){
+    std::string newString = removeSpaceAndConcat(remove);
+    while(newString.find("-") != std::string::npos){
+        newString.erase(newString.find("-"), 1);
+    }
+    
+    return newString;
+}
 
 //Used for the sort function to sort a vector of pairs
 bool pairCompareStringInt(std::pair<std::string, int> item1, std::pair<std::string, int> item2){
@@ -179,4 +188,26 @@ char * castToCharArray(std::string s){
 std::string toLower(std::string s){
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
     return s;
+}
+
+std::string createMapPath(std::string s){
+    std::string checker = removeSpaceAndConcatAndDash(s);
+    std::cout << checker << std::endl;
+    std::string locat, replace;
+    for (int x = 0; x < 19; x ++){
+        if (removeSpaceAndConcatAndDash(locos[x]).find(checker)!= std::string::npos){
+            if(locos[x].find(",") != std::string::npos){
+                replace = locos[x];
+                replace.replace(locos[x].find(","), 1, "_");
+                locat = replace;
+            }
+            else{
+                locat = locos[x];
+            }
+            return (mapPathPre + locat + mapPathSuf);
+        }
+    }
+    
+    return "DNE";
+    
 }

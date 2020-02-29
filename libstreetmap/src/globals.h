@@ -54,6 +54,14 @@ extern std::vector<IntersectionIndex> highlighted;
 
 extern float max_lat, min_lat, max_lon, min_lon, max_x, min_x, max_y, min_y, diff_y, diff_x;
 
+const std::string mapPathPre = "/cad2/ece297s/public/maps/";
+
+const std::string mapPathSuf = ".streets.bin";
+
 extern int zoomLevel;
+
+const std::string locos[19] = {"beijing,china", "cairo,egypt", "cape-town,southafrica","golden-horseshoe,canada", "hamilton,canada", "hong-kong,china", "iceland", 
+                            "interlaken,switzerland", "london,england", "moscow,russia", "new-delhi,india", "new-york,usa", "rio-de-janeiro,brazil", "saint-helena", 
+                            "singapore", "sydney,australia", "tehran,iran", "tokyo,japan", "toronto,canada"};
 #endif /* GLOBALS_H */
 

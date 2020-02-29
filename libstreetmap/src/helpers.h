@@ -92,5 +92,6 @@ void zoomOnIntersection(ezgl::application *app, int idx);
 void clearHighlights();
 char * castToCharArray(std::string s);
 std::string toLower(std::string s);
+std::string createMapPath(std::string s);
 #endif /* HELPERS_H */
 

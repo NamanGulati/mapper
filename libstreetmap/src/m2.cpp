@@ -235,7 +235,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     
     std::vector<std::string> toSearch = parse2Streets(text); // fix no and or &
     if (toSearch.size() == 1){
-        text = "No Intersections";
+        std::cout << "No Intersections" << std::endl;
     }
     else{
         
@@ -262,8 +262,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         }
     }
     
-    if (foundIntersects.empty())
-        std::cout << "No intersection found" << std::endl;
+    
 
     clearHighlights();
     
@@ -274,11 +273,53 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     }
     if(!foundIntersects.empty())
         zoomOnIntersection(application, foundIntersects[0]);
+    else{
+        if (toSearch.size() == 2){
+            // Update the status bar message
+            application->update_message("No intersections");
+            // Redraw the graphics
+            application->refresh_drawing();
+            return;
+        }
+    }
+    ///////////////////////////////////////////////////////////Loading Map
+    std::string path = text;
+    std::string newMapPath = createMapPath(path);
     
-    // Update the status bar message
-    application->update_message(text);
-    // Redraw the graphics
+    std::cout << newMapPath << '\n';
+    
+    if (newMapPath == "DNE"){
+        // Update the status bar message
+        application->update_message("Not a valid map");
+        // Redraw the graphics
+        application->refresh_drawing();
+        return;
+    }
+        
+    
+    close_map();
+    load_map(newMapPath);
+    
+    std::cout << "loaded map" << '\n';
+    
+    intersectionsData.resize(getNumIntersections());
+    
+    diff_x = abs(abs(max_x) - abs(min_x));
+    diff_y = abs(abs(max_y) - abs(min_y));
+    
+    for (int i = 0; i < getNumIntersections(); i++)
+    {
+        intersectionsData[i].position = getIntersectionPosition(i);
+        intersectionsData[i].name = getIntersectionName(i);
+    }
+    
+    ezgl::rectangle new_world({min_x, min_y},{max_x, max_y});
+    zoomLevel = 1;
+    clearHighlights();
+    application->change_canvas_world_coordinates("MainCanvas", new_world);
     application->refresh_drawing();
+    
+    
 }
 
 void onLoadMap(GtkWidget* widget, ezgl::application* application){
@@ -291,11 +332,18 @@ void onLoadMap(GtkWidget* widget, ezgl::application* application){
     //Retrieve the text from the search entry
     std::string newMapInput = gtk_entry_get_text(search_entry);
     
-    std::string mapPathPrefix = "/cad2/ece297s/public/maps/";
-    std::string mapPathSuffix = ".streets.bin";
-    std::string newMapPath = mapPathPrefix + newMapInput + mapPathSuffix;
+    std::string newMapPath = createMapPath(newMapInput);
     
     std::cout << newMapPath << '\n';
+    
+    if (newMapPath == "DNE"){
+        // Update the status bar message
+        application->update_message("Not a valid map");
+        // Redraw the graphics
+        application->refresh_drawing();
+        return;
+    }
+        
     
     close_map();
     load_map(newMapPath);
