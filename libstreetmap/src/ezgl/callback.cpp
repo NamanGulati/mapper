@@ -171,7 +171,6 @@ gboolean press_zoom_fit(GtkWidget *, gpointer data)
 
 gboolean press_zoom_in(GtkWidget *, gpointer data)
 {
-  zoomLevel++;
   auto application = static_cast<ezgl::application *>(data);
 
   std::string main_canvas_id = application->get_main_canvas_id();
@@ -184,7 +183,6 @@ gboolean press_zoom_in(GtkWidget *, gpointer data)
 
 gboolean press_zoom_out(GtkWidget *, gpointer data)
 {
-  zoomLevel--;
   auto application = static_cast<ezgl::application *>(data);
 
   std::string main_canvas_id = application->get_main_canvas_id();

@@ -56,7 +56,7 @@ std::vector<double> segLen; // a vector that holds length of a street segment at
 std::vector<FeatureData> featureData; //vector of all natural features on the map
 std::vector<POIData> pois; //vector of all points of interest on the map
 float lat_avg; //average latitude of current map
-float max_lat, min_lat, max_lon, min_lon;
+float max_lat, min_lat, max_lon, min_lon, max_x, min_x, max_y, min_y;
 constexpr double LARGE_DIST= 10000000000;
 constexpr double KM_per_H_to_M_per_S = 3.6;
 /**
@@ -82,6 +82,13 @@ bool load_map(std::string map_streets_database_filename) {
     
     getBounds(min_lon, max_lon, min_lat, max_lat);    
     lat_avg = DEGREE_TO_RADIAN*(min_lat + max_lat)/2;
+    
+    max_x = x_from_lon(max_lon);
+    max_y = y_from_lat(max_lat);
+    min_x = x_from_lon(min_lon);
+    min_y = y_from_lat(min_lat);
+    
+    
     /**
      * Loading of ways and nodes
      **/

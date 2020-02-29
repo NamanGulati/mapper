@@ -37,6 +37,7 @@ void drawIntersection(ezgl::renderer * g, IntersectionIndex idx);
 void drawPOI(ezgl::renderer *g, POIIndex idx);
 ezgl::surface* iconSurface;
 void drawStreetName(ezgl::renderer *g,StreetSegmentData segDat);
+float diff_x, diff_y;
 
 void draw_map()
 {
@@ -44,9 +45,13 @@ void draw_map()
     settings.main_ui_resource = "libstreetmap/resources/main.ui";
     settings.window_identifier = "MainWindow";
     settings.canvas_identifier = "MainCanvas";
+    std::cout << "min_x: "<< min_x << "max_x: "<< max_x <<  "min_x: "<< min_y <<  "max_y: " << max_y <<std::endl;
         
     intersectionsData.resize(getNumIntersections());
-
+    
+    diff_x = abs(abs(max_x) - abs(min_x));
+    diff_y = abs(abs(max_y) - abs(min_y));
+    
     for (int i = 0; i < getNumIntersections(); i++)
     {
         intersectionsData[i].position = getIntersectionPosition(i);
@@ -55,7 +60,7 @@ void draw_map()
 
     ezgl::application application(settings);
 
-    ezgl::rectangle initial_world({x_from_lon(min_lon), y_from_lat(min_lat)}, {x_from_lon(max_lon), y_from_lat(max_lat)});
+    ezgl::rectangle initial_world({min_x, min_y}, {max_x, max_y});
 
     application.add_canvas("MainCanvas",
                            draw_main_canvas,
@@ -160,19 +165,36 @@ void onSetup(ezgl::application *app, bool new_window){
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 {
     LatLon clickPos(lat_from_y(y),lon_from_x(x));
-    IntersectionIndex intersection = find_closest_intersection(clickPos);
+    IntersectionIndex idx = find_closest_intersection(clickPos);
     //if intersections are circles
     //if(getIntersectionPosition())
-    std::cout << "x: "<< x << "y: " << y << "intersection: " << intersection<< std::endl;
-    std::cout << "Lon: "<< clickPos.lon() << "Lat: " << clickPos.lat() << "intersectionLon: " << getIntersectionPosition(intersection).lon() << std::endl;
-    std::cout << getIntersectionName(intersection) << std::endl;
-    intersectionsData[intersection].isHighlighted = true;
+    std::cout << "x: "<< x << "y: " << y << "intersection: " << idx << std::endl;
+    std::cout << "Lon: "<< clickPos.lon() << "Lat: " << clickPos.lat() << "intersectionLon: " << getIntersectionPosition(idx).lon() << std::endl;
+    std::cout << getIntersectionName(idx) << std::endl;
+    intersectionsData[idx].isHighlighted = true;
     
-    ezgl::rectangle region({(x-0.0001), (y-0.0001)}, {(x+0.0001), (y+0.0001)});
+    float x_2d = x_from_lon(getIntersectionPosition(idx).lon());
+    float y_2d = y_from_lat(getIntersectionPosition(idx).lat());
+
+//    ezgl::rectangle region({x_2d-diff_x/5000, y_2d-diff_y/5000}, 
+//    {x_2d+diff_x/5000, y_2d+diff_y/5000});
+//    zoomLevel = 16;
+    std::cout << x_2d - diff_x/2 << std::endl;
     
+    ezgl::rectangle region({(x_2d - diff_x/2), (y_2d - diff_y/2)}, {(x_2d + diff_x/2), (y_2d + diff_y/2)});
+
     std::string main_canvas_id = app->get_main_canvas_id();
     auto canvas = app->get_canvas(main_canvas_id);
     ezgl::zoom_fit(canvas, region);
+    
+//    int zoomNumber = 10;
+//    while(zoomNumber != 0){
+//        ezgl::zoom_in(canvas, 5.0 / 3.0);
+//        zoomNumber--;
+//    }
+    zoomLevel = 9;
+    ezgl::zoom_in(canvas, pow(5.0/3.0,10));
+    
     
     app->refresh_drawing();
 }
