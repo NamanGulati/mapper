@@ -108,7 +108,7 @@ void draw_main_canvas(ezgl::renderer *g)
             g->set_color(149, 235, 100, 255);
         else if (fType == Beach)
             g->set_color(230, 216, 173, 255);
-        else if (fType == Building && zoomLevel > 4)
+        else if (fType == Building && zoomLevel > 5)
             g->set_color(ezgl::GREY_75);
         else
             break;
@@ -351,7 +351,7 @@ void onLoadMap(GtkWidget* widget, ezgl::application* application){
     std::cout << "loaded map" << '\n';
     
     intersectionsData.resize(getNumIntersections());
-//    
+    
 //    diff_x = abs(abs(max_x) - abs(min_x));
 //    diff_y = abs(abs(max_y) - abs(min_y));
     getDiff(diff_x, diff_y);
@@ -383,7 +383,7 @@ void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){
                 lineWidth=((segDat.lanes!=-1)&&zoomLevel>=7?segDat.lanes*0.75:3)*(zoomLevel/3);
             }
             else {//if(segDat.type==StreetType::RESIDENTIAL){
-                if(zoomLevel<7)
+                if(zoomLevel<6)
                     return;
                 lineWidth=((segDat.lanes!=-1)?segDat.lanes*0.75:1)*(zoomLevel-6);
             }

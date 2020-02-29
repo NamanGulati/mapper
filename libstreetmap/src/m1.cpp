@@ -143,8 +143,12 @@ bool load_map(std::string map_streets_database_filename) {
                     dat.type=StreetType::OTHER;
                 }
             }
-            else if(wayTag.first=="lanes"){                
-                dat.lanes=std::stoi(wayTag.second);       
+            else if(wayTag.first=="lanes"){ 
+                try{
+                    dat.lanes=std::stoi(wayTag.second);       
+                }catch(const std::invalid_argument &ia){
+                    dat.lanes=0;
+                }
             }
     
         }
@@ -244,7 +248,7 @@ bool load_map(std::string map_streets_database_filename) {
     }
 
     std::sort(featureData.begin(), featureData.end(), sortFeatures);
-    
+
     for(int i=0;i<getNumPointsOfInterest();i++){
         POIData poi;
         poi.type=getPointOfInterestType(i);
@@ -254,6 +258,7 @@ bool load_map(std::string map_streets_database_filename) {
         poi.node=nodes[getPointOfInterestOSMNodeID(i)];
         pois.push_back(poi);
     }
+    
     load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
 
