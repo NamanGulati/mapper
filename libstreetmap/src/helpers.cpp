@@ -244,7 +244,7 @@ void loadImages(ezgl::renderer *g){
  * @param ss string stream of input
  **/
 std::string parseTransitInfo(std::stringstream& ss){
-    char header[200];castToCharArray
+    char header[200];
     char result[300];
     std::string stopName="";
     std::getline(ss, stopName, '|');
