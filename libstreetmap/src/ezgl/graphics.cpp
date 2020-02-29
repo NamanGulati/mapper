@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <glib.h>
+#include <iostream>
 
 namespace ezgl {
 
@@ -253,7 +254,7 @@ void renderer::set_line_dash(line_dash dash)
 #endif
 }
 
-void renderer::set_line_width(int width)
+void renderer::set_line_width(double width)
 {
   cairo_set_line_width(m_cairo, width == 0 ? 1 : width);
 
@@ -538,7 +539,6 @@ void renderer::draw_text(point2d point, std::string const &text, double bound_x,
   if(scaled_width > bound_x || scaled_height > bound_y) {
     return;
   }
-
   // save the current state to undo the rotation needed for drawing rotated text
   cairo_save(m_cairo);
 

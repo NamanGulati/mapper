@@ -242,7 +242,7 @@ public:
    * A value of 0 is still one pixel wide but about 100x faster 
    * to draw than other line widths.
    */
-  void set_line_width(int width);
+  void set_line_width(double width);
 
   /**
    * Change the font size.

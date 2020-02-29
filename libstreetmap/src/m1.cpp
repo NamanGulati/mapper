@@ -137,9 +137,14 @@ bool load_map(std::string map_streets_database_filename) {
             }
             else if(wayTag.first=="lanes"){
                 dat.lanes=std::stoi(wayTag.second);
+                
             }
     
         }
+        if(dat.lanes==-1&&streetSegData[sgmt.streetID].size()!=0){
+            dat.lanes=(streetSegData[sgmt.streetID].back()).lanes;
+        }
+            
 
         dat.curvePts.push_back(getIntersectionPosition(sgmt.from));
         dat.convertedCurvePoints.push_back(LatLonTo2d(getIntersectionPosition(sgmt.from)));
