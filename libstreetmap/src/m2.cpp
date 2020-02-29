@@ -78,13 +78,12 @@ void draw_main_canvas(ezgl::renderer *g)
 {   
 //    if(iconImgs.empty())
 //        loadImages(g);
-    if(iconImgs.empty())
-        for(auto type: poiTypes)
-            iconImgs.emplace(type, g->load_png(("libstreetmap/resources/Icons/"+type+"_icon.png").c_str()));
+//    if(iconImgs.empty())
+//        for(auto type: poiTypes)
+//            iconImgs.emplace(type, g->load_png(("libstreetmap/resources/Icons/"+type+".png").c_str()));
     
     //iconSurface = g->load_png("libstreetmap/resources/Icons/construction_icon.png");
-    //iconSurface = g->load_png("libstreetmap/resources/small_image.png");
-    std::cout<<"area: "<<g->get_visible_world().area()<<std::endl;
+    iconSurface = g->load_png("libstreetmap/resources/location_icon.png");
     g->set_color(211, 211, 211, 255);
     g->fill_rectangle(g->get_visible_world());
 
@@ -127,7 +126,6 @@ void draw_main_canvas(ezgl::renderer *g)
 //                g->draw_line(featureData[i].convertedPoints[p],featureData[i].convertedPoints[p+1]);
 //        }
     }
-    std::cout<<"ZoomLevel: "<<zoomLevel<<std::endl;
 
     for (size_t i = 0; i < streetSegData.size(); i++)
     {
@@ -160,7 +158,7 @@ void draw_main_canvas(ezgl::renderer *g)
     }
     
 
-    if(zoomLevel > 7){
+    if(zoomLevel > 8){
         for(int k = 0; k < pois.size(); k++){
             //if(pois[k].)
             drawPOI(g, k);
@@ -204,8 +202,6 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
     IntersectionIndex idx = find_closest_intersection(clickPos);
     //if intersections are circles
     //if(getIntersectionPosition())
-    std::cout << "x: "<< x << "y: " << y << "intersection: " << idx << std::endl;
-    std::cout << "Lon: "<< clickPos.lon() << "Lat: " << clickPos.lat() << "intersectionLon: " << getIntersectionPosition(idx).lon() << std::endl;
     std::stringstream ss (curlData(clickPos));
     std::string transitInfo = parseTransitInfo(ss);
     std::cout << transitInfo << std::endl;
@@ -376,13 +372,15 @@ void drawIntersection(ezgl::renderer * g, IntersectionIndex idx){
 
 void drawPOI(ezgl::renderer *g, POIIndex idx){
     
-    auto find = iconImgs.find(getPointOfInterestType(idx));
-    ezgl::surface* iconSurface;
+//    auto find = iconImgs.find(getPointOfInterestType(idx));
+//    ezgl::surface* iconSurface;
+//    
+//    if(find == iconImgs.end())
+//        return;
+//    else
+//        iconSurface = find->second;
     
-    if(find == iconImgs.end())
-        return;
-    else
-        iconSurface = find->second;
+    cairo_surface_set_device_scale(iconSurface, 20, 20);
     
     g->draw_surface(iconSurface, LatLonTo2d(pois[idx].position));
 }
