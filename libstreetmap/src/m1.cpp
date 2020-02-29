@@ -50,12 +50,12 @@ std::vector<intersection_data> intersectionsData; //unordered map that holds dat
 std::vector<std::vector<StreetSegmentIndex>> intersections; //a vector that holds a vector to street segments at an intersection at intersectionIndex in the vector
 std::unordered_map<OSMID,const OSMWay *> ways; //unordered map that holds all OSMWay* with their OSMID as keys
 std::unordered_map<OSMID,const OSMNode*> nodes; //unordered map that holds all OSMNode* with their OSMID as keys
-std::vector<std::pair<std::string, int>> streetNames; 
+std::vector<std::pair<std::string, int>> streetNames; //holds street name and its index
 std::vector<float> speedLim; // a vector that holds speed limit of a street segment at index=StreetSegmentIndex
 std::vector<double> segLen; // a vector that holds length of a street segment at index=StreetSegmentIndex
 std::vector<FeatureData> featureData; //vector of all natural features on the map
 std::vector<POIData> pois; //vector of all points of interest on the map
-std::vector<IntersectionIndex> highlighted;
+std::vector<IntersectionIndex> highlighted; //holds the current highlighted intersections
 float lat_avg; //average latitude of current map
 float max_lat, min_lat, max_lon, min_lon, max_x, min_x, max_y, min_y;
 constexpr double LARGE_DIST= 10000000000;
@@ -303,7 +303,6 @@ void loadFeatureData(){
         
         featureData.push_back(fd);
     }
-
     std::sort(featureData.begin(), featureData.end(), sortFeatures);
 }
 
@@ -319,9 +318,6 @@ void loadPOIs(){
         }
     }
 }
-
-
-
 
 //finds the distance between two given LatLon points by converting them to Cartesian and using pythagoras' theorem
 double find_distance_between_two_points(std::pair<LatLon, LatLon> points){

@@ -30,20 +30,29 @@
 #define  HIGH_LEVEL_DRAW_LIM  8.05723e-05 //expressway and small highway
 #define  SECONDARY_LEVEL_DRAW_LIM  2.9006e-05 //city road 
 #define  TERTIARY_LEVEL_DRAW_LIM  4.8719e-07 //residential and other
-
+#define middle_mouse_button 2
+#define RENDER_POIS_STREET 7
+#define HIGH_ZOOM 9
+#define BUILDING_ZOOM 5
 
 void draw_main_canvas(ezgl::renderer *g);
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y);
 void onSearch(GtkWidget *widget, ezgl::application *application);
 void onSetup(ezgl::application *app, bool new_window);
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat);
+void drawSegments(ezgl::renderer *g);
+void drawPOIs(ezgl::renderer *g);
+void drawIntersections(ezgl::renderer *g);
 void drawIntersection(ezgl::renderer * g, IntersectionIndex idx);
 void drawPOI(ezgl::renderer *g, POIData p);
 void getDiff(float &diffX, float &diffY);
+void drawFeatures(ezgl::renderer *g); 
 ezgl::surface* iconSurface;
 bool drawStreetName(ezgl::renderer *g,StreetSegmentData segDat);
 void drawPOIText(ezgl::renderer * g,POIIndex idx);
 float diff_x, diff_y;
+void loadPNGs(ezgl::renderer *g);
+
 
 void draw_map()
 {
@@ -51,7 +60,6 @@ void draw_map()
     settings.main_ui_resource = "libstreetmap/resources/main.ui";
     settings.window_identifier = "MainWindow";
     settings.canvas_identifier = "MainCanvas";
-    std::cout << "min_x: "<< min_x << "max_x: "<< max_x <<  "min_x: "<< min_y <<  "max_y: " << max_y <<std::endl;
         
     intersectionsData.resize(getNumIntersections());
     
@@ -79,95 +87,16 @@ void draw_map()
  **/
 void draw_main_canvas(ezgl::renderer *g)
 {   
-//    if(iconImgs.empty())
-//        loadImages(g);
-    if(iconImgs.empty())
-        for(auto type: poiTypes)
-            iconImgs.emplace(type, g->load_png(("libstreetmap/resources/"+type+".png").c_str()));
-    
-    //iconSurface = g->load_png("libstreetmap/resources/Icons/construction_icon.png");
-    //iconSurface = g->load_png("libstreetmap/resources/location_icon.png");
+    //loads the pngs for icons
+    loadPNGs(g);
+    //sets background colour
     g->set_color(211, 211, 211, 255);
     g->fill_rectangle(g->get_visible_world());
-
-    for (size_t i = 0; i < featureData.size(); i++)
-    {
-        
-        if (g->get_visible_world().height() > 0.3 && featureData[i].points.size() < 40)
-            break;
-        if (g->get_visible_world().height() > 0.07)
-            break;
-
-        //std::transform(featureData[i].points.begin(), featureData[i].points.end(), std::back_inserter(convertedPoints), LatLonTo2d);
-        FeatureType fType = featureData[i].type;
-        if(fType == Stream){
-            g->set_color(149, 217, 255, 255);
-            g->set_line_width(1);
-            for(size_t p; p < featureData[i].convertedPoints.size()-1; p++)
-                g->draw_line(featureData[i].convertedPoints[p],featureData[i].convertedPoints[p+1]);
-        }
-        else if (fType == Lake || fType == River)
-            g->set_color(149, 217, 255, 255);
-        else if (fType == Greenspace || fType == Island)
-            g->set_color(149, 235, 100, 255);
-        else if (fType == Park || fType == Golfcourse)
-            g->set_color(149, 235, 100, 255);
-        else if (fType == Beach)
-            g->set_color(230, 216, 173, 255);
-        else if (fType == Building && zoomLevel > 5)
-            g->set_color(ezgl::GREY_75);
-        else
-            break;
-        
-        std::vector<ezgl::point2d> FDconvertedPoints = featureData[i].convertedPoints;
-        if (featureData[i].points.size() > 1 && featureData[i].isClosed)
-        {
-            g->fill_poly(featureData[i].convertedPoints);
-        }
-//        else if(zoomLevel > 5){
-//            for(size_t p; p < featureData[i].convertedPoints.size()-1; p++)
-//                g->draw_line(featureData[i].convertedPoints[p],featureData[i].convertedPoints[p+1]);
-//        }
-    }
-
-    for (size_t i = 0; i < streetSegData.size(); i++)
-    {
-
-        
-        for (size_t j = 0; j < streetSegData[i].size(); j++)
-        {
-            
-            drawStreetSegment(g,streetSegData[i][j]);
-        }
-
-        bool done =false;
-        for(int j = 0; (j< streetSegData[i].size())&&!done;j++){
-            StreetSegmentData segDat = streetSegData[i][j];
-            bool b = g->get_visible_world().contains((segDat.convertedCurvePoints[0]+segDat.convertedCurvePoints[segDat.convertedCurvePoints.size()-1])*ezgl::point2d(0.5,0.5));
-            if(b&&zoomLevel>=8){
-                done=drawStreetName(g,segDat);
-            }
-        }
-    }
     
-
-    
-    for (int i = 0; i < intersectionsData.size(); i++)
-    {
-        if (intersectionsData[i].isHighlighted)
-            drawIntersection(g, i);
-        //g->fill_arc({x,y},width,0,360);
-        //g->fill_rectangle({x,y},{x + width, y + height});
-    }
-    
-
-    if(zoomLevel > 7){
-        for(int k = 0; k < pois.size(); k++){
-            if(zoomLevel > 9)
-                drawPOI(g, pois[k]);
-            drawPOIText(g,k);
-        }
-    }
+    drawFeatures(g);
+    drawSegments(g);
+    drawIntersections(g);
+    drawPOIs(g);
 }
 
 /**
@@ -200,7 +129,7 @@ void onSetup(ezgl::application *app, bool new_window){
  **/
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 {
-    if(event->button == 2)
+    if(event->button == middle_mouse_button)
         return;
     LatLon clickPos(lat_from_y(y),lon_from_x(x));
     IntersectionIndex idx = find_closest_intersection(clickPos);
@@ -284,7 +213,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         return;
     }    
     else{
-        if (toSearch.size() == 2){
+        if (toSearch.size() == 2){ //two elements in to search
             // Update the status bar message
             application->update_message("No intersections");
             // Redraw the graphics
@@ -341,21 +270,22 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
  **/
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){
             g->set_color(ezgl::WHITE);
-            double area = g->get_visible_world().area();
             double lineWidth = 4;
+            int CITY_ROAD_ADJUST = 3;
+            int RESIDENTIAL_ADJUST = 6;
             if(segDat.type==StreetType::EXPRESSWAY){
-                    lineWidth=((segDat.lanes!=-1)&&zoomLevel>=7?segDat.lanes:5)*zoomLevel;
+                    lineWidth=((segDat.lanes!=-1)&&zoomLevel>=RENDER_POIS_STREET?segDat.lanes:5)*zoomLevel;
                 //g->set_line_width(20);
                 g->set_color(ezgl::YELLOW);
             }
             else if(segDat.type == StreetType::CITY_ROAD){
                 
-                lineWidth=((segDat.lanes!=-1)&&zoomLevel>=7?segDat.lanes:4)*(zoomLevel/3);
+                lineWidth=((segDat.lanes!=-1)&&zoomLevel>=RENDER_POIS_STREET?segDat.lanes:4)*(zoomLevel/CITY_ROAD_ADJUST);
             }
             else {//if(segDat.type==StreetType::RESIDENTIAL){
                 if(zoomLevel<6)
                     return;
-                lineWidth=((segDat.lanes!=-1)?segDat.lanes:2)*(zoomLevel-6);
+                lineWidth=((segDat.lanes!=-1)?segDat.lanes:2)*(zoomLevel-RESIDENTIAL_ADJUST);
             }
            // segDat.drawHieght=lineWidth;
             g->set_line_width(lineWidth);
@@ -373,13 +303,7 @@ void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){
  * @param idx intersection id of intersection to render
  **/
 void drawIntersection(ezgl::renderer * g, IntersectionIndex idx){
-    
-    float x = x_from_lon(intersectionsData[idx].position.lon());
-    float y = y_from_lat(intersectionsData[idx].position.lat());
 
-    float width = 0.000001;
-    float height = width;
-    
     g->set_color(ezgl::RED);
     //g->fill_rectangle({x,y},{x + width, y + height});
     g->fill_arc(LatLonTo2d(intersectionsData[idx].position), g->get_visible_world().height()*0.01,0,360);
@@ -478,4 +402,91 @@ void drawPOIText(ezgl::renderer * g,POIIndex idx){
     g->set_color(ezgl::BLACK);
     g->set_text_rotation(0);
     g->draw_text(LatLonTo2d(pois[idx].position),pois[idx].name);
+}
+
+void drawFeatures(ezgl::renderer *g){
+    float MIN_RENDER = 0.07;
+    float MAX_RENDER = 0.3;
+    int num_points = 40;
+    for (size_t i = 0; i < featureData.size(); i++)
+    {
+        
+        if (g->get_visible_world().height() > MAX_RENDER && featureData[i].points.size() < num_points)
+            break;
+        if (g->get_visible_world().height() > MIN_RENDER)
+            break;
+
+        //std::transform(featureData[i].points.begin(), featureData[i].points.end(), std::back_inserter(convertedPoints), LatLonTo2d);
+        FeatureType fType = featureData[i].type;
+        if(fType == Stream){
+            g->set_color(149, 217, 255, 255);
+            g->set_line_width(1);
+            for(size_t p; p < featureData[i].convertedPoints.size()-1; p++)
+                g->draw_line(featureData[i].convertedPoints[p],featureData[i].convertedPoints[p+1]);
+        }
+        else if (fType == Lake || fType == River)
+            g->set_color(149, 217, 255, 255);
+        else if (fType == Greenspace || fType == Island)
+            g->set_color(149, 235, 100, 255);
+        else if (fType == Park || fType == Golfcourse)
+            g->set_color(149, 235, 100, 255);
+        else if (fType == Beach)
+            g->set_color(230, 216, 173, 255);
+        else if (fType == Building && zoomLevel > BUILDING_ZOOM)
+            g->set_color(ezgl::GREY_75);
+        else
+            break;
+        
+        std::vector<ezgl::point2d> FDconvertedPoints = featureData[i].convertedPoints;
+        if (featureData[i].points.size() > 1 && featureData[i].isClosed)
+        {
+            g->fill_poly(featureData[i].convertedPoints);
+        }
+    }
+}
+
+void drawSegments(ezgl::renderer *g){
+    for (size_t i = 0; i < streetSegData.size(); i++)
+    {
+
+        
+        for (size_t j = 0; j < streetSegData[i].size(); j++)
+        {
+            
+            drawStreetSegment(g,streetSegData[i][j]);
+        }
+
+        bool done =false;
+        for(int j = 0; (j< streetSegData[i].size())&&!done;j++){
+            StreetSegmentData segDat = streetSegData[i][j];
+            bool b = g->get_visible_world().contains((segDat.convertedCurvePoints[0]+segDat.convertedCurvePoints[segDat.convertedCurvePoints.size()-1])*ezgl::point2d(0.5,0.5));
+            if(b&&zoomLevel>RENDER_POIS_STREET){
+                done=drawStreetName(g,segDat);
+            }
+        }
+    }
+}
+
+void drawIntersections(ezgl::renderer *g){
+    for (int i = 0; i < intersectionsData.size(); i++)
+    {
+        if (intersectionsData[i].isHighlighted)
+            drawIntersection(g, i);
+    }
+}
+
+void drawPOIs(ezgl::renderer *g){
+    if(zoomLevel > RENDER_POIS_STREET){
+        for(int k = 0; k < pois.size(); k++){
+            if(zoomLevel > HIGH_ZOOM)
+                drawPOI(g, pois[k]);
+            drawPOIText(g,k);
+        }
+    }
+}
+
+void loadPNGs(ezgl::renderer *g){
+    if(iconImgs.empty())
+        for(auto type: poiTypes)
+            iconImgs.emplace(type, g->load_png(("libstreetmap/resources/"+type+".png").c_str()));
 }

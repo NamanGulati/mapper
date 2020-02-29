@@ -94,7 +94,6 @@ void clearHighlights();
 char * castToCharArray(std::string s);
 std::string toLower(std::string s);
 std::string createMapPath(std::string s);
-void loadImages(ezgl::renderer *g);
 std::string parseTransitInfo(std::stringstream& ss);
 void infoPopup(ezgl::application *app, std::vector<int> interId, std::string transitInfo);
 void onDialogResponse(GtkDialog *dialog, gint response_id, gpointer user_data);
