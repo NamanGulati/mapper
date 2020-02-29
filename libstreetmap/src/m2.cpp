@@ -237,7 +237,7 @@ void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){
             double area = g->get_visible_world().area();
             double lineWidth = 4;
             if(segDat.type==StreetType::EXPRESSWAY){
-               lineWidth=(segDat.lanes!=-1?segDat.lanes*0.75:4)*zoomLevel;
+                    lineWidth=((segDat.lanes!=-1)&&zoomLevel>=7?segDat.lanes*0.75:4)*zoomLevel;
                 //g->set_line_width(20);
                 g->set_color(ezgl::YELLOW);
             }
@@ -245,12 +245,12 @@ void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){
                 if(zoomLevel<3)
                     return;
                 
-                lineWidth=(segDat.lanes!=-1?segDat.lanes*0.75:3)*(zoomLevel-2);
+                lineWidth=((segDat.lanes!=-1)&&zoomLevel>=7?segDat.lanes*0.75:3)*(zoomLevel-2);
             }
             else {//if(segDat.type==StreetType::RESIDENTIAL){
                 if(zoomLevel<7)
                     return;
-                lineWidth=(segDat.lanes!=-1?segDat.lanes*0.75:1)*(zoomLevel-6);
+                lineWidth=((segDat.lanes!=-1)?segDat.lanes*0.75:1)*(zoomLevel-6);
             }
            // segDat.drawHieght=lineWidth;
             g->set_line_width(lineWidth);
@@ -306,8 +306,16 @@ void drawStreetName(ezgl::renderer *g,StreetSegmentData segDat){
     else if(angle>90) angle-=180;
     g->set_text_rotation(angle);
     std::cout<<"begin: "<<segDat.convertedCurvePoints.front().x<<"end: "<<segDat.convertedCurvePoints.back().x<<std::endl;
-    ezgl::point2d idk= segDat.convertedCurvePoints.front()-segDat.convertedCurvePoints.back();
-    double segmentLen=sqrt(pow(idk.x,2)+pow(idk.y,2));
-    std::cout<<"dx: "<<idk.x<<" dy: "<<idk.y<<" len: "<<segmentLen<<std::endl;  
-    g->draw_text(centerPt,name,segmentLen,10);
+    ezgl::point2d diff= segDat.convertedCurvePoints.front()-segDat.convertedCurvePoints.back();
+    double segmentLen=sqrt(pow(diff.x,2)+pow(diff.y,2));
+    std::string oneWayIndicator="";
+    if(segDat.info.oneWay){
+        if(atan2(diff.x,diff.y)<0)
+            g->draw_text(centerPt," → "+name+" → ",segmentLen,10);
+        else
+            g->draw_text(centerPt," ← "+name+" ← ",segmentLen,10);
+    }
+    else
+        g->draw_text(centerPt,name,segmentLen,10);
+    std::cout<<"dx: "<<diff.x<<" dy: "<<diff.y<<" len: "<<segmentLen<<std::endl;  
 }
