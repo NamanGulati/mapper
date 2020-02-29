@@ -2,8 +2,23 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.6"/>
-  <object class="GtkListStore" id="AutoCompleteList"/>
-  <object class="GtkEntryCompletion" id="AutoCompleter"/>
+  <object class="GtkListStore" id="AutoCompleteList">
+    <columns>
+      <!-- column-name 0 -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">yonge</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkEntryCompletion" id="AutoCompleter">
+    <property name="model">AutoCompleteList</property>
+    <property name="text_column">0</property>
+    <property name="inline_completion">True</property>
+    <property name="inline_selection">True</property>
+  </object>
   <object class="GtkWindow" id="MainWindow">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -220,6 +235,7 @@
             <property name="primary_icon_sensitive">False</property>
             <property name="primary_icon_tooltip_text" translatable="yes">Write new map name here and press load map to open a new map</property>
             <property name="placeholder_text" translatable="yes">Search for an intersection (street names seperated by "and" or "&amp;")</property>
+            <property name="completion">AutoCompleter</property>
           </object>
           <packing>
             <property name="left_attach">0</property>

@@ -13,7 +13,9 @@
 #include "ezgl/graphics.hpp"
 #include "m1.h"
 #include <cmath>
+#include <string>
 #include <boost/algorithm/string.hpp>
+#include <bits/stdc++.h>
 
 //converts a pair of LatLon points to a pair of Cartesian points
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){
@@ -147,3 +149,14 @@ void clearHighlights(){
     highlighted.clear();
 }
 //bool sortStreets()
+char * castToCharArray(std::string s){
+    int a = s.length();
+    char charArr[a + 1]; 
+    strcpy(charArr, s.c_str());
+}
+
+std::string toLower(std::string s){
+    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+    return s;
+}
+

@@ -90,5 +90,7 @@ bool sortFeatures(FeatureData first, FeatureData second);
 void zoomOnIntersection(ezgl::application *app, int idx);
 bool sortStreets(std::vector<StreetSegmentData> first, std::vector<StreetSegmentData> second);
 void clearHighlights();
+char * castToCharArray(std::string s);
+std::string toLower(std::string s);
 #endif /* HELPERS_H */
 

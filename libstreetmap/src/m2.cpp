@@ -20,9 +20,11 @@
 #include <math.h>
 #include <set>
 #include <unordered_set>
+#include <boost/algorithm/string.hpp>
 #include "OSMDatabaseAPI.h"
 #include "transit.h"
 #include <sstream>
+#include <gdk/gdk.h>
 
 
 #define  HIGH_LEVEL_DRAW_LIM  8.05723e-05 //expressway and small highway
@@ -161,11 +163,28 @@ void draw_main_canvas(ezgl::renderer *g)
 }
 
 void onSetup(ezgl::application *app, bool new_window){
+    new_window;
     GObject *searchEntry = app->get_object("SearchEntry");
     g_signal_connect(searchEntry, "activate", G_CALLBACK(onSearch), app);
     
     GObject *loadMap = app->get_object("LoadMap");
     g_signal_connect(loadMap, "clicked", G_CALLBACK(onLoadMap), app);
+    
+    //////////////////AUTO COMPLETION
+    GtkListStore *completeOptions = (GtkListStore*)app->get_object("AutoCompleteList");
+    GtkTreeIter iter;
+
+    gtk_list_store_clear(completeOptions);
+
+    for (int x = 0; x < getNumStreets(); x++) {
+        gtk_list_store_append(completeOptions, &iter);
+        gtk_list_store_set(completeOptions, &iter, 0, (gchar*)castToCharArray(toLower(getStreetName(x))), -1);
+    }
+
+//    for (int i = 0; i < getNumPointsOfInterest(); i++) {
+//        gtk_list_store_append(NamesList, &iter);
+//        gtk_list_store_set(NamesList, &iter, 0, (gchar*)giveCharStar(toLower(getPointOfInterestName(i))), -1);
+//    }
 }
 
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
