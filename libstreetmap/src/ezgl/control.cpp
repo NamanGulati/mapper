@@ -20,6 +20,7 @@
 #include "globals.h"
 #include "ezgl/camera.hpp"
 #include "ezgl/canvas.hpp"
+#include <cmath>
 
 namespace ezgl {
 
@@ -47,7 +48,7 @@ static rectangle zoom_out_world(point2d zoom_point, rectangle world, double zoom
 
 void zoom_in(canvas *cnv, double zoom_factor)
 {
-  zoomLevel++;
+  zoomLevel += log10(zoom_factor)/log10(2);
   point2d const zoom_point = cnv->get_camera().get_world().center();
   rectangle const world = cnv->get_camera().get_world();
 
@@ -57,7 +58,7 @@ void zoom_in(canvas *cnv, double zoom_factor)
 
 void zoom_in(canvas *cnv, point2d zoom_point, double zoom_factor)
 {
-  zoomLevel++;
+  zoomLevel += log10(zoom_factor)/log10(2);
   zoom_point = cnv->get_camera().widget_to_world(zoom_point);
   rectangle const world = cnv->get_camera().get_world();
 
@@ -67,7 +68,7 @@ void zoom_in(canvas *cnv, point2d zoom_point, double zoom_factor)
 
 void zoom_out(canvas *cnv, double zoom_factor)
 {
-  zoomLevel--;
+  zoomLevel -= log10(zoom_factor)/log10(2);
   point2d const zoom_point = cnv->get_camera().get_world().center();
   rectangle const world = cnv->get_camera().get_world();
 
@@ -77,7 +78,7 @@ void zoom_out(canvas *cnv, double zoom_factor)
 
 void zoom_out(canvas *cnv, point2d zoom_point, double zoom_factor)
 {
-  zoomLevel--;
+  zoomLevel -= log10(zoom_factor)/log10(2);
   zoom_point = cnv->get_camera().widget_to_world(zoom_point);
   rectangle const world = cnv->get_camera().get_world();
 

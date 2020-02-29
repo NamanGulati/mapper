@@ -143,8 +143,7 @@ bool load_map(std::string map_streets_database_filename) {
                 }
             }
             else if(wayTag.first=="lanes"){
-                dat.lanes=std::stoi(wayTag.second);
-                
+                dat.lanes=std::stoi(wayTag.second);       
             }
     
         }

@@ -25,7 +25,7 @@ namespace ezgl {
 
 // File wide static variables to track whether the left mouse
 // button is currently pressed AND the old x and y positions of the mouse pointer
-bool left_mouse_button_pressed = false;
+bool middle_mouse_button_pressed = false;
 int last_panning_event_time = 0;
 double prev_x = 0, prev_y = 0;
 
@@ -49,8 +49,8 @@ gboolean press_mouse(GtkWidget *, GdkEventButton *event, gpointer data)
   if(event->type == GDK_BUTTON_PRESS) {
 
     // Check for Middle mouse press to support dragging
-    if(event->button == 1) {
-      left_mouse_button_pressed = true;
+    if(event->button == 2) {
+      middle_mouse_button_pressed = true;
       prev_x = event->x;
       prev_y = event->y;
     }
@@ -74,8 +74,8 @@ gboolean release_mouse(GtkWidget *, GdkEventButton *event, gpointer )
 {
   if(event->type == GDK_BUTTON_RELEASE) {
     // Check for Middle mouse release to support dragging
-    if(event->button == 1) {
-      left_mouse_button_pressed = false;
+    if(event->button == 2) {
+      middle_mouse_button_pressed = false;
     }
   }
 
@@ -89,7 +89,7 @@ gboolean move_mouse(GtkWidget *, GdkEventButton *event, gpointer data)
   if(event->type == GDK_MOTION_NOTIFY) {
 
     // Check if the middle mouse is pressed to support dragging
-    if(left_mouse_button_pressed) {
+    if(middle_mouse_button_pressed) {
       // drop this panning event if we have just served another one
       if(gtk_get_current_event_time() - last_panning_event_time < 100)
         return true;
@@ -143,12 +143,12 @@ gboolean scroll_mouse(GtkWidget *, GdkEvent *event, gpointer data)
 
     if(scroll_event->direction == GDK_SCROLL_UP) {
       // Zoom in at the scroll point
-      ezgl::zoom_in(canvas, scroll_point, 5.0 / 3.0);
-      zoomLevel++;
+      ezgl::zoom_in(canvas, scroll_point, 2);
+      //zoomLevel++;
     } else if(scroll_event->direction == GDK_SCROLL_DOWN) {
       // Zoom out at the scroll point
-      ezgl::zoom_out(canvas, scroll_point, 5.0 / 3.0);
-      zoomLevel--;
+      ezgl::zoom_out(canvas, scroll_point, 2);
+      //zoomLevel--;
     } else if(scroll_event->direction == GDK_SCROLL_SMOOTH) {
       // Doesn't seem to be happening
     } // NOTE: We ignore scroll GDK_SCROLL_LEFT and GDK_SCROLL_RIGHT
@@ -176,7 +176,7 @@ gboolean press_zoom_in(GtkWidget *, gpointer data)
   std::string main_canvas_id = application->get_main_canvas_id();
   auto canvas = application->get_canvas(main_canvas_id);
 
-  ezgl::zoom_in(canvas, 5.0 / 3.0);
+  ezgl::zoom_in(canvas, 2);
 
   return TRUE;
 }
@@ -188,7 +188,7 @@ gboolean press_zoom_out(GtkWidget *, gpointer data)
   std::string main_canvas_id = application->get_main_canvas_id();
   auto canvas = application->get_canvas(main_canvas_id);
 
-  ezgl::zoom_out(canvas, 5.0 / 3.0);
+  ezgl::zoom_out(canvas, 2);
 
   return TRUE;
 }

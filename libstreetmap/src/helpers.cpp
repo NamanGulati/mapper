@@ -124,3 +124,5 @@ std::vector<std::string> parse2Streets(std::string textInput){
 bool sortFeatures(FeatureData first, FeatureData second){
     return (first.area > second.area);
 }
+
+//bool sortStreets()

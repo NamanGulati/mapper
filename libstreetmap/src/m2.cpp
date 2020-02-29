@@ -89,17 +89,24 @@ void draw_main_canvas(ezgl::renderer *g)
 
         //std::transform(featureData[i].points.begin(), featureData[i].points.end(), std::back_inserter(convertedPoints), LatLonTo2d);
         FeatureType fType = featureData[i].type;
-        if (fType == Lake || fType == River || fType == Stream)
+        if(fType == Stream){
+            g->set_color(149, 217, 255, 255);
+            for(size_t p; p < featureData[i].convertedPoints.size()-1; p++)
+                g->draw_line(featureData[i].convertedPoints[p],featureData[i].convertedPoints[p+1]);
+        }
+        else if (fType == Lake || fType == River)
             g->set_color(149, 217, 255, 255);
         else if (fType == Greenspace || fType == Island)
             g->set_color(149, 235, 100, 255);
         else if (fType == Park || fType == Golfcourse)
             g->set_color(149, 235, 100, 255);
-        else if (fType == Building)
-            g->set_color(ezgl::GREY_75);
         else if (fType == Beach)
             g->set_color(230, 216, 173, 255);
-
+        else if (fType == Building && zoomLevel > 4)
+            g->set_color(ezgl::GREY_75);
+        else
+            break;
+        
         std::vector<ezgl::point2d> FDconvertedPoints = featureData[i].convertedPoints;
         if (featureData[i].points.size() > 1 && featureData[i].isClosed)
         {
@@ -109,13 +116,6 @@ void draw_main_canvas(ezgl::renderer *g)
 //            for(size_t p; p < featureData[i].convertedPoints.size()-1; p++)
 //                g->draw_line(featureData[i].convertedPoints[p],featureData[i].convertedPoints[p+1]);
 //        }
-
-        //        if(featureData[i].isClosed)
-        //            g->fill_poly(convertedPoints);
-        //        else{
-        //            for(size_t j = 0; j < convertedPoints.size()-1; j++)
-        //                g->draw_line(convertedPoints[j], convertedPoints[j+1]);
-        //        }
     }
     std::cout<<"ZoomLevel: "<<zoomLevel<<std::endl;
 
@@ -180,13 +180,13 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
     float x_2d = x_from_lon(getIntersectionPosition(idx).lon());
     float y_2d = y_from_lat(getIntersectionPosition(idx).lat());
 
-//    ezgl::rectangle region({x_2d-diff_x/5000, y_2d-diff_y/5000}, 
-//    {x_2d+diff_x/5000, y_2d+diff_y/5000});
-//    zoomLevel = 16;
-    std::cout << x_2d - diff_x/2 << std::endl;
-    
-    ezgl::rectangle region({(x_2d - diff_x/2), (y_2d - diff_y/2)}, {(x_2d + diff_x/2), (y_2d + diff_y/2)});
-
+    ezgl::rectangle region({x_2d-diff_x/1000, y_2d-diff_y/1000}, 
+    {x_2d+diff_x/1000, y_2d+diff_y/1000});
+    std::cout << x_2d << " " << y_2d << std::endl;
+    ezgl::point2d center(x_2d, y_2d);
+    ezgl::point2d center1(min_x, min_y);
+    //ezgl::rectangle region({(x_2d - diff_x/2), (y_2d - diff_y/2)}, {(x_2d + diff_x/2), (y_2d + diff_y/2)});
+    zoomLevel = 11;
     std::string main_canvas_id = app->get_main_canvas_id();
     auto canvas = app->get_canvas(main_canvas_id);
     ezgl::zoom_fit(canvas, region);
@@ -196,8 +196,8 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 //        ezgl::zoom_in(canvas, 5.0 / 3.0);
 //        zoomNumber--;
 //    }
-    zoomLevel = 9;
-    ezgl::zoom_in(canvas, pow(5.0/3.0,10));
+    //zoomLevel = 1;
+    //ezgl::zoom_in(canvas, 256.0);
     
     
     app->refresh_drawing();
@@ -302,7 +302,7 @@ void onLoadMap(GtkWidget* widget, ezgl::application* application){
     
     
     ezgl::rectangle new_world({min_x, min_y},{max_x, max_y});
-    
+    zoomLevel = 1;
     application->change_canvas_world_coordinates("MainCanvas", new_world);
     application->refresh_drawing();
     
@@ -318,10 +318,10 @@ void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){
                 g->set_color(ezgl::YELLOW);
             }
             else if(segDat.type == StreetType::CITY_ROAD){
-                if(zoomLevel<3)
-                    return;
+//                if(zoomLevel<3)
+//                    return;
                 
-                lineWidth=((segDat.lanes!=-1)&&zoomLevel>=7?segDat.lanes*0.75:3)*(zoomLevel-2);
+                lineWidth=((segDat.lanes!=-1)&&zoomLevel>=7?segDat.lanes*0.75:3)*(zoomLevel/3);
             }
             else {//if(segDat.type==StreetType::RESIDENTIAL){
                 if(zoomLevel<7)
@@ -381,7 +381,6 @@ void drawStreetName(ezgl::renderer *g,StreetSegmentData segDat){
     if(angle<-90) angle+=180;
     else if(angle>90) angle-=180;
     g->set_text_rotation(angle);
-    std::cout<<"begin: "<<segDat.convertedCurvePoints.front().x<<"end: "<<segDat.convertedCurvePoints.back().x<<std::endl;
     ezgl::point2d diff= segDat.convertedCurvePoints.front()-segDat.convertedCurvePoints.back();
     double segmentLen=sqrt(pow(diff.x,2)+pow(diff.y,2));
     std::string oneWayIndicator="";
@@ -393,5 +392,4 @@ void drawStreetName(ezgl::renderer *g,StreetSegmentData segDat){
     }
     else
         g->draw_text(centerPt,name,segmentLen,10);
-    std::cout<<"dx: "<<diff.x<<" dy: "<<diff.y<<" len: "<<segmentLen<<std::endl;  
 }
