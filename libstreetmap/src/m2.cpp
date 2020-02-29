@@ -41,7 +41,7 @@ void drawIntersection(ezgl::renderer * g, IntersectionIndex idx);
 void drawPOI(ezgl::renderer *g, POIIndex idx);
 void getDiff(float &diffX, float &diffY);
 ezgl::surface* iconSurface;
-void drawStreetName(ezgl::renderer *g,StreetSegmentData segDat);
+bool drawStreetName(ezgl::renderer *g,StreetSegmentData segDat);
 void drawPOIText(ezgl::renderer * g,POIIndex idx);
 float diff_x, diff_y;
 
@@ -139,12 +139,12 @@ void draw_main_canvas(ezgl::renderer *g)
             drawStreetSegment(g,streetSegData[i][j]);
         }
 
-        for(int j = 0; j< streetSegData[i].size();j++){
+        bool done =false;
+        for(int j = 0; (j< streetSegData[i].size())&&!done;j++){
             StreetSegmentData segDat = streetSegData[i][j];
             bool b = g->get_visible_world().contains((segDat.convertedCurvePoints[0]+segDat.convertedCurvePoints[segDat.convertedCurvePoints.size()-1])*ezgl::point2d(0.5,0.5));
             if(b&&zoomLevel>=8){
-                drawStreetName(g,segDat);
-                
+                done=drawStreetName(g,segDat);
             }
         }
     }
@@ -386,15 +386,16 @@ void drawPOI(ezgl::renderer *g, POIIndex idx){
     
     g->draw_surface(iconSurface, LatLonTo2d(pois[idx].position));
 }
-void drawStreetName(ezgl::renderer *g,StreetSegmentData segDat){
+bool drawStreetName(ezgl::renderer *g,StreetSegmentData segDat){
+
     std::string name = getStreetName(segDat.info.streetID);
     if(name=="<unknown>")
-        return;
+        return false;
     ezgl::point2d p1(0,0);
     ezgl::point2d p2(0,0);
     g->set_color(ezgl::BLACK);
     if(segDat.convertedCurvePoints.size()>3){
-        p1=segDat.convertedCurvePoints[segDat.convertedCurvePoints.size()/2];
+        p1=segDat.convertedCurvePoints[(segDat.convertedCurvePoints.size()/2)];
         p2=segDat.convertedCurvePoints[(segDat.convertedCurvePoints.size()/2)+1];
     }
     else if(segDat.convertedCurvePoints.size()==3){
@@ -414,14 +415,17 @@ void drawStreetName(ezgl::renderer *g,StreetSegmentData segDat){
     ezgl::point2d diff= segDat.convertedCurvePoints.front()-segDat.convertedCurvePoints.back();
     double segmentLen=sqrt(pow(diff.x,2)+pow(diff.y,2));
     std::string oneWayIndicator="";
+    bool done=false;
     if(segDat.info.oneWay){
         if(atan2(diff.x,diff.y)<0)
-            g->draw_text(centerPt," → "+name+" → ",segmentLen,10);
+            done = g->draw_text(centerPt," → "+name+" → ",segmentLen,10);
         else
-            g->draw_text(centerPt," ← "+name+" ← ",segmentLen,10);
+            done = g->draw_text(centerPt," ← "+name+" ← ",segmentLen,10);
     }
     else
-        g->draw_text(centerPt,name,segmentLen,10);
+        done = g->draw_text(centerPt,name,segmentLen,10);
+   
+    return done;
 }
 
 void getDiff(float &diffX, float &diffY){

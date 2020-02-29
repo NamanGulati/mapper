@@ -419,7 +419,7 @@ public:
    * @param bound_x The maximum allowed width of the text
    * @param bound_y The maximum allowed height of the text
    */
-  void draw_text(point2d point, std::string const &text, double bound_x, double bound_y);
+  bool draw_text(point2d point, std::string const &text, double bound_x, double bound_y);
 
   /**
    * Draw a surface
