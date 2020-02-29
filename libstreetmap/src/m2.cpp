@@ -190,8 +190,6 @@ void onSetup(ezgl::application *app, bool new_window){
 //        gtk_list_store_set(NamesList, &iter, 0, (gchar*)giveCharStar(toLower(getPointOfInterestName(i))), -1);
 //    }
     
-//    GObject *loadMap = app->get_object("LoadMap");
-//    g_signal_connect(loadMap, "clicked", G_CALLBACK(onLoadMap), app);
 }
 
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
@@ -220,7 +218,6 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 void onSearch(GtkWidget *widget, ezgl::application *application){
     // Get the GtkEntry cast of GtkSearchEntry object
     GtkEntry* search_entry = (GtkEntry *) widget;
-            //application->get_object("SearchEntry");
     
     //Retrieve the text from the search entry
     const char* text = gtk_entry_get_text(search_entry);
@@ -290,6 +287,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     
     
     ///////////////////////////////////////////////////////////Loading Map
+    
     std::string path = text;
     std::string newMapPath = createMapPath(path);
     

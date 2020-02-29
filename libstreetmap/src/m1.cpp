@@ -65,6 +65,14 @@ constexpr double KM_per_H_to_M_per_S = 3.6;
  * 
  * @return bool if all data was loaded successfully
  **/ 
+void loadWayAndNode();
+void loadStreetSegStreetInterSpedLimSegLenStreetInterVecs();
+void loadIntersects();
+void loadStreetNames();
+void loadFeatureData();
+void loadPOIs();
+
+
 bool load_map(std::string map_streets_database_filename) {
     bool load_successful = false; //Indicates whether the map has loaded 
                                   //successfully
@@ -93,6 +101,60 @@ bool load_map(std::string map_streets_database_filename) {
     /**
      * Loading of ways and nodes
      **/
+    loadWayAndNode();
+
+
+    /**
+     * Loading of streetSegsVectors,streetIntersections,
+     *              speedLim,segLen,streetIntersectionsVectors
+     **/
+    loadStreetSegStreetInterSpedLimSegLenStreetInterVecs();
+    
+    /**
+     * Loading of intersections
+     **/
+    loadIntersects();
+    
+    /**
+     * Loading of streetNames
+     **/
+    loadStreetNames();
+
+    /**
+     * Loading of Features
+     **/
+    loadFeatureData();
+
+    /**
+     * Loading of POIs
+     **/
+    loadPOIs();
+    
+    load_successful = true; //Make sure this is updated to reflect whether
+                            //loading the map succeeded or failed
+
+    return load_successful;
+}
+
+/**
+ * clear all data loaded in load_map
+ **/
+void close_map() {
+    closeStreetDatabase();
+    closeOSMDatabase();
+    streetIntersections.clear();
+    streetIntersectionsVectors.clear();
+    streetSegsVectors.clear();
+    intersections.clear();
+    ways.clear();
+    nodes.clear();
+    streetNames.clear();
+    segLen.clear();
+    speedLim.clear();
+}
+
+
+void loadWayAndNode(){
     int nWays = getNumberOfWays();
     for(int i=0;i<nWays;i++){
         const OSMWay * temp = getWayByIndex(i);
@@ -104,12 +166,8 @@ bool load_map(std::string map_streets_database_filename) {
         const OSMNode* temp = getNodeByIndex(i);
         nodes[temp->id()] = temp;
     }
-
-
-    /**
-     * Loading of streetSegsVectors,streetIntersections,
-     *              speedLim,segLen,streetIntersectionsVectors
-     **/
+}
+void loadStreetSegStreetInterSpedLimSegLenStreetInterVecs(){
     int nStreetSegments = getNumStreetSegments();
     for(int i=0;i<nStreetSegments;i++){
         struct InfoStreetSegment sgmt = getInfoStreetSegment(i);
@@ -195,10 +253,9 @@ bool load_map(std::string map_streets_database_filename) {
     
     for(int i = 0; i < streetIntersections.size(); i++)
         (streetIntersectionsVectors[i]).assign(streetIntersections[i].begin(), streetIntersections[i].end());
-    
-    /**
-     * Loading of intersections
-     **/
+}
+
+void loadIntersects(){
     int nIntersections=getNumIntersections();
     intersectionsData.resize(nIntersections);
     for(int i = 0;i<nIntersections;i++){
@@ -214,10 +271,9 @@ bool load_map(std::string map_streets_database_filename) {
         }
         intersections.push_back(segmentsAtIntersection);
     }
-    
-    /**
-     * Loading of streetNames
-     **/
+}
+
+void loadStreetNames(){
     std::pair<std::string, int> nameIndexes;
     for (int x = 0; x < getNumStreets(); x ++ ){
         nameIndexes.first = removeSpaceAndConcat(getStreetName(x));
@@ -225,8 +281,9 @@ bool load_map(std::string map_streets_database_filename) {
         streetNames.push_back(nameIndexes);
     }
     std::sort(streetNames.begin(), streetNames.end(), pairCompareStringInt);
+}
 
-    
+void loadFeatureData(){
     for(int i=0;i<getNumFeatures();i++){
         FeatureData fd;
         fd.name=getFeatureName(i);
@@ -248,7 +305,9 @@ bool load_map(std::string map_streets_database_filename) {
     }
 
     std::sort(featureData.begin(), featureData.end(), sortFeatures);
+}
 
+void loadPOIs(){
     for(int i=0;i<getNumPointsOfInterest();i++){
         POIData poi;
         if(poiTypes.find(getPointOfInterestType(i)) != poiTypes.end() && getPointOfInterestName(i) != "unknown"){
@@ -259,29 +318,10 @@ bool load_map(std::string map_streets_database_filename) {
             pois.push_back(poi);
         }
     }
-    
-    load_successful = true; //Make sure this is updated to reflect whether
-                            //loading the map succeeded or failed
-
-    return load_successful;
 }
 
-/**
- * clear all data loaded in load_map
- **/
-void close_map() {
-    closeStreetDatabase();
-    closeOSMDatabase();
-    streetIntersections.clear();
-    streetIntersectionsVectors.clear();
-    streetSegsVectors.clear();
-    intersections.clear();
-    ways.clear();
-    nodes.clear();
-    streetNames.clear();
-    segLen.clear();
-    speedLim.clear();
-}
+
+
 
 //finds the distance between two given LatLon points by converting them to Cartesian and using pythagoras' theorem
 double find_distance_between_two_points(std::pair<LatLon, LatLon> points){

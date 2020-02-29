@@ -96,21 +96,6 @@ void getBounds(){
     min_y = y_from_lat(min_lat);
 }
 
-//void getDiff(float &diffX, float &diffY){
-//    
-//    if(min_x*max_x > 0 && min_y*max_y > 0){
-//        diffX = abs(abs(max_x) - abs(min_x));
-//        diffY = abs(abs(max_y) - abs(min_y));
-//        std::cout << "smd" << std::endl;
-//        return;
-//    }
-//    if(min_x < 0 && max_x > 0)
-//        diffX = max_x - min_x;
-//    if(min_y < 0 && max_y > 0)
-//        diffY = max_y - min_y;
-//}
-
-
 bool compareOSMID(OSMID id1, OSMID id2){
  return id1<id2;   
 }
@@ -145,7 +130,6 @@ std::vector<std::string> parse2Streets(std::string textInput){
     if (textInput.find(" and ") != std::string::npos){
         the2Streets.push_back(textInput.substr(0, textInput.find(" and ")));
         the2Streets.push_back(textInput.substr(textInput.find(" and ") + 5));
-        //boost::split(the2Streets, s, boost::is_any_of("/and"));
         
     }
     else if(textInput.find("&") != std::string::npos){
@@ -180,7 +164,7 @@ void clearHighlights(){
     }
     highlighted.clear();
 }
-//bool sortStreets()
+
 char * castToCharArray(std::string s){
     int a = s.length();
     char charArr[a + 1]; 

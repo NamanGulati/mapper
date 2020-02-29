@@ -83,7 +83,6 @@ std::string removeSpaceAndConcat(std::string remove);
 std::string removeSpaceAndConcatAndDash(std::string remove);
 bool pairCompareStringInt(std::pair<std::string, int>, std::pair<std::string, int>);
 void getBounds();
-//void getDiff(float &diffX, float &diffY);
 float x_from_lon(float lon);
 float y_from_lat(float lat);
 float lon_from_x(float x);
