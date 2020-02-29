@@ -93,5 +93,6 @@ void clearHighlights();
 char * castToCharArray(std::string s);
 std::string toLower(std::string s);
 std::string createMapPath(std::string s);
+void loadImages(ezgl::renderer *g);
 #endif /* HELPERS_H */
 

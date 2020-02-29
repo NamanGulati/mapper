@@ -79,8 +79,8 @@ void draw_map()
 
 void draw_main_canvas(ezgl::renderer *g)
 {   
-    if(iconSurface == NULL)
-        iconSurface = g->load_png("libstreetmap/resources/small_image.png");
+    if(iconImgs.empty())
+        loadImages(g);
 
     std::cout<<"area: "<<g->get_visible_world().area()<<std::endl;
     g->set_color(211, 211, 211, 255);
@@ -98,6 +98,7 @@ void draw_main_canvas(ezgl::renderer *g)
         FeatureType fType = featureData[i].type;
         if(fType == Stream){
             g->set_color(149, 217, 255, 255);
+            g->set_line_width(1);
             for(size_t p; p < featureData[i].convertedPoints.size()-1; p++)
                 g->draw_line(featureData[i].convertedPoints[p],featureData[i].convertedPoints[p+1]);
         }
@@ -157,7 +158,7 @@ void draw_main_canvas(ezgl::renderer *g)
     }
     
 
-    if(zoomLevel > 8){
+    if(zoomLevel > 7){
         for(int k = 0; k < pois.size(); k++){
             //if(pois[k].)
             drawPOI(g, k);
@@ -306,9 +307,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     
     intersectionsData.resize(getNumIntersections());
     
-    diff_x = abs(abs(max_x) - abs(min_x));
-    diff_y = abs(abs(max_y) - abs(min_y));
-    
+    getDiff(diff_x, diff_y);
     for (int i = 0; i < getNumIntersections(); i++)
     {
         intersectionsData[i].position = getIntersectionPosition(i);
@@ -415,6 +414,15 @@ void drawIntersection(ezgl::renderer * g, IntersectionIndex idx){
 }
 
 void drawPOI(ezgl::renderer *g, POIIndex idx){
+    
+//    auto find = iconImgs.find(getPointOfInterestType(idx));
+//    ezgl::surface* iconSurface;
+//    
+//    if(find == iconImgs.end())
+//        return;
+//    else
+//        iconSurface = find->second;
+    
     g->draw_surface(iconSurface, LatLonTo2d(pois[idx].position));
 }
 void drawStreetName(ezgl::renderer *g,StreetSegmentData segDat){
@@ -460,7 +468,6 @@ void getDiff(float &diffX, float &diffY){
     if(min_x*max_x > 0 && min_y*max_y > 0){
         diffX = abs(abs(max_x) - abs(min_x));
         diffY = abs(abs(max_y) - abs(min_y));
-        std::cout << "smd" << std::endl;
         return;
     }
     if(min_x < 0 && max_x > 0)

@@ -17,6 +17,7 @@
 #include <boost/algorithm/string.hpp>
 #include <bits/stdc++.h>
 
+std::unordered_map< std::string, ezgl::surface*> iconImgs;
 //converts a pair of LatLon points to a pair of Cartesian points
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){
     
@@ -210,4 +211,9 @@ std::string createMapPath(std::string s){
     
     return "DNE";
     
+}
+
+void loadImages(ezgl::renderer *g){
+    for(auto type: poiTypes)
+        iconImgs.emplace(type, g->load_png(("libstreetmap/resources/Icons/"+type+"_icon.png").c_str()));
 }

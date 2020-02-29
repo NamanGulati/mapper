@@ -66,6 +66,6 @@ const std::string locos[19] = {"beijing,china", "cairo,egypt", "cape-town,southa
 
 const std::unordered_set<std::string> poiTypes = {"atm","bank","bar","bicycle_parking","bus_station","construction","food_court","gym","library","parking",
                                                    "restaurant", "college", "school", "university", "blank"};
-
+extern std::unordered_map<std::string, ezgl::surface*> iconImgs;
 #endif /* GLOBALS_H */
 
