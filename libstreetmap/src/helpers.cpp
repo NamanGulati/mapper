@@ -61,33 +61,52 @@ float lat_from_y(float y){
     return y/DEGREE_TO_RADIAN;
 }
 
-void getBounds(float &minLon, float &maxLon, float &minLat, float &maxLat){
+void getBounds(){
     
     float currLon, currLat;
-    minLon = getIntersectionPosition(0).lon();
-    maxLon = minLon;
-    minLat = getIntersectionPosition(0).lat();
-    maxLat = minLat;    
+    min_lon = getIntersectionPosition(0).lon();
+    max_lon = min_lon;
+    min_lat = getIntersectionPosition(0).lat();
+    max_lat = min_lat;    
     
     for(int i = 1; i < getNumIntersections(); i++){
         currLon = getIntersectionPosition(i).lon();
         currLat = getIntersectionPosition(i).lat();
         
-        if(currLon < minLon)
-            minLon = currLon;
+        if(currLon < min_lon)
+            min_lon = currLon;
         
-        else if(currLon > maxLon)
-            maxLon = currLon;
+        else if(currLon > max_lon)
+            max_lon = currLon;
         
-        if(currLat < minLat)
-            minLat = currLat;
+        if(currLat < min_lat)
+            min_lat = currLat;
         
-        else if(currLat > maxLat)
-            maxLat = currLat;
+        else if(currLat > max_lat)
+            max_lat = currLat;
     }
 
+    lat_avg = DEGREE_TO_RADIAN*(min_lat + max_lat)/2;
     
+    max_x = x_from_lon(max_lon);
+    max_y = y_from_lat(max_lat);
+    min_x = x_from_lon(min_lon);
+    min_y = y_from_lat(min_lat);
 }
+
+//void getDiff(float &diffX, float &diffY){
+//    
+//    if(min_x*max_x > 0 && min_y*max_y > 0){
+//        diffX = abs(abs(max_x) - abs(min_x));
+//        diffY = abs(abs(max_y) - abs(min_y));
+//        std::cout << "smd" << std::endl;
+//        return;
+//    }
+//    if(min_x < 0 && max_x > 0)
+//        diffX = max_x - min_x;
+//    if(min_y < 0 && max_y > 0)
+//        diffY = max_y - min_y;
+//}
 
 
 bool compareOSMID(OSMID id1, OSMID id2){
@@ -135,7 +154,7 @@ bool sortFeatures(FeatureData first, FeatureData second){
 void zoomOnIntersection(ezgl::application *app, int idx){
     float x_2d = x_from_lon(getIntersectionPosition(idx).lon());
     float y_2d = y_from_lat(getIntersectionPosition(idx).lat());
-    ezgl::rectangle region({x_2d-diff_x/1000, y_2d-diff_y/1000}, {x_2d+diff_x/1000, y_2d+diff_y/1000});
+    ezgl::rectangle region({x_2d-diff_x/500, y_2d-diff_y/500}, {x_2d+diff_x/500, y_2d+diff_y/500});
     zoomLevel = 9;
     std::string main_canvas_id = app->get_main_canvas_id();
     auto canvas = app->get_canvas(main_canvas_id);
@@ -161,4 +180,3 @@ std::string toLower(std::string s){
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
     return s;
 }
-

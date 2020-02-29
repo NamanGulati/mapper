@@ -40,6 +40,7 @@ void onLoadMap(GtkWidget *widget, ezgl::application *application);
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat);
 void drawIntersection(ezgl::renderer * g, IntersectionIndex idx);
 void drawPOI(ezgl::renderer *g, POIIndex idx);
+void getDiff(float &diffX, float &diffY);
 ezgl::surface* iconSurface;
 void drawStreetName(ezgl::renderer *g,StreetSegmentData segDat);
 float diff_x, diff_y;
@@ -54,8 +55,9 @@ void draw_map()
         
     intersectionsData.resize(getNumIntersections());
     
-    diff_x = abs(abs(max_x) - abs(min_x));
-    diff_y = abs(abs(max_y) - abs(min_y));
+//    diff_x = abs(abs(max_x) - abs(min_x));
+//    diff_y = abs(abs(max_y) - abs(min_y));
+    getDiff(diff_x, diff_y);
     
     for (int i = 0; i < getNumIntersections(); i++)
     {
@@ -301,10 +303,10 @@ void onLoadMap(GtkWidget* widget, ezgl::application* application){
     std::cout << "loaded map" << '\n';
     
     intersectionsData.resize(getNumIntersections());
-    
-    diff_x = abs(abs(max_x) - abs(min_x));
-    diff_y = abs(abs(max_y) - abs(min_y));
-    
+//    
+//    diff_x = abs(abs(max_x) - abs(min_x));
+//    diff_y = abs(abs(max_y) - abs(min_y));
+    getDiff(diff_x, diff_y);
     for (int i = 0; i < getNumIntersections(); i++)
     {
         intersectionsData[i].position = getIntersectionPosition(i);
@@ -401,4 +403,18 @@ void drawStreetName(ezgl::renderer *g,StreetSegmentData segDat){
     }
     else
         g->draw_text(centerPt,name,segmentLen,10);
+}
+
+void getDiff(float &diffX, float &diffY){
+    
+    if(min_x*max_x > 0 && min_y*max_y > 0){
+        diffX = abs(abs(max_x) - abs(min_x));
+        diffY = abs(abs(max_y) - abs(min_y));
+        std::cout << "smd" << std::endl;
+        return;
+    }
+    if(min_x < 0 && max_x > 0)
+        diffX = max_x - min_x;
+    if(min_y < 0 && max_y > 0)
+        diffY = max_y - min_y;
 }

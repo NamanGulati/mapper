@@ -81,7 +81,7 @@ bool load_map(std::string map_streets_database_filename) {
     
     std::cout << "load_map: " << map_streets_database_filename << std::endl;
     
-    getBounds(min_lon, max_lon, min_lat, max_lat);    
+    getBounds();    
     lat_avg = DEGREE_TO_RADIAN*(min_lat + max_lat)/2;
     
     max_x = x_from_lon(max_lon);
