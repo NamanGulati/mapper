@@ -182,7 +182,7 @@ std::string createMapPath(std::string s){
     std::cout << checker << std::endl;
     std::string locat, replace;
     for (int x = 0; x < 19; x ++){
-        if (removeSpaceAndConcatAndDash(locos[x]).find(checker)!= std::string::npos){
+        if (removeSpaceAndConcatAndDash(locos[x]).find(checker)!= std::string::npos && removeSpaceAndConcatAndDash(locos[x]).find(checker) == 0){
             if(locos[x].find(",") != std::string::npos){
                 replace = locos[x];
                 replace.replace(locos[x].find(","), 1, "_");
