@@ -43,6 +43,7 @@ void drawPOI(ezgl::renderer *g, POIIndex idx);
 void getDiff(float &diffX, float &diffY);
 ezgl::surface* iconSurface;
 void drawStreetName(ezgl::renderer *g,StreetSegmentData segDat);
+void drawPOIText(ezgl::renderer * g,POIIndex idx);
 float diff_x, diff_y;
 
 void draw_map()
@@ -157,9 +158,10 @@ void draw_main_canvas(ezgl::renderer *g)
     
 
     if(zoomLevel > 8){
-        for(int k = 0; k < getNumPointsOfInterest(); k++){
+        for(int k = 0; k < pois.size(); k++){
             //if(pois[k].)
             drawPOI(g, k);
+            drawPOIText(g,k);
         }
     }
 }
@@ -374,18 +376,18 @@ void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){
             double area = g->get_visible_world().area();
             double lineWidth = 4;
             if(segDat.type==StreetType::EXPRESSWAY){
-                    lineWidth=((segDat.lanes!=-1)&&zoomLevel>=7?segDat.lanes*0.75:4)*zoomLevel;
+                    lineWidth=((segDat.lanes!=-1)&&zoomLevel>=7?segDat.lanes:5)*zoomLevel;
                 //g->set_line_width(20);
                 g->set_color(ezgl::YELLOW);
             }
             else if(segDat.type == StreetType::CITY_ROAD){
                 
-                lineWidth=((segDat.lanes!=-1)&&zoomLevel>=7?segDat.lanes*0.75:3)*(zoomLevel/3);
+                lineWidth=((segDat.lanes!=-1)&&zoomLevel>=7?segDat.lanes:4)*(zoomLevel/3);
             }
             else {//if(segDat.type==StreetType::RESIDENTIAL){
                 if(zoomLevel<6)
                     return;
-                lineWidth=((segDat.lanes!=-1)?segDat.lanes*0.75:1)*(zoomLevel-6);
+                lineWidth=((segDat.lanes!=-1)?segDat.lanes:2)*(zoomLevel-6);
             }
            // segDat.drawHieght=lineWidth;
             g->set_line_width(lineWidth);
@@ -465,4 +467,9 @@ void getDiff(float &diffX, float &diffY){
         diffX = max_x - min_x;
     if(min_y < 0 && max_y > 0)
         diffY = max_y - min_y;
+}
+void drawPOIText(ezgl::renderer * g,POIIndex idx){
+    g->set_color(ezgl::BLACK);
+    g->set_text_rotation(0);
+    g->draw_text(LatLonTo2d(pois[idx].position),pois[idx].name);
 }
