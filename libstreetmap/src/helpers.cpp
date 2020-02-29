@@ -17,6 +17,7 @@
 #include <boost/algorithm/string.hpp>
 #include <bits/stdc++.h>
 #include <sstream>
+#include <boost/format.hpp>
 
 std::unordered_map< std::string, ezgl::surface*> iconImgs;
 //converts a pair of LatLon points to a pair of Cartesian points
@@ -204,6 +205,8 @@ void loadImages(ezgl::renderer *g){
         iconImgs.emplace(type, g->load_png(("libstreetmap/resources/Icons/"+type+"_icon.png").c_str()));
 }
 std::string parseTransitInfo(std::stringstream& ss){
+    char header[200];
+    char result[300];
     std::string stopName="";
     std::getline(ss, stopName, '|');
     std::string mode="";
@@ -214,7 +217,15 @@ std::string parseTransitInfo(std::stringstream& ss){
     std::getline(ss, agency, '|');
     std::string time="";
     std::getline(ss, time, '|');
-    return (stopName + " " + mode + " " + name + " " + agency + " " + time);
+    std::cout<<stopName<<" "<<mode<<" "<<name<<" "<<agency<<" "<<time<<" "<<std::endl;
+    std::sprintf(header,"\n|%*s|%*s|%*s|%*s|%*s|",strlen(stopName.c_str()),"Stop Name",strlen(mode.c_str()),"Mode",
+    strlen(name.c_str()),"Route Name",strlen(agency.c_str()),"Transit Agency",strlen(time.c_str()),"Time");
+    
+    std::sprintf(result,"|%*s|%*s|%*s|%*s|%*s|",9,stopName.c_str(),4,mode.c_str(),
+    10,name.c_str(),14,agency.c_str(),4,time.c_str());
+    //std::cout<<result<<std::endl;
+    //return (stopName + " " + mode + " " + name + " " + agency + " " + time);
+    return std::string(header)+"\n"+std::string(result);
 }
 
 void infoPopup(ezgl::application *app, std::vector<int> interId, std::string transitInfo){
@@ -244,7 +255,7 @@ void infoPopup(ezgl::application *app, std::vector<int> interId, std::string tra
     }
     label1 = gtk_label_new(names.c_str()); //castToCharArray(names)
     gtk_container_add(GTK_CONTAINER(content_area), label1);
-    label2 = gtk_label_new(("Transit Info: " + transitInfo).c_str());
+    label2 = gtk_label_new(("Upcoming Transit Departures:\n " + transitInfo).c_str());
     gtk_container_add(GTK_CONTAINER(content_area), label2);
 
     gtk_widget_show_all(dialog);
