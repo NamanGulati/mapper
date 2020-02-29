@@ -50,7 +50,10 @@ extern std::vector<FeatureData> featureData; //vector of all natural features on
 
 extern std::vector<POIData> pois;
 
-extern float max_lat, min_lat, max_lon, min_lon, max_x, min_x, max_y, min_y;
+extern std::vector<IntersectionIndex> highlighted;
+
+extern float max_lat, min_lat, max_lon, min_lon, max_x, min_x, max_y, min_y, diff_y, diff_x;
+
 extern int zoomLevel;
 #endif /* GLOBALS_H */
 

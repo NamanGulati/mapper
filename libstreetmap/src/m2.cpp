@@ -131,7 +131,7 @@ void draw_main_canvas(ezgl::renderer *g)
             drawStreetSegment(g,streetSegData[i][j]);
         }
 
-        for(size_t j = 0; j< streetSegData[i].size();j++){
+        for(int j = 0; j< streetSegData[i].size();j++){
             StreetSegmentData segDat = streetSegData[i][j];
             bool b = g->get_visible_world().contains((segDat.convertedCurvePoints[0]+segDat.convertedCurvePoints[segDat.convertedCurvePoints.size()-1])*ezgl::point2d(0.5,0.5));
             if(b&&zoomLevel>=8){
@@ -143,7 +143,7 @@ void draw_main_canvas(ezgl::renderer *g)
     
 
     
-    for (size_t i = 0; i < intersectionsData.size(); i++)
+    for (int i = 0; i < intersectionsData.size(); i++)
     {
         if (intersectionsData[i].isHighlighted)
             drawIntersection(g, i);
@@ -152,8 +152,8 @@ void draw_main_canvas(ezgl::renderer *g)
     }
     
 
-    if(zoomLevel > 10){
-        for(size_t k = 0; k < getNumPointsOfInterest(); k++){
+    if(zoomLevel > 8){
+        for(int k = 0; k < getNumPointsOfInterest(); k++){
             //if(pois[k].)
             drawPOI(g, k);
         }
@@ -170,6 +170,8 @@ void onSetup(ezgl::application *app, bool new_window){
 
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 {
+    if(event->button == 2)
+        return;
     LatLon clickPos(lat_from_y(y),lon_from_x(x));
     IntersectionIndex idx = find_closest_intersection(clickPos);
     //if intersections are circles
@@ -190,30 +192,10 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 
 
     std::cout << getIntersectionName(idx) << std::endl;
+    clearHighlights();
     intersectionsData[idx].isHighlighted = true;
-    
-    float x_2d = x_from_lon(getIntersectionPosition(idx).lon());
-    float y_2d = y_from_lat(getIntersectionPosition(idx).lat());
-
-    ezgl::rectangle region({x_2d-diff_x/1000, y_2d-diff_y/1000}, 
-    {x_2d+diff_x/1000, y_2d+diff_y/1000});
-    std::cout << x_2d << " " << y_2d << std::endl;
-    ezgl::point2d center(x_2d, y_2d);
-    ezgl::point2d center1(min_x, min_y);
-    //ezgl::rectangle region({(x_2d - diff_x/2), (y_2d - diff_y/2)}, {(x_2d + diff_x/2), (y_2d + diff_y/2)});
-    zoomLevel = 11;
-    std::string main_canvas_id = app->get_main_canvas_id();
-    auto canvas = app->get_canvas(main_canvas_id);
-    ezgl::zoom_fit(canvas, region);
-    
-//    int zoomNumber = 10;
-//    while(zoomNumber != 0){
-//        ezgl::zoom_in(canvas, 5.0 / 3.0);
-//        zoomNumber--;
-//    }
-    //zoomLevel = 1;
-    //ezgl::zoom_in(canvas, 256.0);
-    
+    highlighted.push_back(idx);
+    zoomOnIntersection(app, idx);
     
     app->refresh_drawing();
 }
@@ -259,23 +241,19 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         }
     }
     
-    
-    
-    
-    
-    
-    //std::cout << "Finding Intersections For: " << getStreetName(foundStreets.first) << " , " << getStreetName(foundStreets.second) << std::endl;
-    
-   
-    
     if (foundIntersects.empty())
         std::cout << "No intersection found" << std::endl;
 
+    clearHighlights();
+    
     for (int x = 0; x < foundIntersects.size(); x ++){
         std::cout << getIntersectionName(foundIntersects[x]) << std::endl;
         intersectionsData[foundIntersects[x]].isHighlighted = true;
+        highlighted.push_back(foundIntersects[x]);
     }
 
+    zoomOnIntersection(application, foundIntersects[0]);
+    
     // Update the status bar message
     application->update_message(text);
     // Redraw the graphics
@@ -318,6 +296,7 @@ void onLoadMap(GtkWidget* widget, ezgl::application* application){
     
     ezgl::rectangle new_world({min_x, min_y},{max_x, max_y});
     zoomLevel = 1;
+    clearHighlights();
     application->change_canvas_world_coordinates("MainCanvas", new_world);
     application->refresh_drawing();
     
@@ -333,8 +312,6 @@ void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){
                 g->set_color(ezgl::YELLOW);
             }
             else if(segDat.type == StreetType::CITY_ROAD){
-//                if(zoomLevel<3)
-//                    return;
                 
                 lineWidth=((segDat.lanes!=-1)&&zoomLevel>=7?segDat.lanes*0.75:3)*(zoomLevel/3);
             }
@@ -346,7 +323,7 @@ void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){
            // segDat.drawHieght=lineWidth;
             g->set_line_width(lineWidth);
             g->set_line_cap(ezgl::line_cap::round);
-            for (size_t k = 0; k < segDat.curvePts.size() - 1; k++)
+            for (int k = 0; k < segDat.curvePts.size() - 1; k++)
             {   
                 //g->draw_line(LatLonTo2d(segDat.curvePts[k]), LatLonTo2d(segDat.curvePts[k + 1]));
                 g->draw_line(segDat.convertedCurvePoints[k],segDat.convertedCurvePoints[k+1]);

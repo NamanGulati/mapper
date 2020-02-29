@@ -55,6 +55,7 @@ std::vector<float> speedLim; // a vector that holds speed limit of a street segm
 std::vector<double> segLen; // a vector that holds length of a street segment at index=StreetSegmentIndex
 std::vector<FeatureData> featureData; //vector of all natural features on the map
 std::vector<POIData> pois; //vector of all points of interest on the map
+std::vector<IntersectionIndex> highlighted;
 float lat_avg; //average latitude of current map
 float max_lat, min_lat, max_lon, min_lon, max_x, min_x, max_y, min_y;
 constexpr double LARGE_DIST= 10000000000;

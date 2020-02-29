@@ -6,6 +6,11 @@
 #include "helpers.h"
 #include "globals.h"
 #include "ezgl/point.hpp"
+#include "ezgl/control.hpp"
+#include "ezgl/camera.hpp"
+#include "ezgl/canvas.hpp"
+#include "ezgl/application.hpp"
+#include "ezgl/graphics.hpp"
 #include "m1.h"
 #include <cmath>
 #include <boost/algorithm/string.hpp>
@@ -125,4 +130,20 @@ bool sortFeatures(FeatureData first, FeatureData second){
     return (first.area > second.area);
 }
 
+void zoomOnIntersection(ezgl::application *app, int idx){
+    float x_2d = x_from_lon(getIntersectionPosition(idx).lon());
+    float y_2d = y_from_lat(getIntersectionPosition(idx).lat());
+    ezgl::rectangle region({x_2d-diff_x/500, y_2d-diff_y/500}, {x_2d+diff_x/500, y_2d+diff_y/500});
+    zoomLevel = 9;
+    std::string main_canvas_id = app->get_main_canvas_id();
+    auto canvas = app->get_canvas(main_canvas_id);
+    ezgl::zoom_fit(canvas, region);
+}
+
+void clearHighlights(){
+    for(int i = 0; i < highlighted.size(); i++){
+        intersectionsData[highlighted[i]].isHighlighted = false;
+    }
+    highlighted.clear();
+}
 //bool sortStreets()

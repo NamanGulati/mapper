@@ -17,6 +17,11 @@
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
 #include "ezgl/point.hpp"
+#include "ezgl/control.hpp"
+#include "ezgl/camera.hpp"
+#include "ezgl/canvas.hpp"
+#include "ezgl/application.hpp"
+#include "ezgl/graphics.hpp"
 #include <vector>
 
 struct Cartesian{
@@ -82,5 +87,8 @@ float lon_from_x(float x);
 float lat_from_y(float y);
 std::vector<std::string> parse2Streets(std::string s);
 bool sortFeatures(FeatureData first, FeatureData second);
+void zoomOnIntersection(ezgl::application *app, int idx);
+bool sortStreets(std::vector<StreetSegmentData> first, std::vector<StreetSegmentData> second);
+void clearHighlights();
 #endif /* HELPERS_H */
 
