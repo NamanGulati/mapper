@@ -16,6 +16,7 @@
 #include <string>
 #include <boost/algorithm/string.hpp>
 #include <bits/stdc++.h>
+#include <sstream>
 
 std::unordered_map< std::string, ezgl::surface*> iconImgs;
 //converts a pair of LatLon points to a pair of Cartesian points
@@ -213,7 +214,86 @@ std::string createMapPath(std::string s){
     
 }
 
+
 void loadImages(ezgl::renderer *g){
     for(auto type: poiTypes)
         iconImgs.emplace(type, g->load_png(("libstreetmap/resources/Icons/"+type+"_icon.png").c_str()));
+}
+std::string parseTransitInfo(std::stringstream& ss){
+    std::string stopName="";
+    std::getline(ss, stopName, '|');
+    std::string mode="";
+    std::getline(ss, mode, '|');
+    std::string name="";
+    std::getline(ss, name, '|');
+    std::string agency="";
+    std::getline(ss, agency, '|');
+    std::string time="";
+    std::getline(ss, time, '|');
+    return (stopName + " " + mode + " " + name + " " + agency + " " + time);
+}
+
+void infoPopup(ezgl::application *app, std::vector<int> interId, std::string transitInfo){
+    GObject *window;
+    GtkWidget *content_area;
+    GtkWidget *label1;
+    GtkWidget *label2;
+    GtkWidget *dialog;
+    std::string names = "Name(s): ";
+    window = app->get_object(app->get_main_window_id().c_str());
+    dialog = gtk_dialog_new_with_buttons(
+    "Intersection Information",
+    (GtkWindow*) window,
+    GTK_DIALOG_MODAL,
+    ("OK"),
+    GTK_RESPONSE_ACCEPT,
+    ("CANCEL"),
+    GTK_RESPONSE_REJECT,
+    NULL);
+
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    for (int x = 0; x < interId.size(); x ++){
+        if (x > 0){
+            names += ", ";
+        }
+        names += getIntersectionName(interId[x]);
+    }
+    label1 = gtk_label_new(names.c_str()); //castToCharArray(names)
+    gtk_container_add(GTK_CONTAINER(content_area), label1);
+    label2 = gtk_label_new(("Transit Info: " + transitInfo).c_str());
+    gtk_container_add(GTK_CONTAINER(content_area), label2);
+
+    gtk_widget_show_all(dialog);
+
+    g_signal_connect(
+    GTK_DIALOG(dialog),
+    "response",
+    G_CALLBACK(onDialogResponse),
+    NULL
+    );
+}
+
+void onDialogResponse(GtkDialog *dialog, gint response_id, gpointer user_data){
+    std::cout << "response is ";
+    switch(response_id) {
+        case GTK_RESPONSE_ACCEPT:
+            std::cout << "GTK_RESPONSE_ACCEPT ";
+            break;
+        case GTK_RESPONSE_DELETE_EVENT:
+            std::cout << "GTK_RESPONSE_DELETE_EVENT (i.e. ’X’ button) ";
+            break;
+        case GTK_RESPONSE_REJECT:
+            std::cout << "GTK_RESPONSE_REJECT ";
+            break;
+        default:
+            std::cout << "UNKNOWN ";
+            break;
+    }
+    
+    std::cout << "(" << response_id << ")\n";
+    // This will cause the dialog to be destroyed and close
+    // without this line the dialog remains open unless the
+    // response_id is GTK_RESPONSE_DELETE_EVENT which
+    // automatically closes the dialog without the following line.
+    gtk_widget_destroy(GTK_WIDGET (dialog));
 }

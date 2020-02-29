@@ -164,19 +164,6 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">7</property>
-                <property name="width">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="LoadMap">
-                <property name="label" translatable="yes">Load Mapazz</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
                 <property name="top_attach">6</property>
                 <property name="width">3</property>
               </packing>
@@ -233,8 +220,10 @@
             <property name="primary_icon_name">edit-find-symbolic</property>
             <property name="primary_icon_activatable">False</property>
             <property name="primary_icon_sensitive">False</property>
-            <property name="primary_icon_tooltip_text" translatable="yes">Write new map name here and press load map to open a new map</property>
-            <property name="placeholder_text" translatable="yes">Search for an intersection (street names seperated by "and" or "&amp;")</property>
+            <property name="primary_icon_tooltip_text" translatable="yes">You can enter a city name to load a new map
+You can enter an intersection to locate it on the given map, this 	feature includes autocomplete
+All searches are activated by pressing enter</property>
+            <property name="placeholder_text" translatable="yes">Search here for city or intersection (mouse over the icon for more info)</property>
             <property name="completion">AutoCompleter</property>
           </object>
           <packing>

@@ -23,6 +23,7 @@
 #include "ezgl/application.hpp"
 #include "ezgl/graphics.hpp"
 #include <vector>
+#include <sstream>
 
 struct Cartesian{
     double xCoord;
@@ -79,6 +80,7 @@ bool compareOSMID(OSMID id1, OSMID id2);
 const OSMWay* getWayFromOSMID(OSMID way_id);
 const OSMNode* getNodeFromOSMID(OSMID node_id);
 std::string removeSpaceAndConcat(std::string remove);
+std::string removeSpaceAndConcatAndDash(std::string remove);
 bool pairCompareStringInt(std::pair<std::string, int>, std::pair<std::string, int>);
 void getBounds();
 //void getDiff(float &diffX, float &diffY);
@@ -94,5 +96,8 @@ char * castToCharArray(std::string s);
 std::string toLower(std::string s);
 std::string createMapPath(std::string s);
 void loadImages(ezgl::renderer *g);
+std::string parseTransitInfo(std::stringstream& ss);
+void infoPopup(ezgl::application *app, std::vector<int> interId, std::string transitInfo);
+void onDialogResponse(GtkDialog *dialog, gint response_id, gpointer user_data);
 #endif /* HELPERS_H */
 

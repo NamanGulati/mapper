@@ -36,7 +36,6 @@ void draw_main_canvas(ezgl::renderer *g);
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y);
 void onSearch(GtkWidget *widget, ezgl::application *application);
 void onSetup(ezgl::application *app, bool new_window);
-void onLoadMap(GtkWidget *widget, ezgl::application *application);
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat);
 void drawIntersection(ezgl::renderer * g, IntersectionIndex idx);
 void drawPOI(ezgl::renderer *g, POIIndex idx);
@@ -172,8 +171,7 @@ void onSetup(ezgl::application *app, bool new_window){
     GObject *searchEntry = app->get_object("SearchEntry");
     g_signal_connect(searchEntry, "activate", G_CALLBACK(onSearch), app);
     
-    GObject *loadMap = app->get_object("LoadMap");
-    g_signal_connect(loadMap, "clicked", G_CALLBACK(onLoadMap), app);
+
     
     //////////////////AUTO COMPLETION
     GtkListStore *completeOptions = (GtkListStore*)app->get_object("AutoCompleteList");
@@ -190,6 +188,9 @@ void onSetup(ezgl::application *app, bool new_window){
 //        gtk_list_store_append(NamesList, &iter);
 //        gtk_list_store_set(NamesList, &iter, 0, (gchar*)giveCharStar(toLower(getPointOfInterestName(i))), -1);
 //    }
+    
+//    GObject *loadMap = app->get_object("LoadMap");
+//    g_signal_connect(loadMap, "clicked", G_CALLBACK(onLoadMap), app);
 }
 
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
@@ -203,23 +204,16 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
     std::cout << "x: "<< x << "y: " << y << "intersection: " << idx << std::endl;
     std::cout << "Lon: "<< clickPos.lon() << "Lat: " << clickPos.lat() << "intersectionLon: " << getIntersectionPosition(idx).lon() << std::endl;
     std::stringstream ss (curlData(clickPos));
-    std::string stopName="";
-    std::getline(ss, stopName, '|');
-    std::string mode="";
-    std::getline(ss, mode, '|');
-    std::string name="";
-    std::getline(ss, name, '|');
-    std::string agency="";
-    std::getline(ss, agency, '|');
-    std::string time="";
-    std::getline(ss, time, '|');
-    std::cout << stopName << " " << mode << " " << name << " " << agency << " " << time << " " << std::endl;
+    std::string transitInfo = parseTransitInfo(ss);
+    std::cout << transitInfo << std::endl;
 
     std::cout << getIntersectionName(idx) << std::endl;
     clearHighlights();
     intersectionsData[idx].isHighlighted = true;
     highlighted.push_back(idx);
     zoomOnIntersection(app, idx);
+    std::vector<int> inter{idx};
+    infoPopup(app, inter, transitInfo);
     
     app->refresh_drawing();
 }
@@ -235,8 +229,8 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     std::vector<int> streetMatches1, streetMatches2;
     std::pair<int, int> foundStreets;
     std::vector<int> foundIntersects;
+    std::vector<std::string> toSearch = parse2Streets(text);
     
-    std::vector<std::string> toSearch = parse2Streets(text); // fix no and or &
     if (toSearch.size() == 1){
         std::cout << "No Intersections" << std::endl;
     }
@@ -265,8 +259,6 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         }
     }
     
-    
-
     clearHighlights();
     
     for (int x = 0; x < foundIntersects.size(); x ++){
@@ -274,8 +266,18 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         intersectionsData[foundIntersects[x]].isHighlighted = true;
         highlighted.push_back(foundIntersects[x]);
     }
-    if(!foundIntersects.empty())
+    if(!foundIntersects.empty()){
+        LatLon foundPos(getIntersectionPosition(foundIntersects[0]).lat(),getIntersectionPosition(foundIntersects[0]).lon());
+        std::stringstream ss (curlData(foundPos));
+        std::string transit = parseTransitInfo(ss);
+        
+
         zoomOnIntersection(application, foundIntersects[0]);
+        
+        infoPopup(application, foundIntersects, transit);
+        
+        return;
+    }    
     else{
         if (toSearch.size() == 2){
             // Update the status bar message
@@ -285,6 +287,9 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
             return;
         }
     }
+    
+    
+    
     ///////////////////////////////////////////////////////////Loading Map
     std::string path = text;
     std::string newMapPath = createMapPath(path);
@@ -320,53 +325,6 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     application->change_canvas_world_coordinates("MainCanvas", new_world);
     application->refresh_drawing();
     
-    
-}
-
-void onLoadMap(GtkWidget* widget, ezgl::application* application){
-    // Get the GtkEntry cast of GtkSearchEntry object
-    GtkEntry* search_entry = (GtkEntry *) application->get_object("SearchEntry");
-            //application->get_object("SearchEntry");
-    
-    std::cout << "object got" << '\n';
-    
-    //Retrieve the text from the search entry
-    std::string newMapInput = gtk_entry_get_text(search_entry);
-    
-    std::string newMapPath = createMapPath(newMapInput);
-    
-    std::cout << newMapPath << '\n';
-    
-    if (newMapPath == "DNE"){
-        // Update the status bar message
-        application->update_message("Not a valid map");
-        // Redraw the graphics
-        application->refresh_drawing();
-        return;
-    }
-        
-    
-    close_map();
-    load_map(newMapPath);
-    
-    std::cout << "loaded map" << '\n';
-    
-    intersectionsData.resize(getNumIntersections());
-    
-//    diff_x = abs(abs(max_x) - abs(min_x));
-//    diff_y = abs(abs(max_y) - abs(min_y));
-    getDiff(diff_x, diff_y);
-    for (int i = 0; i < getNumIntersections(); i++)
-    {
-        intersectionsData[i].position = getIntersectionPosition(i);
-        intersectionsData[i].name = getIntersectionName(i);
-    }
-    
-    ezgl::rectangle new_world({min_x, min_y},{max_x, max_y});
-    zoomLevel = 1;
-    clearHighlights();
-    application->change_canvas_world_coordinates("MainCanvas", new_world);
-    application->refresh_drawing();
     
 }
 
