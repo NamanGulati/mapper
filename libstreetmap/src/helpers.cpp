@@ -105,9 +105,9 @@ bool pairCompareStringInt(std::pair<std::string, int> item1, std::pair<std::stri
 std::vector<std::string> parse2Streets(std::string textInput){
     std::vector<std::string> the2Streets;
     std::string s1, s2, toDrop;
-    if (textInput.find("and") != std::string::npos){
-        the2Streets.push_back(textInput.substr(0, textInput.find("and")));
-        the2Streets.push_back(textInput.substr(textInput.find("and") + 3));
+    if (textInput.find(" and ") != std::string::npos){
+        the2Streets.push_back(textInput.substr(0, textInput.find(" and ")));
+        the2Streets.push_back(textInput.substr(textInput.find(" and ") + 5));
         //boost::split(the2Streets, s, boost::is_any_of("/and"));
         
     }

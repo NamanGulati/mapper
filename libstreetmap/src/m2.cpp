@@ -156,10 +156,47 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     //Retrieve the text from the search entry
     const char* text = gtk_entry_get_text(search_entry);
     
-    std::vector<std::string> searchStreets = parse2Streets(text);
+    std::vector<std::string> toSearch = parse2Streets(text);
+    std::vector<int> streetMatches1, streetMatches2;
+    std::pair<int, int> foundStreets;
+    std::vector<int> foundIntersects;
+    streetMatches1 = find_street_ids_from_partial_street_name(toSearch[0]);
+    streetMatches2 = find_street_ids_from_partial_street_name(toSearch[1]);
+    bool breakLoop = 0;
     
-    std::cout << searchStreets[0] << "," << searchStreets[1] << std::endl;
+    if (!streetMatches1.empty() && !streetMatches2.empty()){
+        std::cout << "I have entered" << std::endl;
+        for (int x = 0; x < streetMatches1.size(); x ++){
+            foundStreets.first = streetMatches1[x];
+            for (int y = 0; y < streetMatches2.size(); y ++){
+                foundStreets.second = streetMatches2[y];
+                foundIntersects = find_intersections_of_two_streets(foundStreets);
+                if (!foundIntersects.empty()){
+                    breakLoop = 1;
+                    break;
+                }
+                    
+            }
+            if (breakLoop)
+                break;
+        }
+    }
     
+    
+    
+    
+    //std::cout << "Finding Intersections For: " << getStreetName(foundStreets.first) << " , " << getStreetName(foundStreets.second) << std::endl;
+    
+   
+    
+    if (foundIntersects.empty())
+        std::cout << "No intersection found" << std::endl;
+
+    for (int x = 0; x < foundIntersects.size(); x ++){
+        std::cout << getIntersectionName(foundIntersects[x]) << std::endl;
+        intersectionsData[foundIntersects[x]].isHighlighted = true;
+    }
+
     // Update the status bar message
     application->update_message(text);
     // Redraw the graphics
