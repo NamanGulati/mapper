@@ -38,7 +38,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application);
 void onSetup(ezgl::application *app, bool new_window);
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat);
 void drawIntersection(ezgl::renderer * g, IntersectionIndex idx);
-void drawPOI(ezgl::renderer *g, POIIndex idx);
+void drawPOI(ezgl::renderer *g, POIData p);
 void getDiff(float &diffX, float &diffY);
 ezgl::surface* iconSurface;
 bool drawStreetName(ezgl::renderer *g,StreetSegmentData segDat);
@@ -78,12 +78,12 @@ void draw_main_canvas(ezgl::renderer *g)
 {   
 //    if(iconImgs.empty())
 //        loadImages(g);
-//    if(iconImgs.empty())
-//        for(auto type: poiTypes)
-//            iconImgs.emplace(type, g->load_png(("libstreetmap/resources/Icons/"+type+".png").c_str()));
+    if(iconImgs.empty())
+        for(auto type: poiTypes)
+            iconImgs.emplace(type, g->load_png(("libstreetmap/resources/"+type+".png").c_str()));
     
     //iconSurface = g->load_png("libstreetmap/resources/Icons/construction_icon.png");
-    iconSurface = g->load_png("libstreetmap/resources/location_icon.png");
+    //iconSurface = g->load_png("libstreetmap/resources/location_icon.png");
     g->set_color(211, 211, 211, 255);
     g->fill_rectangle(g->get_visible_world());
 
@@ -158,10 +158,10 @@ void draw_main_canvas(ezgl::renderer *g)
     }
     
 
-    if(zoomLevel > 8){
+    if(zoomLevel > 7){
         for(int k = 0; k < pois.size(); k++){
-            //if(pois[k].)
-            drawPOI(g, k);
+            if(zoomLevel > 9)
+                drawPOI(g, pois[k]);
             drawPOIText(g,k);
         }
     }
@@ -183,13 +183,7 @@ void onSetup(ezgl::application *app, bool new_window){
     for (int x = 0; x < getNumStreets(); x++) {
         gtk_list_store_append(completeOptions, &iter);
         gtk_list_store_set(completeOptions, &iter, 0, (gchar*)castToCharArray(toLower(getStreetName(x))), -1);
-    }
-
-//    for (int i = 0; i < getNumPointsOfInterest(); i++) {
-//        gtk_list_store_append(NamesList, &iter);
-//        gtk_list_store_set(NamesList, &iter, 0, (gchar*)giveCharStar(toLower(getPointOfInterestName(i))), -1);
-//    }
-    
+    }  
 }
 
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
@@ -301,7 +295,6 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         return;
     }
         
-    
     close_map();
     load_map(newMapPath);
     
@@ -368,19 +361,19 @@ void drawIntersection(ezgl::renderer * g, IntersectionIndex idx){
     
 }
 
-void drawPOI(ezgl::renderer *g, POIIndex idx){
+void drawPOI(ezgl::renderer *g, POIData p){
     
-//    auto find = iconImgs.find(getPointOfInterestType(idx));
-//    ezgl::surface* iconSurface;
-//    
-//    if(find == iconImgs.end())
-//        return;
-//    else
-//        iconSurface = find->second;
+    auto find = iconImgs.find(p.type);
+    ezgl::surface* iconSurface;
     
-    cairo_surface_set_device_scale(iconSurface, 20, 20);
+    if(find == iconImgs.end())
+        return;
+    else
+        iconSurface = find->second;
     
-    g->draw_surface(iconSurface, LatLonTo2d(pois[idx].position));
+    cairo_surface_set_device_scale(iconSurface, 5, 5);
+    
+    g->draw_surface(iconSurface, LatLonTo2d(p.position));
 }
 bool drawStreetName(ezgl::renderer *g,StreetSegmentData segDat){
 
