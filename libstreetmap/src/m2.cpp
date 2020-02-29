@@ -32,6 +32,7 @@ void draw_main_canvas(ezgl::renderer *g);
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y);
 void onSearch(GtkWidget *widget, ezgl::application *application);
 void onSetup(ezgl::application *app, bool new_window);
+void onLoadMap(GtkWidget *widget, ezgl::application *application);
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat);
 void drawIntersection(ezgl::renderer * g, IntersectionIndex idx);
 void drawPOI(ezgl::renderer *g, POIIndex idx);
@@ -160,6 +161,9 @@ void draw_main_canvas(ezgl::renderer *g)
 void onSetup(ezgl::application *app, bool new_window){
     GObject *searchEntry = app->get_object("SearchEntry");
     g_signal_connect(searchEntry, "activate", G_CALLBACK(onSearch), app);
+    
+    GObject *loadMap = app->get_object("LoadMap");
+    g_signal_connect(loadMap, "clicked", G_CALLBACK(onLoadMap), app);
 }
 
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
@@ -207,31 +211,40 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     //Retrieve the text from the search entry
     const char* text = gtk_entry_get_text(search_entry);
     
-    std::vector<std::string> toSearch = parse2Streets(text);
     std::vector<int> streetMatches1, streetMatches2;
     std::pair<int, int> foundStreets;
     std::vector<int> foundIntersects;
-    streetMatches1 = find_street_ids_from_partial_street_name(toSearch[0]);
-    streetMatches2 = find_street_ids_from_partial_street_name(toSearch[1]);
-    bool breakLoop = 0;
     
-    if (!streetMatches1.empty() && !streetMatches2.empty()){
-        std::cout << "I have entered" << std::endl;
-        for (int x = 0; x < streetMatches1.size(); x ++){
-            foundStreets.first = streetMatches1[x];
-            for (int y = 0; y < streetMatches2.size(); y ++){
-                foundStreets.second = streetMatches2[y];
-                foundIntersects = find_intersections_of_two_streets(foundStreets);
-                if (!foundIntersects.empty()){
-                    breakLoop = 1;
-                    break;
+    std::vector<std::string> toSearch = parse2Streets(text); // fix no and or &
+    if (toSearch.size() == 1){
+        text = "No Intersections";
+    }
+    else{
+        
+        streetMatches1 = find_street_ids_from_partial_street_name(toSearch[0]);
+        streetMatches2 = find_street_ids_from_partial_street_name(toSearch[1]);
+        bool breakLoop = 0;
+
+        if (!streetMatches1.empty() && !streetMatches2.empty()){
+            std::cout << "I have entered" << std::endl;
+            for (int x = 0; x < streetMatches1.size(); x ++){
+                foundStreets.first = streetMatches1[x];
+                for (int y = 0; y < streetMatches2.size(); y ++){
+                    foundStreets.second = streetMatches2[y];
+                    foundIntersects = find_intersections_of_two_streets(foundStreets);
+                    if (!foundIntersects.empty()){
+                        breakLoop = 1;
+                        break;
+                    }
+
                 }
-                    
+                if (breakLoop)
+                    break;
             }
-            if (breakLoop)
-                break;
         }
     }
+    
+    
     
     
     
@@ -252,6 +265,47 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     application->update_message(text);
     // Redraw the graphics
     application->refresh_drawing();
+}
+
+void onLoadMap(GtkWidget* widget, ezgl::application* application){
+    // Get the GtkEntry cast of GtkSearchEntry object
+    GtkEntry* search_entry = (GtkEntry *) application->get_object("SearchEntry");
+            //application->get_object("SearchEntry");
+    
+    std::cout << "object got" << '\n';
+    
+    //Retrieve the text from the search entry
+    std::string newMapInput = gtk_entry_get_text(search_entry);
+    
+    std::string mapPathPrefix = "/cad2/ece297s/public/maps/";
+    std::string mapPathSuffix = ".streets.bin";
+    std::string newMapPath = mapPathPrefix + newMapInput + mapPathSuffix;
+    
+    std::cout << newMapPath << '\n';
+    
+    close_map();
+    load_map(newMapPath);
+    
+    std::cout << "loaded map" << '\n';
+    
+    intersectionsData.resize(getNumIntersections());
+    
+    diff_x = abs(abs(max_x) - abs(min_x));
+    diff_y = abs(abs(max_y) - abs(min_y));
+    
+    for (int i = 0; i < getNumIntersections(); i++)
+    {
+        intersectionsData[i].position = getIntersectionPosition(i);
+        intersectionsData[i].name = getIntersectionName(i);
+    }
+    
+    
+    
+    ezgl::rectangle new_world({min_x, min_y},{max_x, max_y});
+    
+    application->change_canvas_world_coordinates("MainCanvas", new_world);
+    application->refresh_drawing();
+    
 }
 
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){

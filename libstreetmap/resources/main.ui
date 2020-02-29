@@ -2,6 +2,8 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.6"/>
+  <object class="GtkListStore" id="AutoCompleteList"/>
+  <object class="GtkEntryCompletion" id="AutoCompleter"/>
   <object class="GtkWindow" id="MainWindow">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -147,6 +149,19 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
+                <property name="top_attach">7</property>
+                <property name="width">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="LoadMap">
+                <property name="label" translatable="yes">Load Mapazz</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
                 <property name="top_attach">6</property>
                 <property name="width">3</property>
               </packing>
@@ -203,7 +218,8 @@
             <property name="primary_icon_name">edit-find-symbolic</property>
             <property name="primary_icon_activatable">False</property>
             <property name="primary_icon_sensitive">False</property>
-            <property name="placeholder_text" translatable="yes">Search for a street or intersection</property>
+            <property name="primary_icon_tooltip_text" translatable="yes">Write new map name here and press load map to open a new map</property>
+            <property name="placeholder_text" translatable="yes">Search for an intersection (street names seperated by "and" or "&amp;")</property>
           </object>
           <packing>
             <property name="left_attach">0</property>

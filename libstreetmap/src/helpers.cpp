@@ -114,6 +114,9 @@ std::vector<std::string> parse2Streets(std::string textInput){
     else if(textInput.find("&") != std::string::npos){
         boost::split(the2Streets, textInput, boost::is_any_of("&"));
     }
+    else{
+        the2Streets.push_back(textInput);
+    }
     
     return the2Streets;
 }
