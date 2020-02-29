@@ -251,12 +251,13 @@ bool load_map(std::string map_streets_database_filename) {
 
     for(int i=0;i<getNumPointsOfInterest();i++){
         POIData poi;
-        poi.type=getPointOfInterestType(i);
-        poi.name = getPointOfInterestName(i);
-        poi.position=getPointOfInterestPosition(i);
-        //poi.location=LatLonTo2d(poi.position);
-        poi.node=nodes[getPointOfInterestOSMNodeID(i)];
-        pois.push_back(poi);
+        if(poiTypes.find(getPointOfInterestType(i)) != poiTypes.end() && getPointOfInterestName(i) != "unknown"){
+            poi.type=getPointOfInterestType(i);
+            poi.name = getPointOfInterestName(i);
+            poi.position=getPointOfInterestPosition(i);
+            poi.node=nodes[getPointOfInterestOSMNodeID(i)];
+            pois.push_back(poi);
+        }
     }
     
     load_successful = true; //Make sure this is updated to reflect whether

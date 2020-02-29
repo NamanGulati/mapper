@@ -63,5 +63,9 @@ extern int zoomLevel;
 const std::string locos[19] = {"beijing,china", "cairo,egypt", "cape-town,southafrica","golden-horseshoe,canada", "hamilton,canada", "hong-kong,china", "iceland", 
                             "interlaken,switzerland", "london,england", "moscow,russia", "new-delhi,india", "new-york,usa", "rio-de-janeiro,brazil", "saint-helena", 
                             "singapore", "sydney,australia", "tehran,iran", "tokyo,japan", "toronto,canada"};
+
+const std::unordered_set<std::string> poiTypes = {"atm","bank","bar","bicycle_parking","bus_station","construction","food_court","gym","library","parking",
+                                                   "restaurant", "college", "school", "university", "blank"};
+
 #endif /* GLOBALS_H */
 
