@@ -248,23 +248,28 @@ std::string parseTransitInfo(std::stringstream& ss){
     char result[300];
     std::string stopName="";
     std::getline(ss, stopName, '|');
+    stopName="\nStop Name: "+stopName;
     std::string mode="";
     std::getline(ss, mode, '|');
+    mode="Transit Mode:"+ mode;
     std::string name="";
     std::getline(ss, name, '|');
+    name = "Route: "+name;
     std::string agency="";
     std::getline(ss, agency, '|');
+    agency="Agency: "+agency;
     std::string time="";
     std::getline(ss, time, '|');
+    time = "Time: "+time;
     std::cout<<stopName<<" "<<mode<<" "<<name<<" "<<agency<<" "<<time<<" "<<std::endl;
-    std::sprintf(header,"\n|%*s|%*s|%*s|%*s|%*s|",strlen(stopName.c_str()),"Stop Name",strlen(mode.c_str()),"Mode",
-    strlen(name.c_str()),"Route Name",strlen(agency.c_str()),"Transit Agency",strlen(time.c_str()),"Time");
+    //std::sprintf(header,"\n|%*s|%*s|%*s|%*s|%*s|",strlen(stopName.c_str()),"Stop Name",strlen(mode.c_str()),"Mode",
+   // strlen(name.c_str()),"Route Name",strlen(agency.c_str()),"Transit Agency",strlen(time.c_str()),"Time");
     
-    std::sprintf(result,"|%*s|%*s|%*s|%*s|%*s|",9,stopName.c_str(),4,mode.c_str(),
-    10,name.c_str(),14,agency.c_str(),4,time.c_str());
+    //std::sprintf(result,"|%*s|%*s|%*s|%*s|%*s|",9,stopName.c_str(),4,mode.c_str(),
+    //10,name.c_str(),14,agency.c_str(),4,time.c_str());
     //std::cout<<result<<std::endl;
-    //return (stopName + " " + mode + " " + name + " " + agency + " " + time);
-    return std::string(header)+"\n"+std::string(result);
+    return (stopName + "\n" + mode + "\n" + name + "\n" + agency + "\n" + time);
+    //return std::string(header)+"\n"+std::string(result);
 }
 
 /**
