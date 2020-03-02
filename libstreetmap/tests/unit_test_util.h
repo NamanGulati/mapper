@@ -34,18 +34,18 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
 }
 
 // overloading ostream << to print enum class TurnType
-inline std::ostream& operator<<(std::ostream& os, const TurnType& turn) {
-    if (turn == TurnType::STRAIGHT)
-        os << "TurnType::STRAIGHT";
-    else if (turn == TurnType::RIGHT)
-        os << "TurnType::RIGHT";
-    else if (turn == TurnType::LEFT)
-        os << "TurnType::LEFT";
-    else 
-        os << "TurnType::NONE";
-
-    return os;
-}
+//inline std::ostream& operator<<(std::ostream& os, const TurnType& turn) {
+//    if (turn == TurnType::STRAIGHT)
+//        os << "TurnType::STRAIGHT";
+//    else if (turn == TurnType::RIGHT)
+//        os << "TurnType::RIGHT";
+//    else if (turn == TurnType::LEFT)
+//        os << "TurnType::LEFT";
+//    else 
+//        os << "TurnType::NONE";
+//
+//    return os;
+//}
 
 namespace ece297test {
 

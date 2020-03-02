@@ -320,7 +320,7 @@ void drawIntersection(ezgl::renderer * g, IntersectionIndex idx){
 void drawPOI(ezgl::renderer *g, POIData p){
     
     auto find = iconImgs.find(p.type);
-    ezgl::surface* iconSurface;
+    //ezgl::surface* iconSurface;
    
     if(find == iconImgs.end())
         return;
@@ -418,12 +418,8 @@ void drawFeatures(ezgl::renderer *g){
 
         //std::transform(featureData[i].points.begin(), featureData[i].points.end(), std::back_inserter(convertedPoints), LatLonTo2d);
         FeatureType fType = featureData[i].type;
-        if(fType == Stream){
+        if(fType == Stream)
             g->set_color(149, 217, 255, 255);
-            g->set_line_width(1);
-            for(size_t p; p < featureData[i].convertedPoints.size()-1; p++)
-                g->draw_line(featureData[i].convertedPoints[p],featureData[i].convertedPoints[p+1]);
-        }
         else if (fType == Lake || fType == River)
             g->set_color(149, 217, 255, 255);
         else if (fType == Greenspace || fType == Island)
@@ -441,6 +437,10 @@ void drawFeatures(ezgl::renderer *g){
         if (featureData[i].points.size() > 1 && featureData[i].isClosed)
         {
             g->fill_poly(featureData[i].convertedPoints);
+        }else if(featureData[i].points.size() > 1 && zoomLevel > 8){
+            g->set_line_width(1);
+            for(size_t p = 0; p < featureData[i].convertedPoints.size()-1; p++)
+                g->draw_line(featureData[i].convertedPoints[p],featureData[i].convertedPoints[p+1]);
         }
     }
 }
