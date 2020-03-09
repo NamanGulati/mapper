@@ -151,6 +151,10 @@ void close_map() {
     streetNames.clear();
     segLen.clear();
     speedLim.clear();
+    pois.clear();
+    streetSegData.clear();
+    featureData.clear();
+    highlighted.clear();
 }
 
 

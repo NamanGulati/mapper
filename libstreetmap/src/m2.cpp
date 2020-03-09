@@ -32,6 +32,7 @@
 #define  TERTIARY_LEVEL_DRAW_LIM  4.8719e-07 //residential and other
 #define middle_mouse_button 2
 #define RENDER_POIS_STREET 7
+#define RENDER_STREET_NAME 5
 #define HIGH_ZOOM 9
 #define BUILDING_ZOOM 5
 
@@ -460,7 +461,7 @@ void drawSegments(ezgl::renderer *g){
         for(int j = 0; (j< streetSegData[i].size())&&!done;j++){
             StreetSegmentData segDat = streetSegData[i][j];
             bool b = g->get_visible_world().contains((segDat.convertedCurvePoints[0]+segDat.convertedCurvePoints[segDat.convertedCurvePoints.size()-1])*ezgl::point2d(0.5,0.5));
-            if(b&&zoomLevel>RENDER_POIS_STREET){
+            if(b&&zoomLevel>RENDER_STREET_NAME){
                 done=drawStreetName(g,segDat);
             }
         }
