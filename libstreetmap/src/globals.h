@@ -67,5 +67,7 @@ const std::string locos[19] = {"beijing,china", "cairo,egypt", "cape-town,south-
 const std::unordered_set<std::string> poiTypes = {"atm","bank","bar","bicycle_parking","bus_station","construction","food_court","gym","library","parking",
                                                    "college", "school", "university"};
 extern std::unordered_map<std::string, ezgl::surface*> iconImgs;
+
+extern std::vector<std::vector<std::pair<IntersectionIndex,StreetSegmentIndex>>> adjacencyList;
 #endif /* GLOBALS_H */
 

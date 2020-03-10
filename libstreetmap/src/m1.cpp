@@ -56,6 +56,7 @@ std::vector<double> segLen; // a vector that holds length of a street segment at
 std::vector<FeatureData> featureData; //vector of all natural features on the map
 std::vector<POIData> pois; //vector of all points of interest on the map
 std::vector<IntersectionIndex> highlighted; //holds the current highlighted intersections
+std::vector<std::vector<std::pair<IntersectionIndex,StreetSegmentIndex>>> adjacencyList;
 float lat_avg; //average latitude of current map
 float max_lat, min_lat, max_lon, min_lon, max_x, min_x, max_y, min_y;
 constexpr double LARGE_DIST= 10000000000;
@@ -253,6 +254,9 @@ void loadStreetSegStreetInterSpedLimSegLenStreetInterVecs(){
         }
         segLen.push_back(length);
 
+        if(!sgmt.oneWay)
+            adjacencyList[sgmt.to].push_back(std::make_pair(sgmt.from,i));
+        adjacencyList[sgmt.from].push_back(std::make_pair(sgmt.to,i));
     }
     
     for(int i = 0; i < streetIntersections.size(); i++)
