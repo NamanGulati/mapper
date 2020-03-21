@@ -53,7 +53,7 @@ std::string curlData(LatLon pos){
     curl_easy_cleanup(curlHandle);
     curlHandle = nullptr;
     return 0;*/
-    return exec(("curl \"http://ec2-3-82-130-183.compute-1.amazonaws.com/upcoming?lat="+std::to_string(pos.lat())+"&lon="+std::to_string(pos.lon())+"\"").c_str());
+    return exec(("curl -s \"http://ec2-3-82-130-183.compute-1.amazonaws.com/upcoming?lat="+std::to_string(pos.lat())+"&lon="+std::to_string(pos.lon())+"\"").c_str());
 }
 std::string exec(const char* cmd) {
     std::array<char, 128> buffer;
