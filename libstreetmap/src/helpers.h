@@ -51,7 +51,7 @@ enum TurnType{
     LEFT,
     STRAIGHT,
     NONE
-}
+};
 
 struct StreetSegmentData{
     InfoStreetSegment info;
