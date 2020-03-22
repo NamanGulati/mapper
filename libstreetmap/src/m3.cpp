@@ -14,7 +14,10 @@ public:
     { 
         return p1.second > p2.second; 
     } 
-}; 
+};
+
+double heuristic(IntersectionIndex current, IntersectionIndex destination);
+double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next);
 
 double compute_path_travel_time(const std::vector<StreetSegmentIndex>& path, const double turn_penalty){
 
