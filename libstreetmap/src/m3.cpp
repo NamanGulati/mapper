@@ -77,7 +77,7 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
     int temp = lastSeg;
     while(temp != -1){
         path.push_back(temp);
-        node = pathTaken[node];
+        temp = pathTaken[temp];
     }
 
     std::reverse(path.begin(),path.end());

@@ -101,7 +101,7 @@ class segIntersectionData{
 
     
 
-    bool operator>(segInersectionData & rhs){
+    bool operator>(segIntersectionData & rhs){
         return distance>rhs.distance;
     }
 
