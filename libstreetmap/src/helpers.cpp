@@ -340,3 +340,20 @@ void onDialogResponse(GtkDialog *dialog, gint response_id, gpointer user_data){
     // automatically closes the dialog without the following line.
     gtk_widget_destroy(GTK_WIDGET (dialog));
 }
+
+TurnType determineDirection(LatLon O, LatLon A, LatLon B){
+    Cartesian pointA = convertLatLonToCartesian(A);
+    Cartesian pointB = convertLatLonToCartesian(B);
+    Cartesian origin = convertLatLonToCartesian(O);
+    pointA.x -= origin.x;
+    pointA.y -= origin.y;
+    pointB.x -= origin.x;
+    pointB.y -= origin.y;
+
+    int result = pointB.x * pointA.y - pointA.x * pointB.y;
+
+    if(result > 0) return TurnType::RIGHT;
+    else if(result < 0) return TurnType::LEFT;
+    else return TurnType::STRAIGHT;
+
+}
