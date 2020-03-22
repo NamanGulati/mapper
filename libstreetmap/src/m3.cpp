@@ -5,12 +5,12 @@
 #include "m1.h"
 #include "helpers.h"
 
-typedef std::pair<int, int> intPair;
+typedef std::pair<int, double> intDoubPair;
 
-class pairCompareIntInt
+class pairCompareIntDouble
 { 
 public: 
-    int operator() (const intPair& p1, const intPair& p2) 
+    int operator() (const intDoubPair& p1, const intDoubPair& p2) 
     { 
         return p1.second > p2.second; 
     } 
@@ -41,6 +41,7 @@ double compute_path_walking_time(const std::vector<StreetSegmentIndex>& path, co
     }
     return sum;
 }
+
 
 std::vector<StreetSegmentIndex> find_path_between_intersections(const IntersectionIndex intersect_id_start, const IntersectionIndex intersect_id_end, const double turn_penalty){
 
@@ -103,7 +104,7 @@ std::vector<StreetSegmentIndex> find_path_between_intersections_temp(const Inter
     std::vector<StreetSegmentIndex> path;
     dist[intersect_id_start] = 0;
     
-    std::priority_queue < intPair, std::vector<intPair>, pairCompareIntInt > pq;
+    std::priority_queue < intDoubPair, std::vector<intDoubPair>, pairCompareIntDouble > pq;
     pq.push(std::make_pair(intersect_id_start, dist[intersect_id_start]));
     
     while (!pq.empty()){
@@ -114,8 +115,8 @@ std::vector<StreetSegmentIndex> find_path_between_intersections_temp(const Inter
         pq.pop();
          
         for (int x = 0; x < adjacencyList[top].size(); x ++){
-            int interId = adjacencyList[top][x].first;
-            std::pair<int, int> currInter(interId, find_street_segment_travel_time(adjacencyList[top][x].second));
+            int interId = adjacencyList[top][x].intersection;
+            std::pair<int, int> currInter(interId, adjacencyList[top][x].distance);
             if (dist[currInter.first] > dist[top] + currInter.second) 
             { 
                 // Updating distance of current Intersection 
