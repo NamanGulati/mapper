@@ -104,7 +104,19 @@ class segIntersectionData{
     bool operator>(segIntersectionData & rhs){
         return distance>rhs.distance;
     }
+    bool operator<(segIntersectionData & rhs){
+        return distance<rhs.distance;
+    }
 
+    
+
+};
+
+class segIntersectionDataComparator{
+    public:
+        bool operator()(segIntersectionData& lhs, segIntersectionData & rhs){
+            return lhs.distance > rhs.distance;
+        }
 };
 
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points);

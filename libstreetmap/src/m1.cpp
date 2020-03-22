@@ -173,7 +173,7 @@ void loadWayAndNode(){
     }
 }
 void loadStreetSegStreetInterSpedLimSegLenStreetInterVecs(){
-    adjacencyList = std::vector<std::vector<std::pair<int,int>>>(getNumIntersections(),std::vector<std::pair<int,int>>(0));
+    adjacencyList = std::vector<std::vector<segIntersectionData>>(getNumIntersections(),std::vector<segIntersectionData>(0));
     int nStreetSegments = getNumStreetSegments();
     for(int i=0;i<nStreetSegments;i++){
         struct InfoStreetSegment sgmt = getInfoStreetSegment(i);
