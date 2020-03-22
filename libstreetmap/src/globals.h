@@ -68,6 +68,6 @@ const std::unordered_set<std::string> poiTypes = {"atm","bank","bar","bicycle_pa
                                                    "college", "school", "university"};
 extern std::unordered_map<std::string, ezgl::surface*> iconImgs;
 
-extern std::vector<std::vector<std::pair<IntersectionIndex,StreetSegmentIndex>>> adjacencyList;
+extern std::vector<std::vector<segIntersectionData>> adjacencyList;
 #endif /* GLOBALS_H */
 

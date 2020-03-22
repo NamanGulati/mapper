@@ -74,6 +74,39 @@ struct POIData{
     const OSMNode * node;
 };
 
+class segIntersectionData{
+    public:
+        IntersectionIndex intersection;
+        StreetSegmentIndex segment;
+        double distance;
+    
+    
+    segIntersectionData(int intersect, int sgmt){
+        intersection=intersect;
+        segment=sgmt;
+        distance=0;
+    }
+
+    segIntersectionData(int intersect,int sgmt, int dist){
+        intersection=intersect;
+        segment=sgmt;
+        distance=dist;
+    }
+    
+    segIntersectionData(){
+        intersection=-1;
+        segment=-1;
+        distance=0;
+    }
+
+    
+
+    bool operator>(segInersectionData & rhs){
+        return distance>rhs.distance;
+    }
+
+};
+
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points);
 ezgl::point2d LatLonTo2d(LatLon point);
 bool compareOSMID(OSMID id1, OSMID id2);
