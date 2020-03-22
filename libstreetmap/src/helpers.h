@@ -106,17 +106,12 @@ class segIntersectionData{
         distance=0;
     }
 
-    
-
     bool operator>(segIntersectionData & rhs){
         return distance>rhs.distance;
     }
     bool operator<(segIntersectionData & rhs){
         return distance<rhs.distance;
     }
-
-    
-
 };
 
 class segIntersectionDataComparator{
@@ -149,5 +144,6 @@ std::string createMapPath(std::string s);
 std::string parseTransitInfo(std::stringstream& ss);
 void infoPopup(ezgl::application *app, std::vector<int> interId, std::string transitInfo);
 void onDialogResponse(GtkDialog *dialog, gint response_id, gpointer user_data);
+TurnType determineDirection(LatLon O, LatLon A, LatLon B);
 #endif /* HELPERS_H */
 

@@ -342,9 +342,9 @@ void onDialogResponse(GtkDialog *dialog, gint response_id, gpointer user_data){
 }
 
 TurnType determineDirection(LatLon O, LatLon A, LatLon B){
-    Cartesian pointA = convertLatLonToCartesian(A);
-    Cartesian pointB = convertLatLonToCartesian(B);
-    Cartesian origin = convertLatLonToCartesian(O);
+    ezgl::point2d pointA = LatLonTo2d(A);
+    ezgl::point2d pointB = LatLonTo2d(B);
+    ezgl::point2d origin = LatLonTo2d(O);
     pointA.x -= origin.x;
     pointA.y -= origin.y;
     pointB.x -= origin.x;
