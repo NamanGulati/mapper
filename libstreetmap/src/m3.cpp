@@ -61,7 +61,7 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
         priorityQueue.pop();
 
         for(int i=0;i<adjacencyList[currIntersection].size();i++){
-            segIntersectionData dat = adjacencyList[i];
+            segIntersectionData dat = adjacencyList[currIntersection][i];
             double currentCost = intersectionCost[i] + get_segment_cost(lastSeg,dat.segment);
 
             if(!visited[dat.intersection]&&(intersectionCost[dat.intersection]!=-1 || intersectionCost[dat.intersection] > currentCost)){
@@ -91,8 +91,11 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
 double heuristic(IntersectionIndex current, IntersectionIndex destination){
     return find_distance_between_two_points(std::make_pair(getIntersectionPosition(current),getIntersectionPosition(destination)));
 }
-double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next){
-    return find_street_segment_travel_time(next);
+double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next, IntersectionIndex intersction, const double turn_penalty){
+    double cost =  find_street_segment_travel_time(next);
+    TurnType tt = determineDirection(getIntersectionPosition(intersction),getLastCurvePoint(current),getFirstCurvePoint(next));
+    if(tt==TurnType::LEFT||tt==TurnType::RIGHT)
+        cost+=turn_penalty;
 }
 
 std::vector<StreetSegmentIndex> find_path_between_intersections_temp(const IntersectionIndex intersect_id_start, const IntersectionIndex intersect_id_end, const double turn_penalty){

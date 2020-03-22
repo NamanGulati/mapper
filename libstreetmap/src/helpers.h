@@ -145,5 +145,7 @@ std::string parseTransitInfo(std::stringstream& ss);
 void infoPopup(ezgl::application *app, std::vector<int> interId, std::string transitInfo);
 void onDialogResponse(GtkDialog *dialog, gint response_id, gpointer user_data);
 TurnType determineDirection(LatLon O, LatLon A, LatLon B);
+LatLon getFirstCurvePoint(IntersectionIndex idx);
+LatLon getLastCurvePoint(IntersectionIndex idx);
 #endif /* HELPERS_H */
 
