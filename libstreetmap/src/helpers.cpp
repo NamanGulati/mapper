@@ -341,9 +341,9 @@ void onDialogResponse(GtkDialog *dialog, gint response_id, gpointer user_data){
     gtk_widget_destroy(GTK_WIDGET (dialog));
 }
 
-TurnType determineDirection(LatLon O, LatLon A, LatLon B){
-    ezgl::point2d pointA = LatLonTo2d(A);
-    ezgl::point2d pointB = LatLonTo2d(B);
+TurnType determineDirection(LatLon O, LatLon to, LatLon from){
+    ezgl::point2d pointA = LatLonTo2d(to);
+    ezgl::point2d pointB = LatLonTo2d(from);
     ezgl::point2d origin = LatLonTo2d(O);
     pointA.x -= origin.x;
     pointA.y -= origin.y;
@@ -363,4 +363,14 @@ LatLon getFirstCurvePoint(IntersectionIndex idx){
 }
 LatLon getLastCurvePoint(IntersectionIndex idx){
     return getStreetSegmentCurvePoint(idx, getInfoStreetSegment(idx).curvePointCount-1);
+}
+
+IntersectionIndex findIntersectionOfSegments(StreetSegmentIndex first, StreetSegmentIndex second){
+    InfoStreetSegment seg1 = getInfoStreetSegment(first);
+    InfoStreetSegment seg2 = getInfoStreetSegment(second);
+
+    if(seg1.from == seg2.to || seg1.from == seg2.from)
+        return seg1.from;
+    else if(seg1.to == seg2.from || seg1.to == seg2.to)
+        return seg1.to;
 }

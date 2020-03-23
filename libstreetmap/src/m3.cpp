@@ -145,3 +145,4 @@ std::vector<StreetSegmentIndex> find_path_between_intersections_temp(const Inter
     std::reverse(path.begin(), path.end());
     return path;
 }
+
