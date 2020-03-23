@@ -52,6 +52,8 @@ extern std::vector<POIData> pois;
 
 extern std::vector<IntersectionIndex> highlighted;
 
+extern std::vector<StreetSegmentIndex> highlightedSegs;
+
 extern float max_lat, min_lat, max_lon, min_lon, max_x, min_x, max_y, min_y, diff_y, diff_x;
 
 const std::string mapPathPre = "/cad2/ece297s/public/maps/";
@@ -66,8 +68,11 @@ const std::string locos[19] = {"beijing,china", "cairo,egypt", "cape-town,south-
 
 const std::unordered_set<std::string> poiTypes = {"atm","bank","bar","bicycle_parking","bus_station","construction","food_court","gym","library","parking",
                                                    "college", "school", "university"};
+                                                   
 extern std::unordered_map<std::string, ezgl::surface*> iconImgs;
 
 extern std::vector<std::vector<segIntersectionData>> adjacencyList;
+
+extern ezgl::application * appl;
 #endif /* GLOBALS_H */
 

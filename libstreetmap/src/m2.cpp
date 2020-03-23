@@ -54,6 +54,7 @@ void drawPOIText(ezgl::renderer * g,POIIndex idx);
 float diff_x, diff_y;
 void loadPNGs(ezgl::renderer *g);
 
+ezgl::application * appl;
 
 void draw_map()
 {
@@ -72,15 +73,17 @@ void draw_map()
         intersectionsData[i].name = getIntersectionName(i);
     }
 
-    ezgl::application application(settings);
+    ezgl::application * application = new ezgl::application(settings);
 
     ezgl::rectangle initial_world({min_x, min_y}, {max_x, max_y});
 
-    application.add_canvas("MainCanvas",
+    application->add_canvas("MainCanvas",
                            draw_main_canvas,
                            initial_world);
 
-    application.run(onSetup, onClick, NULL, NULL);
+    appl=application;
+    application->run(onSetup, onClick, NULL, NULL);
+    
 }
 
 /**
@@ -465,6 +468,9 @@ void drawSegments(ezgl::renderer *g){
                 done=drawStreetName(g,segDat);
             }
         }
+    }
+    for(int i=0;i<highlightedSegs.size();i++){
+        std::cout<<highlightedSegs[i]<<std::endl;
     }
 }
 

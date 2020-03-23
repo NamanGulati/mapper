@@ -57,6 +57,7 @@ std::vector<FeatureData> featureData; //vector of all natural features on the ma
 std::vector<POIData> pois; //vector of all points of interest on the map
 std::vector<IntersectionIndex> highlighted; //holds the current highlighted intersections
 std::vector<std::vector<segIntersectionData>> adjacencyList;
+std::vector<StreetSegmentIndex> highlightedSegs;
 float lat_avg; //average latitude of current map
 float max_lat, min_lat, max_lon, min_lon, max_x, min_x, max_y, min_y;
 constexpr double LARGE_DIST= 10000000000;

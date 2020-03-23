@@ -23,6 +23,7 @@
 
 #include "m1.h"
 #include "m2.h"
+#include "m3.h"
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
 
@@ -68,9 +69,9 @@ int main(int argc, char** argv) {
 
     //You can now do something with the map data
 
-
     //Clean-up the map data and related data structures
     draw_map();
+    find_path_between_intersections(0, 400, 15);
     std::cout << "Closing map\n";
     close_map(); 
 

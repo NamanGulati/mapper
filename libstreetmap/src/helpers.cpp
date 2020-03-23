@@ -358,6 +358,7 @@ TurnType determineDirection(LatLon O, LatLon A, LatLon B){
 
 }
 LatLon getFirstCurvePoint(IntersectionIndex idx){
+    if(getInfoStreetSegment(idx).curvePointCount>0)
     return getStreetSegmentCurvePoint(idx, 0);
 }
 LatLon getLastCurvePoint(IntersectionIndex idx){
