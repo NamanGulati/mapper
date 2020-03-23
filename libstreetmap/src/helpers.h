@@ -147,5 +147,7 @@ void onDialogResponse(GtkDialog *dialog, gint response_id, gpointer user_data);
 TurnType determineDirection(LatLon O, LatLon A, LatLon B);
 LatLon getFirstCurvePoint(IntersectionIndex idx);
 LatLon getLastCurvePoint(IntersectionIndex idx);
+IntersectionIndex findIntersectionOfSegments(StreetSegmentIndex first, StreetSegmentIndex second);
+int findTotalPathDistance(std::vector<StreetSegmentIndex> path);
 #endif /* HELPERS_H */
 

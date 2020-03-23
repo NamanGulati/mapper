@@ -374,3 +374,11 @@ IntersectionIndex findIntersectionOfSegments(StreetSegmentIndex first, StreetSeg
     else if(seg1.to == seg2.from || seg1.to == seg2.to)
         return seg1.to;
 }
+
+int findTotalPathDistance(std::vector<StreetSegmentIndex> path){
+    int totalDist = 0;
+    for(int i = 0; i < path.size(); i++){
+        totalDist += segLen[path[i]];
+    }
+    return totalDist;
+}
