@@ -76,5 +76,7 @@ extern std::vector<std::vector<segIntersectionData>> adjacencyList;
 extern std::vector<std::vector<segIntersectionData>> adjacencyListWalking;
 
 extern ezgl::application * appl;
+
+extern std::vector<StreetSegmentData> segmentData;
 #endif /* GLOBALS_H */
 

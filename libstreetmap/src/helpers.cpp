@@ -360,6 +360,7 @@ TurnType determineDirection(LatLon O, LatLon to, LatLon from){
 LatLon getFirstCurvePoint(IntersectionIndex idx){
     if(getInfoStreetSegment(idx).curvePointCount>0)
     return getStreetSegmentCurvePoint(idx, 0);
+    return getIntersectionPosition(idx);
 }
 LatLon getLastCurvePoint(IntersectionIndex idx){
     return getStreetSegmentCurvePoint(idx, getInfoStreetSegment(idx).curvePointCount-1);

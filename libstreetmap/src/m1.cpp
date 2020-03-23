@@ -59,6 +59,7 @@ std::vector<IntersectionIndex> highlighted; //holds the current highlighted inte
 std::vector<std::vector<segIntersectionData>> adjacencyList;
 std::vector<std::vector<segIntersectionData>> adjacencyListWalking;
 std::vector<StreetSegmentIndex> highlightedSegs;
+std::vector<StreetSegmentData> segmentData;
 float lat_avg; //average latitude of current map
 float max_lat, min_lat, max_lon, min_lon, max_x, min_x, max_y, min_y;
 constexpr double LARGE_DIST= 10000000000;
@@ -233,7 +234,7 @@ void loadStreetSegStreetInterSpedLimSegLenStreetInterVecs(){
         }
         dat.convertedCurvePoints.push_back(LatLonTo2d(getIntersectionPosition(sgmt.to)));
         dat.curvePts.push_back(getIntersectionPosition(sgmt.to));
-
+        segmentData.push_back(dat);
         streetSegData[sgmt.streetID].push_back(dat);
         
         double length = 0;

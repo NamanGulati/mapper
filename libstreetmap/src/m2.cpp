@@ -16,6 +16,7 @@
 #include <map>
 #include <vector>
 #include "m1.h"
+#include "m3.h"
 #include "StreetsDatabaseAPI.h"
 #include <math.h>
 #include <set>
@@ -40,7 +41,7 @@ void draw_main_canvas(ezgl::renderer *g);
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y);
 void onSearch(GtkWidget *widget, ezgl::application *application);
 void onSetup(ezgl::application *app, bool new_window);
-void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat);
+void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const ezgl::color * color);
 void drawSegments(ezgl::renderer *g);
 void drawPOIs(ezgl::renderer *g);
 void drawIntersections(ezgl::renderer *g);
@@ -55,6 +56,8 @@ float diff_x, diff_y;
 void loadPNGs(ezgl::renderer *g);
 
 ezgl::application * appl;
+bool previouslyHighlighted =false;
+int lastIntersection = -1;
 
 void draw_map()
 {
@@ -135,6 +138,26 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 {
     if(event->button == middle_mouse_button)
         return;
+    if(event->button == 1){
+        LatLon clickPos(lat_from_y(y),lon_from_x(x));
+        IntersectionIndex idx = find_closest_intersection(clickPos);
+        intersectionsData[idx].isHighlighted = true;
+        highlighted.push_back(idx);
+        if(previouslyHighlighted){
+            std::vector<StreetSegmentIndex> path = find_path_between_intersections(lastIntersection,idx,15);
+            for(int seg : path){
+                std::cout<<seg<<std::endl;
+                drawStreetSegment(app->get_renderer(),segmentData[seg],&ezgl::RED);
+            }
+            app->flush_drawing();
+            previouslyHighlighted=false;
+            highlighted.clear();
+        }else{
+            lastIntersection=idx;
+            previouslyHighlighted=true;
+        }
+        return;
+    }
     LatLon clickPos(lat_from_y(y),lon_from_x(x));
     IntersectionIndex idx = find_closest_intersection(clickPos);
     //if intersections are circles
@@ -272,7 +295,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
  * @param g ezgl renderer
  * @param segDat data of street segment to render
  **/
-void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){
+void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const ezgl::color * color = nullptr){
             g->set_color(ezgl::WHITE);
             double lineWidth = 4;
             int CITY_ROAD_ADJUST = 3;
@@ -292,6 +315,8 @@ void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat){
                 lineWidth=((segDat.lanes!=-1)?segDat.lanes:2)*(zoomLevel-RESIDENTIAL_ADJUST);
             }
            // segDat.drawHieght=lineWidth;
+           if(color!=nullptr)
+                g->set_color(*color);
             g->set_line_width(lineWidth);
             g->set_line_cap(ezgl::line_cap::round);
             for (int k = 0; k < segDat.curvePts.size() - 1; k++)
