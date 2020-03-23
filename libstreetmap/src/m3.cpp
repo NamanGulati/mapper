@@ -99,6 +99,7 @@ double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next, Int
     TurnType tt = determineDirection(getIntersectionPosition(intersction),getLastCurvePoint(current),getFirstCurvePoint(next));
     if(tt==TurnType::LEFT||tt==TurnType::RIGHT)
         cost+=turn_penalty;
+    return cost;
 }
 
 

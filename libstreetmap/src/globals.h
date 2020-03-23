@@ -73,6 +73,8 @@ extern std::unordered_map<std::string, ezgl::surface*> iconImgs;
 
 extern std::vector<std::vector<segIntersectionData>> adjacencyList;
 
+extern std::vector<std::vector<segIntersectionData>> adjacencyListWalking;
+
 extern ezgl::application * appl;
 #endif /* GLOBALS_H */
 

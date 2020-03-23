@@ -57,6 +57,7 @@ std::vector<FeatureData> featureData; //vector of all natural features on the ma
 std::vector<POIData> pois; //vector of all points of interest on the map
 std::vector<IntersectionIndex> highlighted; //holds the current highlighted intersections
 std::vector<std::vector<segIntersectionData>> adjacencyList;
+std::vector<std::vector<segIntersectionData>> adjacencyListWalking;
 std::vector<StreetSegmentIndex> highlightedSegs;
 float lat_avg; //average latitude of current map
 float max_lat, min_lat, max_lon, min_lon, max_x, min_x, max_y, min_y;
@@ -175,6 +176,8 @@ void loadWayAndNode(){
 }
 void loadStreetSegStreetInterSpedLimSegLenStreetInterVecs(){
     adjacencyList = std::vector<std::vector<segIntersectionData>>(getNumIntersections(),std::vector<segIntersectionData>(0));
+    adjacencyListWalking = std::vector<std::vector<segIntersectionData>>(getNumIntersections(),std::vector<segIntersectionData>(0));
+
     int nStreetSegments = getNumStreetSegments();
     for(int i=0;i<nStreetSegments;i++){
         struct InfoStreetSegment sgmt = getInfoStreetSegment(i);
@@ -259,7 +262,8 @@ void loadStreetSegStreetInterSpedLimSegLenStreetInterVecs(){
         if(!sgmt.oneWay)
             adjacencyList[sgmt.to].push_back(segIntersectionData(sgmt.from,i));
         adjacencyList[sgmt.from].push_back(segIntersectionData(sgmt.to,i));
-        
+        adjacencyListWalking[sgmt.to].push_back(segIntersectionData(sgmt.from, i));
+        adjacencyListWalking[sgmt.from].push_back(segIntersectionData(sgmt.to,i));
     }
 
     for(int i = 0; i < streetIntersections.size(); i++)
