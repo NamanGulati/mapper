@@ -91,7 +91,7 @@ class segIntersectionData{
     segIntersectionData(int intersect, int sgmt){
         intersection=intersect;
         segment=sgmt;
-        distance=0;
+        distance=INT_MAX;
     }
 
     segIntersectionData(int intersect,int sgmt, int dist){
@@ -103,7 +103,7 @@ class segIntersectionData{
     segIntersectionData(){
         intersection=-1;
         segment=-1;
-        distance=0;
+        distance=INT_MAX;
     }
 
     bool operator>(segIntersectionData & rhs){
