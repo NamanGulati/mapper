@@ -108,6 +108,7 @@ std::vector<StreetSegmentIndex> find_path_between_intersections_temp(const Inter
     int nodeLength = adjacencyList.size();
     std::vector<int> dist(adjacencyList.size(),INT_MAX);
     std::vector<int> parent(adjacencyList.size(),-1);
+    std::vector<bool> visited(getNumIntersections(),false);
     int top;
     int topWeight;
     std::vector<StreetSegmentIndex> path;
@@ -121,12 +122,13 @@ std::vector<StreetSegmentIndex> find_path_between_intersections_temp(const Inter
         if (top == intersect_id_end)
             break;
         topWeight = pq.top().second;
+        visited[top] = true;
         pq.pop();
          
         for (int x = 0; x < adjacencyList[top].size(); x ++){
             int interId = adjacencyList[top][x].intersection;
             std::pair<int, int> currInter(interId, adjacencyList[top][x].distance);
-            if (dist[currInter.first] > dist[top] + currInter.second) 
+            if (visited[currInter.first] == false && dist[currInter.first] > dist[top] + currInter.second) 
             { 
                 // Updating distance of current Intersection 
                 dist[currInter.first] = dist[top] + currInter.second; 
@@ -134,7 +136,6 @@ std::vector<StreetSegmentIndex> find_path_between_intersections_temp(const Inter
                 pq.push(std::make_pair(currInter.first, dist[currInter.first]));
             } 
         }
-        
     }
     int x = top;
     while(parent[x] != -1){
