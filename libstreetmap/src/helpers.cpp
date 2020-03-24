@@ -357,13 +357,15 @@ TurnType determineDirection(LatLon O, LatLon to, LatLon from){
     else return TurnType::STRAIGHT_DIFF_STREET;
 
 }
-LatLon getFirstCurvePoint(IntersectionIndex idx){
+LatLon getFirstCurvePoint(IntersectionIndex idx, InfoStreetSegment seg){
     if(getInfoStreetSegment(idx).curvePointCount>0)
         return getStreetSegmentCurvePoint(idx, 0);
-    return getIntersectionPosition(idx);
+    return getIntersectionPosition(seg.to);
 }
-LatLon getLastCurvePoint(IntersectionIndex idx){
-    return getStreetSegmentCurvePoint(idx, getInfoStreetSegment(idx).curvePointCount-1);
+LatLon getLastCurvePoint(IntersectionIndex idx, InfoStreetSegment seg){
+    if(getInfoStreetSegment(idx).curvePointCount>0)
+        return getStreetSegmentCurvePoint(idx, getInfoStreetSegment(idx).curvePointCount-1);
+    return getIntersectionPosition(seg.from);
 }
 
 TurnType findTurnType(StreetSegmentIndex first, StreetSegmentIndex second){
@@ -375,13 +377,17 @@ TurnType findTurnType(StreetSegmentIndex first, StreetSegmentIndex second){
         return TurnType::STRAIGHT_SAME_STREET;
 
     if(seg1.from == seg2.from)
-        return determineDirection(getIntersectionPosition(seg1.from), getFirstCurvePoint(first), getFirstCurvePoint(second));
+        return determineDirection(getIntersectionPosition(seg1.from), 
+            getFirstCurvePoint(first, seg1), getFirstCurvePoint(second, seg2));
     else if(seg1.from == seg2.to)
-        return determineDirection(getIntersectionPosition(seg1.from), getFirstCurvePoint(first), getLastCurvePoint(second));
+        return determineDirection(getIntersectionPosition(seg1.from), 
+            getFirstCurvePoint(first, seg1), getLastCurvePoint(second, seg2));
     else if(seg1.to == seg2.from)
-        return determineDirection(getIntersectionPosition(seg1.from), getLastCurvePoint(first), getFirstCurvePoint(second));
+        return determineDirection(getIntersectionPosition(seg1.from), 
+            getLastCurvePoint(first, seg1), getFirstCurvePoint(second, seg2));
     else if(seg1.to == seg2.to)
-        return determineDirection(getIntersectionPosition(seg1.from), getLastCurvePoint(first), getLastCurvePoint(second));
+        return determineDirection(getIntersectionPosition(seg1.from), 
+            getLastCurvePoint(first, seg1), getLastCurvePoint(second, seg2));
     else
         return TurnType::NONE;    
 
