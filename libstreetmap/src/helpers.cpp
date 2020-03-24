@@ -396,6 +396,18 @@ TurnType findTurnType(StreetSegmentIndex first, StreetSegmentIndex second){
 
 }
 
+IntersectionIndex findIntersectionOfSegments(StreetSegmentIndex first, StreetSegmentIndex second){
+    InfoStreetSegment seg1 = getInfoStreetSegment(first);
+    InfoStreetSegment seg2 = getInfoStreetSegment(second);
+
+    if(seg1.from == seg2.from || seg1.from == seg2.to)
+        return seg1.from;
+    else if(seg1.to == seg2.from || seg1.to == seg2.to)
+        return seg1.to;
+    else
+        return 0;
+}
+
 int getTotalPathDistance(std::vector<StreetSegmentIndex> path){
     int totalDist = 0;
     for(int i = 0; i < path.size(); i++){

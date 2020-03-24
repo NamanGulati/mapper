@@ -28,6 +28,8 @@ double compute_segment_walking_time(StreetSegmentIndex seg, const double walking
 
 double compute_path_travel_time(const std::vector<StreetSegmentIndex>& path, const double turn_penalty){
 
+void printDirections(std::vector<StreetSegmentIndex> path);
+
     double sum=0;
     for(int i=0;i<path.size()-1;i++){
         InfoStreetSegment seg = getInfoStreetSegment(path[i]);
@@ -176,7 +178,14 @@ double compute_segment_walking_time(StreetSegmentIndex seg, const double walking
 
 void printDirections(std::vector<StreetSegmentIndex> path){
     int totalPathDistance = getTotalPathDistance(path);
+    int initDist = segLen[path[0]];
 
+    std::cout << "Go straight on " << getStreetName(path[0]) << "towards " << getIntersectionName(findIntersectionOfSegments(path[0],path[1]));
+    if(initDist > 1000)
+        std::cout << " for " << initDist/1000 << " km." << std::endl;
+    else
+        std::cout << " for " << initDist << " m." << std::endl;
+    
     for(int i = 1; i < path.size(); i++){
         
     }
