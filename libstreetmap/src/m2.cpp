@@ -86,7 +86,7 @@ void draw_map()
 
     appl=application;
     application->run(onSetup, onClick, NULL, NULL);
-    
+    delete appl;
 }
 
 /**
