@@ -354,29 +354,40 @@ TurnType determineDirection(LatLon O, LatLon to, LatLon from){
 
     if(result > 0) return TurnType::RIGHT;
     else if(result < 0) return TurnType::LEFT;
-    else return TurnType::STRAIGHT;
+    else return TurnType::STRAIGHT_DIFF_STREET;
 
 }
 LatLon getFirstCurvePoint(IntersectionIndex idx){
     if(getInfoStreetSegment(idx).curvePointCount>0)
-    return getStreetSegmentCurvePoint(idx, 0);
+        return getStreetSegmentCurvePoint(idx, 0);
     return getIntersectionPosition(idx);
 }
 LatLon getLastCurvePoint(IntersectionIndex idx){
     return getStreetSegmentCurvePoint(idx, getInfoStreetSegment(idx).curvePointCount-1);
 }
 
-IntersectionIndex findIntersectionOfSegments(StreetSegmentIndex first, StreetSegmentIndex second){
+TurnType findTurnType(StreetSegmentIndex first, StreetSegmentIndex second){
+
     InfoStreetSegment seg1 = getInfoStreetSegment(first);
     InfoStreetSegment seg2 = getInfoStreetSegment(second);
 
-    if(seg1.from == seg2.to || seg1.from == seg2.from)
-        return seg1.from;
-    else if(seg1.to == seg2.from || seg1.to == seg2.to)
-        return seg1.to;
+    if(seg1.streetID == seg2.streetID)
+        return TurnType::STRAIGHT_SAME_STREET;
+
+    if(seg1.from == seg2.from)
+        return determineDirection(getIntersectionPosition(seg1.from), getFirstCurvePoint(first), getFirstCurvePoint(second));
+    else if(seg1.from == seg2.to)
+        return determineDirection(getIntersectionPosition(seg1.from), getFirstCurvePoint(first), getLastCurvePoint(second));
+    else if(seg1.to == seg2.from)
+        return determineDirection(getIntersectionPosition(seg1.from), getLastCurvePoint(first), getFirstCurvePoint(second));
+    else if(seg1.to == seg2.to)
+        return determineDirection(getIntersectionPosition(seg1.from), getLastCurvePoint(first), getLastCurvePoint(second));
+    else
+        return TurnType::NONE;    
+
 }
 
-int findTotalPathDistance(std::vector<StreetSegmentIndex> path){
+int getTotalPathDistance(std::vector<StreetSegmentIndex> path){
     int totalDist = 0;
     for(int i = 0; i < path.size(); i++){
         totalDist += segLen[path[i]];

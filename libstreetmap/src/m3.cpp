@@ -212,3 +212,11 @@ std::pair<std::vector<StreetSegmentIndex>, std::vector<StreetSegmentIndex>> //ch
 double compute_segment_walking_time(StreetSegmentIndex seg, const double walking_speed){
     return find_street_segment_length(seg)/walking_speed * 3.6; //dont know if conversion is needed
 }
+
+void printDirections(std::vector<StreetSegmentIndex> path){
+    int totalPathDistance = getTotalPathDistance(path);
+
+    for(int i = 1; i < path.size(); i++){
+        
+    }
+}

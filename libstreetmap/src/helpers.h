@@ -49,7 +49,8 @@ enum StreetType{
 enum TurnType{
     RIGHT,
     LEFT,
-    STRAIGHT,
+    STRAIGHT_SAME_STREET,
+    STRAIGHT_DIFF_STREET,
     NONE
 };
 
@@ -148,6 +149,6 @@ TurnType determineDirection(LatLon O, LatLon A, LatLon B);
 LatLon getFirstCurvePoint(IntersectionIndex idx);
 LatLon getLastCurvePoint(IntersectionIndex idx);
 IntersectionIndex findIntersectionOfSegments(StreetSegmentIndex first, StreetSegmentIndex second);
-int findTotalPathDistance(std::vector<StreetSegmentIndex> path);
+int getTotalPathDistance(std::vector<StreetSegmentIndex> path);
 #endif /* HELPERS_H */
 
