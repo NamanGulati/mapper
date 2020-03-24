@@ -159,13 +159,10 @@ void close_map() {
     streetSegData.clear();
     featureData.clear();
     highlighted.clear();
-    for(int i=0;i<adjacencyList.size();i++)
-        adjacencyList[i].clear();
     adjacencyList.clear();
-    for(int i=0;i<adjacencyListWalking.size();i++)
-        adjacencyListWalking[i].clear();
     adjacencyListWalking.clear();
-
+    iconImgs.clear();
+    segmentData.clear();
 }
 
 
