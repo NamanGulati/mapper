@@ -150,5 +150,7 @@ LatLon getFirstCurvePoint(IntersectionIndex idx);
 LatLon getLastCurvePoint(IntersectionIndex idx);
 IntersectionIndex findIntersectionOfSegments(StreetSegmentIndex first, StreetSegmentIndex second);
 int getTotalPathDistance(std::vector<StreetSegmentIndex> path);
+int findTotalPathDistance(std::vector<StreetSegmentIndex> path);
+void drawPathStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const ezgl::color * color);
 #endif /* HELPERS_H */
 

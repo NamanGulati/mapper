@@ -159,6 +159,10 @@ void close_map() {
     streetSegData.clear();
     featureData.clear();
     highlighted.clear();
+    adjacencyList.clear();
+    adjacencyListWalking.clear();
+
+    delete appl;
 }
 
 

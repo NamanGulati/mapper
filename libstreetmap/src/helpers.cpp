@@ -19,6 +19,9 @@
 #include <sstream>
 #include <boost/format.hpp>
 
+#define RENDER_POIS_STREET 7
+
+
 std::unordered_map< std::string, ezgl::surface*> iconImgs;
 //converts a pair of LatLon points to a pair of Cartesian points
 std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatLon> points){
@@ -399,4 +402,36 @@ int getTotalPathDistance(std::vector<StreetSegmentIndex> path){
         totalDist += segLen[path[i]];
     }
     return totalDist;
+}
+
+void drawPathStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const ezgl::color * color = nullptr){
+            g->set_color(ezgl::WHITE);
+
+            double lineWidth = 4;
+            int CITY_ROAD_ADJUST = 3;
+            int RESIDENTIAL_ADJUST = 6;
+            if(segDat.type==StreetType::EXPRESSWAY){
+                    lineWidth=((segDat.lanes!=-1)&&zoomLevel>=RENDER_POIS_STREET?segDat.lanes:5)*zoomLevel;
+                //g->set_line_width(20);
+                g->set_color(ezgl::YELLOW);
+            }
+            else if(segDat.type == StreetType::CITY_ROAD){
+                
+                lineWidth=((segDat.lanes!=-1)&&zoomLevel>=RENDER_POIS_STREET?segDat.lanes:4)*(zoomLevel/CITY_ROAD_ADJUST);
+            }
+            else {//if(segDat.type==StreetType::RESIDENTIAL){
+                if(zoomLevel<6)
+                    return;
+                lineWidth=((segDat.lanes!=-1)?segDat.lanes:2)*(zoomLevel-RESIDENTIAL_ADJUST);
+            }
+
+           if(color!=nullptr)
+                g->set_color(*color);
+            g->set_line_width(5);
+            g->set_line_cap(ezgl::line_cap::round);
+            for (int k = 0; k < segDat.curvePts.size() - 1; k++)
+            {   
+                //g->draw_line(LatLonTo2d(segDat.curvePts[k]), LatLonTo2d(segDat.curvePts[k + 1]));
+                g->draw_line(segDat.convertedCurvePoints[k],segDat.convertedCurvePoints[k+1]);
+            }
 }

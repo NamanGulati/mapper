@@ -7,7 +7,6 @@
 #include <chrono>
 #include <thread>
 
-#define RENDER_POIS_STREET 7
 
 //typedef std::pair<int, double> intDoubPair;
 //
@@ -29,110 +28,70 @@ double compute_segment_walking_time(StreetSegmentIndex seg, const double walking
 
 double compute_path_travel_time(const std::vector<StreetSegmentIndex>& path, const double turn_penalty){
 
-    int sum=0;
+    double sum=0;
     for(int i=0;i<path.size()-1;i++){
         InfoStreetSegment seg = getInfoStreetSegment(path[i]);
-        sum+=segLen[i]*seg.speedLimit;
+        sum+=find_street_segment_travel_time(path[i]);
         if(seg.streetID!=getInfoStreetSegment(path[i+1]).streetID)
             sum+=turn_penalty;
     }
+    sum+=find_street_segment_travel_time(path.back());
     return sum;
 }
 
 double compute_path_walking_time(const std::vector<StreetSegmentIndex>& path, const double walking_speed, const double turn_penalty){
-    int sum=0;
+    double sum=0;
     for(int i=0;i<path.size()-1;i++){
         InfoStreetSegment seg = getInfoStreetSegment(path[i]);
-        sum+=segLen[i]*walking_speed;
+        sum+=segLen[path[i]]*walking_speed*3.6;
         if(seg.streetID!=getInfoStreetSegment(path[i+1]).streetID)
             sum+=turn_penalty;
     }
+    sum+=segLen[path.back()];
     return sum;
 }
 
 
-void drawStreetSegment1(ezgl::renderer * g, StreetSegmentData& segDat, const ezgl::color * color = nullptr){
-            g->set_color(ezgl::WHITE);
-            double lineWidth = 4;
-            int CITY_ROAD_ADJUST = 3;
-            int RESIDENTIAL_ADJUST = 6;
-            if(segDat.type==StreetType::EXPRESSWAY){
-                    lineWidth=((segDat.lanes!=-1)&&zoomLevel>=RENDER_POIS_STREET?segDat.lanes:5)*zoomLevel;
-                //g->set_line_width(20);
-                g->set_color(ezgl::YELLOW);
-            }
-            else if(segDat.type == StreetType::CITY_ROAD){
-                
-                lineWidth=((segDat.lanes!=-1)&&zoomLevel>=RENDER_POIS_STREET?segDat.lanes:4)*(zoomLevel/CITY_ROAD_ADJUST);
-            }
-            else {//if(segDat.type==StreetType::RESIDENTIAL){
-                if(zoomLevel<6)
-                    return;
-                lineWidth=((segDat.lanes!=-1)?segDat.lanes:2)*(zoomLevel-RESIDENTIAL_ADJUST);
-            }
-           // segDat.drawHieght=lineWidth;
-           if(color!=nullptr)
-                g->set_color(*color);
-            g->set_line_width(lineWidth);
-            g->set_line_cap(ezgl::line_cap::round);
-            for (int k = 0; k < segDat.curvePts.size() - 1; k++)
-            {   
-                //g->draw_line(LatLonTo2d(segDat.curvePts[k]), LatLonTo2d(segDat.curvePts[k + 1]));
-                g->draw_line(segDat.convertedCurvePoints[k],segDat.convertedCurvePoints[k+1]);
-            }
-}
-
 
 std::vector<StreetSegmentIndex> find_path_between_intersections(const IntersectionIndex intersect_id_start, const IntersectionIndex intersect_id_end, const double turn_penalty){
+    std::priority_queue<segIntersectionData,std::vector<segIntersectionData>, segIntersectionDataComparator> openSet;
+    std::vector<segIntersectionData>cameFrom(adjacencyList.size());
+    std::vector<double> gScore(adjacencyList.size(),DBL_MAX);
+    gScore[intersect_id_start]=0;
 
-    highlightedSegs.clear();
-    std::priority_queue<segIntersectionData,std::vector<segIntersectionData>, segIntersectionDataComparator> priorityQueue;
-    std::vector<bool> visited(getNumIntersections(),false);
-    std::vector<StreetSegmentIndex>pathTaken(getNumStreetSegments(),-1);
-    int currIntersection=intersect_id_start;
-    int lastSeg = -1;
-    priorityQueue.push(segIntersectionData(currIntersection,-1));
-    std::vector<double> intersectionCost(getNumIntersections(),-1);
-    intersectionCost[0]=0;
+    openSet.emplace(intersect_id_start,-1,heuristic(intersect_id_start,intersect_id_end)*10);
     ezgl::renderer * g = appl->get_renderer();
-    while(!priorityQueue.empty() && currIntersection!=intersect_id_end){
-        currIntersection = priorityQueue.top().intersection;
-        lastSeg = priorityQueue.top().segment;
-        visited[currIntersection]=true;
-        priorityQueue.pop();
-
-        for(int i=0;i<adjacencyList[currIntersection].size();i++){
-            segIntersectionData dat = adjacencyList[currIntersection][i];
-            double currentCost = intersectionCost[i] + get_segment_cost(lastSeg,dat.segment,currIntersection,turn_penalty);
-            drawStreetSegment1(appl->get_renderer(),segmentData[dat.segment],&ezgl::BLUE);
-            delay(50);
+    
+    while(!openSet.empty()){
+        segIntersectionData current = openSet.top();
+        if(current.intersection==intersect_id_end){
+            segIntersectionData temp = current;
+            std::vector<StreetSegmentIndex> path;
+            while(temp.segment != -1){
+                path.push_back(temp.segment);
+                temp = cameFrom[temp.intersection];
+            }
+            path.push_back(current.segment);
+            std::reverse(path.begin(),path.end());
+            return path;
+        }
+        openSet.pop();
+        for(segIntersectionData neighbor : adjacencyList[current.intersection]){
+            drawPathStreetSegment(g,segmentData[neighbor.segment],&ezgl::BLUE);
             appl->flush_drawing();
-            if(!visited[dat.intersection]&&(intersectionCost[dat.intersection]==-1 || intersectionCost[dat.intersection] > currentCost)){
-                std::cout<<"in here: "<<lastSeg<<std::endl;
-                intersectionCost[dat.intersection] = currentCost;
-                dat.distance = currentCost + heuristic(dat.intersection, intersect_id_end);
-                priorityQueue.push(dat);
-                pathTaken[dat.segment]=lastSeg;
+            double tentative_gScore = gScore[current.intersection] + get_segment_cost(current.segment,neighbor.segment,current.intersection,turn_penalty);
+            if(tentative_gScore < gScore[neighbor.intersection]){
+                cameFrom[neighbor.intersection] = current;
+                gScore[neighbor.intersection]= tentative_gScore;
+                neighbor.distance = tentative_gScore + heuristic(current.intersection,neighbor.intersection)*10;
+                openSet.push(neighbor);
             }
         }
-
     }
+    return std::vector<StreetSegmentIndex>(0);
 
-    std::vector<StreetSegmentIndex> path;
-    if(priorityQueue.empty())
-        return path;
-    
-    int temp = lastSeg;
-    while(temp != -1){
-        std::cout<<"temp: "<<temp<<std::endl;
-        path.push_back(temp);
-        temp = pathTaken[temp];
-    }
-
-    std::reverse(path.begin(),path.end());
-    highlightedSegs.clear();
-    return path;
 }
+
 
 double heuristic(IntersectionIndex current, IntersectionIndex destination){
     return find_distance_between_two_points(std::make_pair(getIntersectionPosition(current),getIntersectionPosition(destination)));

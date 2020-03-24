@@ -147,7 +147,7 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
             std::vector<StreetSegmentIndex> path = find_path_between_intersections(lastIntersection,idx,15);
             for(int seg : path){
                 std::cout<<seg<<std::endl;
-                drawStreetSegment(app->get_renderer(),segmentData[seg],&ezgl::RED);
+                drawPathStreetSegment(app->get_renderer(),segmentData[seg],&ezgl::RED);
             }
             app->flush_drawing();
             previouslyHighlighted=false;
