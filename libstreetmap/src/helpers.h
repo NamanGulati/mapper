@@ -152,5 +152,6 @@ IntersectionIndex findIntersectionOfSegments(StreetSegmentIndex first, StreetSeg
 int getTotalPathDistance(std::vector<StreetSegmentIndex> path);
 int findTotalPathDistance(std::vector<StreetSegmentIndex> path);
 void drawPathStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const ezgl::color * color);
+TurnType findTurnType(StreetSegmentIndex first, StreetSegmentIndex second);
 #endif /* HELPERS_H */
 
