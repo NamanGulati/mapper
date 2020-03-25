@@ -96,6 +96,11 @@ void draw_map()
  **/
 void draw_main_canvas(ezgl::renderer *g)
 {   
+    intersectionsData[114780].isHighlighted=true;
+    highlighted.push_back(114780);
+
+    intersectionsData[26866].isHighlighted=true;
+    highlighted.push_back(26866);
     //loads the pngs for icons
     loadPNGs(g);
     //sets background colour

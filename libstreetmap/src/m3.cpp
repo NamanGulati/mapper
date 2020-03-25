@@ -8,6 +8,7 @@
 #include <thread>
 #include <iostream>
 
+//#define drawAlgos
 
 void delay (int milliseconds) ;
 
@@ -60,8 +61,10 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
 
     openSet.emplace(intersect_id_start,-1,heuristic(intersect_id_start,intersect_id_end));
 
-   // ezgl::renderer * g = appl->get_renderer();
-    
+    #ifdef drawAlgos
+        ezgl::renderer * g = appl->get_renderer();
+    #endif
+
     while(!openSet.empty()){
         segIntersectionData current = openSet.top();
         if(current.intersection==intersect_id_end){
@@ -77,14 +80,18 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
         visited[current.intersection] = true;
         openSet.pop();
         for(segIntersectionData neighbor : adjacencyList[current.intersection]){
-            //drawPathStreetSegment(g,segmentData[neighbor.segment],&ezgl::BLUE);
-            //appl->flush_drawing();
+
+            #ifdef drawAlgos
+                drawPathStreetSegment(g,segmentData[neighbor.segment],&ezgl::BLUE);
+                appl->flush_drawing();
+            #endif
+
             double tentative_gScore = gScore[current.intersection] + get_segment_cost(current.segment,neighbor.segment,turn_penalty);
 
             if(!visited[neighbor.intersection]&&tentative_gScore < gScore[neighbor.intersection]){
                 cameFrom[neighbor.segment] = current.segment;
                 gScore[neighbor.intersection]= tentative_gScore;
-                neighbor.distance = tentative_gScore + heuristic(current.intersection,neighbor.intersection);
+                neighbor.distance = tentative_gScore + heuristic(current.intersection,neighbor.intersection)/maxSpeedLim;
                 openSet.push(neighbor);
             }
         }
@@ -127,8 +134,10 @@ std::pair<std::vector<StreetSegmentIndex>, std::vector<StreetSegmentIndex>> //ch
     std::vector<StreetSegmentIndex> walk;
     std::vector<segIntersectionData> drivingStart; //vector to start the driving search from
     
-    //ezgl::renderer * g = appl->get_renderer(); //drawing for testing
-    
+    #ifdef drawAlgos
+        ezgl::renderer * g = appl->get_renderer(); //drawing for testing
+    #endif
+
     std::priority_queue < segIntersectionData, std::vector<segIntersectionData>, segIntersectionDataComparator > pq;
     pq.emplace(start_intersection, -1, 0);
     dist[start_intersection] = 0;

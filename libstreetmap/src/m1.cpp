@@ -64,6 +64,7 @@ float lat_avg; //average latitude of current map
 float max_lat, min_lat, max_lon, min_lon, max_x, min_x, max_y, min_y;
 constexpr double LARGE_DIST= 10000000000;
 constexpr double KM_per_H_to_M_per_S = 3.6;
+float maxSpeedLim;
 /**
  * Loading above data structures by pulling data from StreetsDatabaseAPI and OSMDatabaseAPI
  * 
@@ -189,6 +190,8 @@ void loadStreetSegStreetInterSpedLimSegLenStreetInterVecs(){
         streetSegsVectors[sgmt.streetID].push_back(i);
         streetIntersections[sgmt.streetID].insert(sgmt.from);
         streetIntersections[sgmt.streetID].insert(sgmt.to);
+        if(sgmt.speedLimit>maxSpeedLim)
+            maxSpeedLim = sgmt.speedLimit;
         speedLim.push_back(sgmt.speedLimit/KM_per_H_to_M_per_S);
         StreetSegmentData dat;
         dat.info=sgmt;

@@ -78,5 +78,7 @@ extern std::vector<std::vector<segIntersectionData>> adjacencyListWalking;
 extern ezgl::application * appl;
 
 extern std::vector<StreetSegmentData> segmentData;
+
+extern float maxSpeedLim;
 #endif /* GLOBALS_H */
 
