@@ -12,6 +12,7 @@
 #include "ezgl/application.hpp"
 #include "ezgl/graphics.hpp"
 #include "m1.h"
+#include "m3.h"
 #include <cmath>
 #include <string>
 #include <boost/algorithm/string.hpp>
@@ -345,7 +346,7 @@ void onDialogResponse(GtkDialog *dialog, gint response_id, gpointer user_data){
     gtk_widget_destroy(GTK_WIDGET (dialog));
 }
 
-TurnType determineDirection(LatLon O, LatLon to, LatLon from){
+TurnType determineDirection(LatLon O, LatLon from, LatLon to){
     ezgl::point2d pointA = LatLonTo2d(to);
     ezgl::point2d pointB = LatLonTo2d(from);
     ezgl::point2d origin = LatLonTo2d(O);
@@ -354,21 +355,21 @@ TurnType determineDirection(LatLon O, LatLon to, LatLon from){
     pointB.x -= origin.x;
     pointB.y -= origin.y;
 
-    int result = pointB.x * pointA.y - pointA.x * pointB.y;
+    double result = pointB.x * pointA.y - pointA.x * pointB.y;
 
     if(result > 0) return TurnType::RIGHT;
     else if(result < 0) return TurnType::LEFT;
     else return TurnType::STRAIGHT_DIFF_STREET;
 
 }
-LatLon getFirstCurvePoint(IntersectionIndex idx, InfoStreetSegment seg){
+LatLon getFirstCurvePoint(StreetSegmentIndex idx, InfoStreetSegment seg){
     if(getInfoStreetSegment(idx).curvePointCount>0)
-        return getStreetSegmentCurvePoint(idx, 0);
+        return getStreetSegmentCurvePoint(0, idx);
     return getIntersectionPosition(seg.to);
 }
-LatLon getLastCurvePoint(IntersectionIndex idx, InfoStreetSegment seg){
+LatLon getLastCurvePoint(StreetSegmentIndex idx, InfoStreetSegment seg){
     if(getInfoStreetSegment(idx).curvePointCount>0)
-        return getStreetSegmentCurvePoint(idx, getInfoStreetSegment(idx).curvePointCount-1);
+        return getStreetSegmentCurvePoint(getInfoStreetSegment(idx).curvePointCount-1, idx);
     return getIntersectionPosition(seg.from);
 }
 
@@ -379,21 +380,20 @@ TurnType findTurnType(StreetSegmentIndex first, StreetSegmentIndex second){
 
     if(seg1.streetID == seg2.streetID)
         return TurnType::STRAIGHT_SAME_STREET;
-
-    if(seg1.from == seg2.from)
+    else if(seg1.from == seg2.from)
         return determineDirection(getIntersectionPosition(seg1.from), 
             getFirstCurvePoint(first, seg1), getFirstCurvePoint(second, seg2));
     else if(seg1.from == seg2.to)
         return determineDirection(getIntersectionPosition(seg1.from), 
             getFirstCurvePoint(first, seg1), getLastCurvePoint(second, seg2));
     else if(seg1.to == seg2.from)
-        return determineDirection(getIntersectionPosition(seg1.from), 
+        return determineDirection(getIntersectionPosition(seg1.to), 
             getLastCurvePoint(first, seg1), getFirstCurvePoint(second, seg2));
     else if(seg1.to == seg2.to)
-        return determineDirection(getIntersectionPosition(seg1.from), 
+        return determineDirection(getIntersectionPosition(seg1.to), 
             getLastCurvePoint(first, seg1), getLastCurvePoint(second, seg2));
     else
-        return TurnType::NONE;    
+        return TurnType::RIGHT;    
 
 }
 
@@ -447,4 +447,74 @@ void drawPathStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const 
                 //g->draw_line(LatLonTo2d(segDat.curvePts[k]), LatLonTo2d(segDat.curvePts[k + 1]));
                 g->draw_line(segDat.convertedCurvePoints[k],segDat.convertedCurvePoints[k+1]);
             }
+}
+
+void printDirections(){//std::vector<StreetSegmentIndex> walkPath, std::vector<StreetSegmentIndex> drivePath){
+    
+    //std::vector<StreetSegmentIndex> walkPath = find_path_with_walk_to_pick_up(parameters);
+    //std::vector<StreetSegmentIndex> drivePath = find_path_between_intersection(parameters);
+    
+    std::vector<StreetSegmentIndex> walkPath = {149809, 149810, 146888, 183222, 146882, 146883, 146884, 146885,
+                                                146886, 146887, 31051, 31050, 289, 288, 287, 286, 15178, 15177,
+                                                15176, 97581, 4098, 136817, 97737, 52359, 97740, 107073, 46533, 
+                                                46532, 46531, 181005, 46535, 176570, 18199, 1589, 211978, 85375};
+                                                
+    int totalPathDistance = getTotalPathDistance(walkPath)/* + getTotalPathDistance(drivePath)*/;
+    std::string initDist = getLengthStreet(walkPath, getInfoStreetSegment(walkPath[0]).streetID, 0);
+    int walkTime =  int(compute_path_walking_time(walkPath, 4.5 /*km/h*/, 15));
+    //int driveTime = int(compute_path_travel_time(drivePath, 15));
+    int totalTime = walkTime ;//+ driveTime;
+    std::string totalDistMsg, totalTimeMsg;
+    
+    if(totalPathDistance > 1000)
+        totalDistMsg = std::to_string(totalPathDistance/1000) + " km";
+    else
+        totalDistMsg = std::to_string(totalPathDistance) + " m";
+    
+    if(totalTime > 3600)
+        totalTimeMsg = std::to_string(totalTime/3600) + " h. and " +std::to_string(totalTime/60-totalTime/3600*60)+ " min.";
+    else if(totalTime > 60){
+        totalTimeMsg = std::to_string(totalTime/60) + " min.";
+    }
+    else
+        totalTimeMsg = std::to_string(totalTime) + " sec.";
+    
+    std::cout << "Your trip is " << totalDistMsg << " long and will take " << totalTimeMsg << std::endl;
+    
+    std::cout << "Go straight on " << getStreetName(getInfoStreetSegment(walkPath[0]).streetID) << " towards " << getIntersectionName(findIntersectionOfSegments(walkPath[0],walkPath[1]))
+                << " for " << initDist << std::endl;
+    
+    for(int i = 1; i < walkPath.size(); i++){
+        TurnType turn = findTurnType(walkPath[i-1], walkPath[i]);
+        std::string streetName = getStreetName(getInfoStreetSegment(walkPath[i]).streetID);
+        int dist = segLen[walkPath[i]];
+        
+        if(turn == TurnType::STRAIGHT_SAME_STREET || turn == TurnType::NONE){
+           ;
+        }
+        else if(turn == TurnType::STRAIGHT_DIFF_STREET){
+            std::cout << "Go straight on " << streetName << "for " << getLengthStreet(walkPath, getInfoStreetSegment(walkPath[i]).streetID, i) <<std::endl;
+        }
+        else if(turn == TurnType::LEFT){
+            std::cout << "Turn left on " << streetName << " and go straight for " << getLengthStreet(walkPath, getInfoStreetSegment(walkPath[i]).streetID, i) <<std::endl;
+        }
+        else if(turn == TurnType::RIGHT){
+            std::cout << "Turn right on " << streetName << " and go straight for " << getLengthStreet(walkPath, getInfoStreetSegment(walkPath[i]).streetID, i) <<std::endl;
+        }
+    }
+}
+
+std::string getLengthStreet(std::vector<StreetSegmentIndex> path, StreetIndex street_id, int idx){
+    double length = 0;
+    for(int i = idx; i < path.size(); i++){
+        if(getInfoStreetSegment(path[i]).streetID == street_id){
+            length += find_street_segment_length(path[i]);
+        }
+    }
+    int intLength = (int) length;
+    
+    if(intLength > 1000)
+        return (std::to_string(intLength/1000) + " km.");
+    else
+        return (std::to_string(intLength) + " m.");
 }

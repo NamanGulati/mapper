@@ -106,6 +106,7 @@ void draw_main_canvas(ezgl::renderer *g)
     drawSegments(g);
     drawIntersections(g);
     drawPOIs(g);
+    printDirections();
 }
 
 /**

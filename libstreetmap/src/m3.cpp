@@ -15,7 +15,6 @@ void delay (int milliseconds) ;
 double heuristic(IntersectionIndex current, IntersectionIndex destination);
 double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next, const double turn_penalty);
 double compute_segment_walking_time(StreetSegmentIndex seg, const double walking_speed);
-void printDirections(std::vector<StreetSegmentIndex> path);
 
 
 double compute_path_travel_time(const std::vector<StreetSegmentIndex>& path, const double turn_penalty){
@@ -170,55 +169,4 @@ std::pair<std::vector<StreetSegmentIndex>, std::vector<StreetSegmentIndex>> //ch
 
 double compute_segment_walking_time(StreetSegmentIndex seg, const double walking_speed){
     return find_street_segment_length(seg)/walking_speed * 3.6; //dont know if conversion is needed
-}
-
-void printDirections(std::vector<StreetSegmentIndex> walkPath, std::vector<StreetSegmentIndex> drivePath){
-    
-    //std::vector<StreetSegmentIndex> walkPath = find_path_with_walk_to_pick_up(parameters);
-    //std::vector<StreetSegmentIndex> drivePath = find_path_between_intersection(parameters);
-    
-    int totalPathDistance = getTotalPathDistance(walkPath) + getTotalPathDistance(drivePath);
-    int initDist = segLen[walkPath[0]];
-    int walkTime =  int(compute_path_walking_time(walkPath, 4.5 /*km/h*/, 15));
-    int driveTime = int(compute_path_travel_time(drivePath, 15));
-    int totalTime = walkTime + driveTime;
-    std::string totalDistMsg, totalTimeMsg;
-    
-    if(totalPathDistance > 1000)
-        totalDistMsg = std::to_string(initDist/1000) + " km";
-    else
-        totalDistMsg = std::to_string(initDist) + " m";
-    
-    if(totalTime > 3600)
-        totalTimeMsg = std::to_string(totalTime/3600) + " h. and " +std::to_string(totalTime/60-totalTime/3600*60)+ " min.";
-    else if(totalTime > 60){
-        totalTimeMsg = std::to_string(totalTime/60) + " min.";
-    }
-    else
-        totalTimeMsg = std::to_string(totalTime) + " sec.";
-    
-    std::cout << "Your trip is " << totalDistMsg << " long and will take " << totalTimeMsg << std::endl;
-
-    std::cout << "Go straight on " << getStreetName(walkPath[0]) << "towards " << getIntersectionName(findIntersectionOfSegments(walkPath[0],walkPath[1]))
-                << " for " << initDist << " m." << std::endl;
-    
-    for(int i = 1; i < walkPath.size(); i++){
-        TurnType turn = findTurnType(walkPath[i-1], walkPath[i]);
-        std::string streetName = getStreetName(getInfoStreetSegment(walkPath[i]).streetID);
-        int dist = segLen[walkPath[i]];
-            
-        if(turn == TurnType::NONE);
-        else if(turn ==  TurnType::STRAIGHT_SAME_STREET){
-            std::cout << "Continue straight on " << streetName << "for " << segLen[walkPath[i]] << " m." << std::endl;
-        }
-        else if(turn == TurnType::STRAIGHT_DIFF_STREET){
-            std::cout << "Go straight on " << streetName << "for " << segLen[walkPath[i]] << " m." <<std::endl;
-        }
-        else if(turn == TurnType::LEFT){
-            std::cout << "Turn left on " << streetName << " and go straight for " <<segLen[walkPath[i]] << " m." <<std::endl;
-        }
-        else if(turn == TurnType::RIGHT){
-            std::cout << "Turn right on " << streetName << " and go straight for " <<segLen[walkPath[i]] << " m." <<std::endl;
-        }
-    }
 }
