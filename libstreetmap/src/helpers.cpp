@@ -199,11 +199,12 @@ void clearHighlights(){
     highlighted.clear();
 }
 
-char * castToCharArray(std::string s){
-    int a = s.length();
-    char charArr[a + 1]; 
-    strcpy(charArr, s.c_str());
-}
+//char * castToCharArray(std::string s){
+//    int a = s.length();
+//    char charArr[a + 1]; 
+//    strcpy(charArr, s.c_str());
+//    return;
+//}
 
 std::string toLower(std::string s){
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
