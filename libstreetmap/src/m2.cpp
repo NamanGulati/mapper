@@ -149,7 +149,7 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
         if(previouslyHighlighted){
             std::vector<StreetSegmentIndex> path = find_path_between_intersections(lastIntersection,idx,15);
             for(int seg : path){
-                std::cout<<seg<<std::endl;
+                //std::cout<<seg<<std::endl;
                 drawPathStreetSegment(app->get_renderer(),segmentData[seg],&ezgl::RED);
             }
             app->flush_drawing();
@@ -521,7 +521,7 @@ void drawPOIs(ezgl::renderer *g){
 }
 
 void loadPNGs(ezgl::renderer *g){
-    if(iconImgs.empty())
-        for(auto type: poiTypes)
-            iconImgs.emplace(type, g->load_png(("libstreetmap/resources/"+type+".png").c_str()));
+//    if(iconImgs.empty())
+//        for(auto type: poiTypes)
+//            iconImgs.emplace(type, g->load_png(("libstreetmap/resources/"+type+".png").c_str()));
 }
