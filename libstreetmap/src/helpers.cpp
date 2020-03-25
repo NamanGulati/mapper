@@ -19,7 +19,7 @@
 #include <sstream>
 #include <boost/format.hpp>
 
-#define RENDER_POIS_STREET 7
+#define RENDER_POIS_STREET 1
 
 
 std::unordered_map< std::string, ezgl::surface*> iconImgs;
@@ -433,8 +433,8 @@ void drawPathStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const 
                 lineWidth=((segDat.lanes!=-1)&&zoomLevel>=RENDER_POIS_STREET?segDat.lanes:4)*(zoomLevel/CITY_ROAD_ADJUST);
             }
             else {//if(segDat.type==StreetType::RESIDENTIAL){
-                if(zoomLevel<6)
-                    return;
+                //if(zoomLevel<6)
+                //    return;
                 lineWidth=((segDat.lanes!=-1)?segDat.lanes:2)*(zoomLevel-RESIDENTIAL_ADJUST);
             }
 

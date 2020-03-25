@@ -85,7 +85,9 @@ void draw_map()
                            initial_world);
 
     appl=application;
+
     application->run(onSetup, onClick, NULL, NULL);
+
     delete appl;
 }
 
@@ -124,7 +126,7 @@ void onSetup(ezgl::application *app, bool new_window){
 
     for (int x = 0; x < getNumStreets(); x++) {
         gtk_list_store_append(completeOptions, &iter);
-        gtk_list_store_set(completeOptions, &iter, 0, (gchar*)castToCharArray(toLower(getStreetName(x))), -1);
+        gtk_list_store_set(completeOptions, &iter, 0, (gchar*)(toLower(getStreetName(x)).c_str()), -1);
     }  
 }
 
@@ -135,7 +137,8 @@ void onSetup(ezgl::application *app, bool new_window){
  * @param y y-coordinate of user click
  **/
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
-{
+{   
+    std::cout<<"BUtton: "<<event->button<<std::endl;
     if(event->button == middle_mouse_button)
         return;
     if(event->button == 1){

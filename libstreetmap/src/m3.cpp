@@ -47,7 +47,8 @@ double compute_path_walking_time(const std::vector<StreetSegmentIndex>& path, co
 
 std::vector<StreetSegmentIndex> find_path_between_intersections(const IntersectionIndex intersect_id_start, const IntersectionIndex intersect_id_end, const double turn_penalty){
     std::priority_queue<segIntersectionData,std::vector<segIntersectionData>, segIntersectionDataComparator> openSet;
-    std::vector<segIntersectionData>cameFrom(adjacencyList.size());
+    std::vector<StreetSegmentIndex>cameFrom(getNumStreetSegments());
+    std::vector<bool> visited(getNumIntersections(),false);
     std::vector<double> gScore(adjacencyList.size(),DBL_MAX);
     gScore[intersect_id_start]=0;
 
@@ -58,30 +59,30 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
     while(!openSet.empty()){
         segIntersectionData current = openSet.top();
         if(current.intersection==intersect_id_end){
-            segIntersectionData temp = current;
+            int temp = current.segment;
             std::vector<StreetSegmentIndex> path;
-            while(temp.segment != -1){
-                path.push_back(temp.segment);
-                temp = cameFrom[temp.intersection];
+            while(temp != -1){
+                path.push_back(temp);
+                temp = cameFrom[temp];
             }
-            //path.push_back(current.segment);
             std::reverse(path.begin(),path.end());
             return path;
         }
+        visited[current.intersection] = true;
         openSet.pop();
         for(segIntersectionData neighbor : adjacencyList[current.intersection]){
             drawPathStreetSegment(g,segmentData[neighbor.segment],&ezgl::BLUE);
             appl->flush_drawing();
             double tentative_gScore = gScore[current.intersection] + get_segment_cost(current.segment,neighbor.segment,current.intersection,turn_penalty);
-            if(current.intersection==366)
-                std::cout<<neighbor.segment<<std::endl;
-            if(tentative_gScore < gScore[neighbor.intersection]){
-                cameFrom[neighbor.intersection] = current;
+
+            if(!visited[neighbor.intersection]&&tentative_gScore < gScore[neighbor.intersection]){
+                cameFrom[neighbor.segment] = current.segment;
                 gScore[neighbor.intersection]= tentative_gScore;
                 neighbor.distance = tentative_gScore + heuristic(current.intersection,neighbor.intersection);
                 openSet.push(neighbor);
             }
         }
+
     }
     return std::vector<StreetSegmentIndex>(0);
 
@@ -89,7 +90,7 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
 
 
 double heuristic(IntersectionIndex current, IntersectionIndex destination){
-    return find_distance_between_two_points(std::make_pair(getIntersectionPosition(current),getIntersectionPosition(destination)))*1;
+    return find_distance_between_two_points(std::make_pair(getIntersectionPosition(current),getIntersectionPosition(destination)));
 }
 double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next, IntersectionIndex intersction, const double turn_penalty){
     if(current==-1)
