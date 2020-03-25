@@ -13,21 +13,23 @@ void delay (int milliseconds) ;
 
 
 double heuristic(IntersectionIndex current, IntersectionIndex destination);
-double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next, IntersectionIndex intersction, const double turn_penalty);
+double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next, const double turn_penalty);
 double compute_segment_walking_time(StreetSegmentIndex seg, const double walking_speed);
 void printDirections(std::vector<StreetSegmentIndex> path);
 
 
 double compute_path_travel_time(const std::vector<StreetSegmentIndex>& path, const double turn_penalty){
-
+    if(path.size()==0)
+        return 0;
     double sum=0;
-    for(int i=0;i<path.size()-1;i++){
+    for(int i=1;i<path.size();i++){
         InfoStreetSegment seg = getInfoStreetSegment(path[i]);
         sum+=find_street_segment_travel_time(path[i]);
-        if(seg.streetID!=getInfoStreetSegment(path[i+1]).streetID)
+        
+        if(seg.streetID!=getInfoStreetSegment(path[i-1]).streetID)
             sum+=turn_penalty;
     }
-    sum+=find_street_segment_travel_time(path.back());
+    sum+=find_street_segment_travel_time(path[0]);
     return sum;
 }
 
@@ -54,7 +56,7 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
 
     openSet.emplace(intersect_id_start,-1,heuristic(intersect_id_start,intersect_id_end));
 
-    ezgl::renderer * g = appl->get_renderer();
+   // ezgl::renderer * g = appl->get_renderer();
     
     while(!openSet.empty()){
         segIntersectionData current = openSet.top();
@@ -71,9 +73,9 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
         visited[current.intersection] = true;
         openSet.pop();
         for(segIntersectionData neighbor : adjacencyList[current.intersection]){
-            drawPathStreetSegment(g,segmentData[neighbor.segment],&ezgl::BLUE);
-            appl->flush_drawing();
-            double tentative_gScore = gScore[current.intersection] + get_segment_cost(current.segment,neighbor.segment,current.intersection,turn_penalty);
+            //drawPathStreetSegment(g,segmentData[neighbor.segment],&ezgl::BLUE);
+            //appl->flush_drawing();
+            double tentative_gScore = gScore[current.intersection] + get_segment_cost(current.segment,neighbor.segment,turn_penalty);
 
             if(!visited[neighbor.intersection]&&tentative_gScore < gScore[neighbor.intersection]){
                 cameFrom[neighbor.segment] = current.segment;
@@ -92,7 +94,7 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
 double heuristic(IntersectionIndex current, IntersectionIndex destination){
     return find_distance_between_two_points(std::make_pair(getIntersectionPosition(current),getIntersectionPosition(destination)));
 }
-double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next, IntersectionIndex intersction, const double turn_penalty){
+double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next, const double turn_penalty){
     if(current==-1)
         return find_street_segment_travel_time(next);
     return  find_street_segment_travel_time(next) + (getInfoStreetSegment(current).streetID!=getInfoStreetSegment(next).streetID?turn_penalty:0);

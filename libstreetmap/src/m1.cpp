@@ -189,7 +189,7 @@ void loadStreetSegStreetInterSpedLimSegLenStreetInterVecs(){
         streetSegsVectors[sgmt.streetID].push_back(i);
         streetIntersections[sgmt.streetID].insert(sgmt.from);
         streetIntersections[sgmt.streetID].insert(sgmt.to);
-        speedLim.push_back(sgmt.speedLimit);
+        speedLim.push_back(sgmt.speedLimit/KM_per_H_to_M_per_S);
         StreetSegmentData dat;
         dat.info=sgmt;
         dat.idx=i;
@@ -244,24 +244,15 @@ void loadStreetSegStreetInterSpedLimSegLenStreetInterVecs(){
         double length = 0;
         std::pair <LatLon, LatLon> pointsL;
         
-        if (sgmt.curvePointCount != 0){
-            pointsL.first = getIntersectionPosition(sgmt.from);
-            pointsL.second = getStreetSegmentCurvePoint(0,i);
+        pointsL.first = getIntersectionPosition(sgmt.from);
+        for(int j=0;j<sgmt.curvePointCount;j++){
+            pointsL.second = getStreetSegmentCurvePoint(j,i);
             length += find_distance_between_two_points(pointsL);
-            for (int x = 0; x < (sgmt.curvePointCount-1); x ++){
-                pointsL.first = getStreetSegmentCurvePoint(x,i);
-                pointsL.second = getStreetSegmentCurvePoint(x + 1,i);
-                length += find_distance_between_two_points(pointsL);
-            }
-            pointsL.first = getStreetSegmentCurvePoint(sgmt.curvePointCount - 1,i);
-            pointsL.second = getIntersectionPosition(sgmt.to);
-            length += find_distance_between_two_points(pointsL);
+            pointsL.first = pointsL.second;
         }
-        else{
-            pointsL.first = getIntersectionPosition(sgmt.from);
-            pointsL.second = getIntersectionPosition(sgmt.to);
-            length += find_distance_between_two_points(pointsL);
-        }
+
+        pointsL.second = getIntersectionPosition(sgmt.to);
+        length += find_distance_between_two_points(pointsL);
         segLen.push_back(length);
 
         if(!sgmt.oneWay)
@@ -351,7 +342,7 @@ double find_street_segment_length(int street_segment_id){
 }//rob
 
 double find_street_segment_travel_time(int street_segment_id){
-    return (find_street_segment_length(street_segment_id)/speedLim[street_segment_id])*KM_per_H_to_M_per_S;
+    return (find_street_segment_length(street_segment_id)/speedLim[street_segment_id]);
 }//rob
 
 //determines the closest intersection to a given point on the map by finding the minimum distance to an intersection 

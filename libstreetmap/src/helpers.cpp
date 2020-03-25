@@ -31,7 +31,7 @@ std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatL
     double lon2 = points.second.lon()*DEGREE_TO_RADIAN;
     double lat1 = points.first.lat()*DEGREE_TO_RADIAN;
     double lat2 = points.second.lat()*DEGREE_TO_RADIAN;
-//    double lat_avg = (lat1 + lat2)/2;
+    double lat_avg = (lat1 + lat2)/2;
     convertedPoints.first.xCoord = lon1*cos(lat_avg);
     convertedPoints.second.xCoord = lon2*cos(lat_avg);
     convertedPoints.first.yCoord = lat1;
