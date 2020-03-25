@@ -11,7 +11,10 @@
 
 void delay (int milliseconds) ;
 
-
+std::vector<StreetSegmentIndex> uber_pool_test(
+                          const IntersectionIndex start_intersection, 
+                          const IntersectionIndex end_intersection,
+                          const double turn_penalty);
 double heuristic(IntersectionIndex current, IntersectionIndex destination);
 double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next, const double turn_penalty);
 double compute_segment_walking_time(StreetSegmentIndex seg, const double walking_speed);
@@ -33,14 +36,16 @@ double compute_path_travel_time(const std::vector<StreetSegmentIndex>& path, con
 }
 
 double compute_path_walking_time(const std::vector<StreetSegmentIndex>& path, const double walking_speed, const double turn_penalty){
+    if(path.size() == 0)
+        return 0;
     double sum=0;
     for(int i=0;i<path.size()-1;i++){
         InfoStreetSegment seg = getInfoStreetSegment(path[i]);
-        sum+=segLen[path[i]]*walking_speed*3.6;
+        sum+=find_street_segment_length(path[i])/walking_speed;
         if(seg.streetID!=getInfoStreetSegment(path[i+1]).streetID)
             sum+=turn_penalty;
     }
-    sum+=segLen[path.back()];
+    sum+=find_street_segment_length(path.back())/walking_speed;
     return sum;
 }
 
@@ -116,13 +121,13 @@ std::pair<std::vector<StreetSegmentIndex>, std::vector<StreetSegmentIndex>> //ch
 
     
     std::vector<double> dist(adjacencyListWalking.size(),INT_MAX); 
-    std::vector<segIntersectionData> parent(adjacencyListWalking.size()); //the path vector
+    std::vector<segIntersectionData> parent(getNumStreetSegments()); //the path vector
     std::vector<bool> visited(getNumIntersections(),false);
     segIntersectionData top; //top of the pq
     std::vector<StreetSegmentIndex> walk;
     std::vector<segIntersectionData> drivingStart; //vector to start the driving search from
     
-    ezgl::renderer * g = appl->get_renderer(); //drawing for testing
+    //ezgl::renderer * g = appl->get_renderer(); //drawing for testing
     
     std::priority_queue < segIntersectionData, std::vector<segIntersectionData>, segIntersectionDataComparator > pq;
     pq.emplace(start_intersection, -1, 0);
@@ -143,30 +148,97 @@ std::pair<std::vector<StreetSegmentIndex>, std::vector<StreetSegmentIndex>> //ch
             { 
                 // Updating distance of current Intersection 
                 dist[currInter.intersection] = dist[top.intersection] + walkTime; 
-                parent[currInter.intersection] = top; //keep track of path
-                InfoStreetSegment previous = getInfoStreetSegment(parent[currInter.intersection].segment); 
-                InfoStreetSegment current = getInfoStreetSegment(currInter.segment);
-                if(current.streetID != previous.streetID){
-                    dist[currInter.intersection] += turn_penalty;
+                parent[currInter.segment] = top; //keep track of path //modified
+                int prevStreet = top.segment;   //modified
+                if (prevStreet >= 0){
+                    InfoStreetSegment previous = getInfoStreetSegment(prevStreet); 
+                    InfoStreetSegment current = getInfoStreetSegment(currInter.segment);
+
+                    if(current.streetID != previous.streetID){
+                        dist[currInter.intersection] += turn_penalty;
+                    }
                 }
                 pq.emplace(currInter.intersection, currInter.segment, dist[currInter.intersection]);
             } 
         }
     }
-    int x = top.intersection;
-    while(parent[x].intersection != -1){
-        walk.push_back(parent[x].segment);
-        x = parent[x].intersection;
-    }
-    std::reverse(walk.begin(), walk.end());
     
-    //std::vector<StreetSegmentIndex> drive = find_path_between_intersections(const IntersectionIndex intersect_id_start, const IntersectionIndex intersect_id_end, turn_penalty);
     
     std::vector<StreetSegmentIndex> drive;
+    
+    
+    segIntersectionData placeHolder; //This is the beginning of the drive path.
+    segIntersectionData x = placeHolder;
+    while(x.segment != -1){
+        walk.push_back(x.segment);
+        x = parent[x.segment];
+    }
+    std::reverse(walk.begin(), walk.end());
     std::pair<std::vector<StreetSegmentIndex>, std::vector<StreetSegmentIndex>> result(walk, drive);
     return result;
 }
 
 double compute_segment_walking_time(StreetSegmentIndex seg, const double walking_speed){
-    return find_street_segment_length(seg)/walking_speed * 3.6; //dont know if conversion is needed
+    return find_street_segment_length(seg)/walking_speed;
+}
+
+
+
+std::vector<StreetSegmentIndex> uber_pool_test(
+                          const IntersectionIndex start_intersection, 
+                          const IntersectionIndex end_intersection,
+                          const double turn_penalty){
+
+    
+    std::vector<double> dist(adjacencyList.size(),INT_MAX); 
+    std::vector<segIntersectionData> parent(getNumStreetSegments()); //modified
+    std::vector<bool> visited(getNumIntersections(),false);
+    segIntersectionData top; //top of the pq
+    std::vector<StreetSegmentIndex> walk;
+    //std::vector<segIntersectionData> drivingStart; //vector to start the driving search from
+    
+    //ezgl::renderer * g = appl->get_renderer(); //drawing for testing
+    
+    std::priority_queue < segIntersectionData, std::vector<segIntersectionData>, segIntersectionDataComparator > pq;
+    pq.emplace(start_intersection, -1, 0);
+    dist[start_intersection] = 0;
+    
+    while (!pq.empty()){
+        top = pq.top(); //break when end is on top
+        if (top.intersection == end_intersection) //within walking distance
+            break;
+        visited[top.intersection] = true;
+        //drivingStart.push_back(top);
+        pq.pop();
+         
+        for (int x = 0; x < adjacencyList[top.intersection].size(); x ++){
+            segIntersectionData currInter = adjacencyList[top.intersection][x];
+            //drawPathStreetSegment(g,segmentData[currInter.segment],&ezgl::BLUE);
+            //appl->flush_drawing();
+            double weight = find_street_segment_travel_time(currInter.segment);
+            if (visited[currInter.intersection] == false && dist[currInter.intersection] > dist[top.intersection] + weight) 
+            { 
+                // Updating distance of current Intersection 
+                dist[currInter.intersection] = dist[top.intersection] + weight; 
+                parent[currInter.segment] = top; //keep track of path //modified
+                int prevStreet = top.segment;   //modified
+                if (prevStreet >= 0){
+                    InfoStreetSegment previous = getInfoStreetSegment(prevStreet); 
+                    InfoStreetSegment current = getInfoStreetSegment(currInter.segment);
+
+                    if(current.streetID != previous.streetID){
+                        dist[currInter.intersection] += turn_penalty;
+                    }
+                }
+                pq.emplace(currInter.intersection, currInter.segment, dist[currInter.intersection]);
+            } 
+        }
+    }
+    segIntersectionData x = top; ////////////////////////modifications
+    while(x.segment != -1){
+        walk.push_back(x.segment);
+        x = parent[x.segment];
+    }
+    std::reverse(walk.begin(), walk.end());
+    return walk;
 }
