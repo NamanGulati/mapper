@@ -173,6 +173,7 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
         intersectionsData[idx].isHighlighted = true;
         highlighted.push_back(idx);
         if(previouslyHighlighted){
+            directionIndex = 0;
             intersectionsData[previousIntersections[0]].isHighlighted=false;
             intersectionsData[previousIntersections[1]].isHighlighted=false;
 
@@ -210,6 +211,11 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
             drawIntersections(app->get_renderer());
             app->flush_drawing();
         }
+        if(!directions.empty()){
+            app->update_message(directions[directionIndex]);
+            directionIndex++;
+        }
+        
         if(!directions.empty()){
             for(int i = 0; i < directions.size(); i++)
                 std::cout << directions[i] << std::endl;
@@ -446,10 +452,12 @@ void findSwitch(GtkWidget *widget){
 }
 
 void nextDirection(GtkWidget *widget, ezgl::application *application){
-    if (directionIndex >= directions.size()){
+    std::cout << "The index is: " << directionIndex << std::endl;
+    std::cout << "Size is : " << directions.size() << std::endl;
+    if (directionIndex == directions.size()){
         directionIndex = 0;
-        return;
     }
+    std::cout << "The index has become: " << directionIndex << std::endl;
     application->update_message(directions[directionIndex]); //maybe refresh drawing
     
     directionIndex ++;
