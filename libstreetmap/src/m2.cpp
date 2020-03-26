@@ -183,8 +183,8 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 
 
             if(!findType){
-                std::vector<StreetSegmentIndex> path = find_path_between_intersections(lastIntersection,idx,15);
                 finalIntersection = idx;
+                std::vector<StreetSegmentIndex> path = find_path_between_intersections(lastIntersection,idx,15);
                 directions = getDirections(std::vector<int>(0),path,walkingSpeed);
                 highlightedSegs=path;
                 drawHighlightedSegs(app->get_renderer());

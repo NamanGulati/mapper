@@ -655,6 +655,9 @@ IntersectionIndex findFirstTurn(std::vector<StreetSegmentIndex> path){
         return 0;
     if(path.size() == 1)
         return finalIntersection;
+    if (getInfoStreetSegment(path[0]).streetID == getInfoStreetSegment(path.back()).streetID){
+        return finalIntersection;
+    }
     int i = 1;
     while(turn == TurnType::STRAIGHT_SAME_STREET && i<path.size()){
         turn = findTurnType(path[i-1], path[i]);
