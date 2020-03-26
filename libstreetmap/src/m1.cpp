@@ -58,7 +58,6 @@ std::vector<POIData> pois; //vector of all points of interest on the map
 std::vector<IntersectionIndex> highlighted; //holds the current highlighted intersections
 std::vector<std::vector<segIntersectionData>> adjacencyList;
 std::vector<std::vector<segIntersectionData>> adjacencyListWalking;
-std::vector<StreetSegmentIndex> highlightedSegs;
 std::vector<StreetSegmentData> segmentData;
 float lat_avg; //average latitude of current map
 float max_lat, min_lat, max_lon, min_lon, max_x, min_x, max_y, min_y;

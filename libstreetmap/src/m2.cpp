@@ -26,6 +26,7 @@
 #include "transit.h"
 #include <sstream>
 #include <gdk/gdk.h>
+#include <regex>
 
 
 #define  HIGH_LEVEL_DRAW_LIM  8.05723e-05 //expressway and small highway
@@ -57,12 +58,17 @@ float diff_x, diff_y;
 void loadPNGs(ezgl::renderer *g);
 std::vector<std::string> directions;
 void drawHighlightedSegs(ezgl::renderer *g);
+void getTimesFromTextBoxes(ezgl::application * application);
 
 ezgl::application * appl;
 bool previouslyHighlighted =false;
 int lastIntersection = -1;
 std::vector<int> previousIntersections(2,0);
 bool findType = false;
+double walkingSpeed=0;
+double walkingLimit=0;
+std::vector<StreetSegmentIndex> highlightedWalkingSegs;
+std::vector<StreetSegmentIndex> highlightedSegs;
 //false means just driving
 //true means walk + drive
 
@@ -102,12 +108,7 @@ void draw_map()
  * main rendering code that renders street segments, intersections, featues and POIS on map refresh
  **/
 void draw_main_canvas(ezgl::renderer *g)
-{   
-    intersectionsData[246].isHighlighted=true;
-    highlighted.push_back(246);
-
-    intersectionsData[247].isHighlighted=true;
-    highlighted.push_back(247);
+{       
     //loads the pngs for icons
     //loadPNGs(g);
     //sets background colour
@@ -155,6 +156,7 @@ void onSetup(ezgl::application *app, bool new_window){
  **/
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 {   
+    getTimesFromTextBoxes(app);
     std::cout<<"BUtton: "<<event->button<<std::endl;
     if(event->button == middle_mouse_button)
         return;
@@ -166,21 +168,35 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
         if(previouslyHighlighted){
             intersectionsData[previousIntersections[0]].isHighlighted=false;
             intersectionsData[previousIntersections[1]].isHighlighted=false;
-            std::vector<StreetSegmentIndex> path = find_path_between_intersections(lastIntersection,idx,15);
-            std::vector<StreetSegmentIndex> emptyPath;
-            //printDirections(path);
-            directions = getDirections(emptyPath, path);
-            highlightedSegs=path;
+
+
+            if(!findType){
+                std::vector<StreetSegmentIndex> path = find_path_between_intersections(lastIntersection,idx,15);
+                directions = getDirections(std::vector<int>(0),path);
+                highlightedSegs=path;
+                drawHighlightedSegs(app->get_renderer());
+
+            }
+            else{
+                std::cout<<"inside here"<<std::endl;
+                std::pair<std::vector<StreetSegmentIndex>,std::vector<StreetSegmentIndex>> path = find_path_with_walk_to_pick_up(lastIntersection, idx, 15, walkingSpeed,walkingLimit);
+                highlightedSegs = path.second;
+                highlightedWalkingSegs = path.first;
+                drawHighlightedSegs(app->get_renderer());
+
+                if(path.first.empty()&&path.second.empty())
+                    directions.clear();
+                else
+                    directions = getDirections(path.first, path.second);
+            }
             previousIntersections.clear();
             previousIntersections.push_back(idx);
             previousIntersections.push_back(lastIntersection);        
             previouslyHighlighted=false;
             highlighted.clear();
 
-            drawHighlightedSegs(app->get_renderer());
             app->flush_drawing();
             app->refresh_drawing();
-            std::cout << "This is the time: " << compute_path_travel_time(path, 15) << std::endl;
         }else{
             lastIntersection=idx;
             previouslyHighlighted=true;
@@ -224,13 +240,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     const char* text = gtk_entry_get_text(search_entry);
     
     //This is the text retrieved from the two text entries
-    GtkEntry* walking_speed = (GtkEntry *) application->get_object("WalkingSpeed");
-    
-    std::string walkSpeedText = gtk_entry_get_text(walking_speed);
-    
-    GtkEntry* walking_limit = (GtkEntry *) application->get_object("WalkingLimit");
-    
-    std::string walkLimitText = gtk_entry_get_text(walking_limit);
+    getTimesFromTextBoxes(application);
     
     std::vector<int> streetMatches1, streetMatches2, streetMatches3, streetMatches4;
     std::pair<int, int> foundStreets1, foundStreets2;
@@ -312,11 +322,27 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         }
         intersectionsData[foundIntersects1[0]].isHighlighted = true;
         intersectionsData[foundIntersects2[0]].isHighlighted = true;
-        std::vector<StreetSegmentIndex> path = find_path_between_intersections(foundIntersects1[0],foundIntersects2[0],15);
-        std::vector<StreetSegmentIndex> emptyPath;
+        
+        if(!findType){
+            std::vector<StreetSegmentIndex> path = find_path_between_intersections(foundIntersects1[0],foundIntersects2[0],15);
+            highlightedWalkingSegs.clear();
             //printDirections(path);
-        directions = getDirections(emptyPath, path);
-        highlightedSegs=path;
+            if(path.empty())
+                directions.clear();
+            else
+                directions = getDirections(std::vector<int>(0),path);
+            highlightedSegs=path;
+        }
+        else{
+            std::pair<std::vector<StreetSegmentIndex>,std::vector<StreetSegmentIndex>> result = find_path_with_walk_to_pick_up(foundIntersects1[0],foundIntersects2[0],15,walkingSpeed,walkingLimit);
+            highlightedSegs = result.second;
+            highlightedWalkingSegs = result.first;
+
+            if(result.first.empty()&&result.second.empty())
+                directions.clear();
+            else
+                directions = getDirections(result.first, result.second);
+        }
         application->refresh_drawing();
         //highlighted.clear();
         if(!directions.empty()){
@@ -547,6 +573,9 @@ void getDiff(float &diffX, float &diffY){
 void drawHighlightedSegs(ezgl::renderer *g){
     for(int seg:highlightedSegs)
         drawPathStreetSegment(g,segmentData[seg],&ezgl::RED);
+    for(int seg:highlightedWalkingSegs)
+        drawPathStreetSegment(g,segmentData[seg],&ezgl::GREEN);
+
 }
 /**
  * @param g ezgl renderer
@@ -622,6 +651,9 @@ void drawSegments(ezgl::renderer *g){
     for(int i=0;i<highlightedSegs.size();i++){
         drawPathStreetSegment(g,segmentData[highlightedSegs[i]],&ezgl::RED);
     }
+    for(int i=0;i<highlightedWalkingSegs.size();i++){
+        drawPathStreetSegment(g,segmentData[highlightedWalkingSegs[i]],&ezgl::GREEN);
+    }
 }
 
 void drawIntersections(ezgl::renderer *g){
@@ -646,4 +678,19 @@ void loadPNGs(ezgl::renderer *g){
     if(iconImgs.empty())
         for(auto type: poiTypes)
             iconImgs.emplace(type, g->load_png(("libstreetmap/resources/"+type+".png").c_str()));
+}
+
+void getTimesFromTextBoxes(ezgl::application * application){
+    GtkEntry* walking_speed = (GtkEntry *) application->get_object("WalkingSpeed");
+    
+    std::string walkSpeedText = gtk_entry_get_text(walking_speed);
+    
+    GtkEntry* walking_limit = (GtkEntry *) application->get_object("WalkingLimit");
+    
+    std::string walkLimitText = gtk_entry_get_text(walking_limit);
+    std::regex cond("([A-Z]|[a-z])\\w+");
+    if(walkSpeedText!=""||!std::regex_match(walkSpeedText,cond))    
+        walkingSpeed = atof(walkSpeedText.c_str());
+    if(walkLimitText!=""||!std::regex_match(walkLimitText,cond))
+        walkingLimit = atof(walkLimitText.c_str());
 }

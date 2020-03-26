@@ -82,5 +82,8 @@ extern ezgl::application * appl;
 extern std::vector<StreetSegmentData> segmentData;
 
 extern float maxSpeedLim;
+
+extern std::vector<StreetSegmentIndex> highlightedWalkingSegs;
+
 #endif /* GLOBALS_H */
 
