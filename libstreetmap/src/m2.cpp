@@ -41,6 +41,7 @@ void draw_main_canvas(ezgl::renderer *g);
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y);
 void onSearch(GtkWidget *widget, ezgl::application *application);
 void onSetup(ezgl::application *app, bool new_window);
+void findSwitch(GtkWidget *widget);
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const ezgl::color * color);
 void drawSegments(ezgl::renderer *g);
 void drawPOIs(ezgl::renderer *g);
@@ -61,6 +62,9 @@ ezgl::application * appl;
 bool previouslyHighlighted =false;
 int lastIntersection = -1;
 std::vector<int> previousIntersections(2,0);
+bool findType = false;
+//false means just driving
+//true means walk + drive
 
 void draw_map()
 {
@@ -90,7 +94,6 @@ void draw_map()
     appl=application;
 
     application->run(onSetup, onClick, NULL, NULL);
-        find_path_between_intersections(114780, 26866, 15);
 
     delete appl;
 }
@@ -100,11 +103,11 @@ void draw_map()
  **/
 void draw_main_canvas(ezgl::renderer *g)
 {   
-    intersectionsData[114780].isHighlighted=true;
-    highlighted.push_back(114780);
+    intersectionsData[246].isHighlighted=true;
+    highlighted.push_back(246);
 
-    intersectionsData[26866].isHighlighted=true;
-    highlighted.push_back(26866);
+    intersectionsData[247].isHighlighted=true;
+    highlighted.push_back(247);
     //loads the pngs for icons
     //loadPNGs(g);
     //sets background colour
@@ -138,6 +141,10 @@ void onSetup(ezgl::application *app, bool new_window){
         gtk_list_store_append(completeOptions, &iter);
         gtk_list_store_set(completeOptions, &iter, 0, (gchar*)(toLower(getStreetName(x)).c_str()), -1);
     }  
+    
+    ///////////////////TOGGLE BUTTON
+    GObject *uberPool = app->get_object("UberPool");
+    g_signal_connect(uberPool, "toggled", G_CALLBACK(findSwitch), NULL);
 }
 
 /**
@@ -172,6 +179,7 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
             drawHighlightedSegs(app->get_renderer());
             app->flush_drawing();
             app->refresh_drawing();
+            std::cout << "This is the time: " << compute_path_travel_time(path, 15) << std::endl;
         }else{
             lastIntersection=idx;
             previouslyHighlighted=true;
@@ -213,6 +221,15 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     
     //Retrieve the text from the search entry
     const char* text = gtk_entry_get_text(search_entry);
+    
+    //This is the text retrieved from the two text entries
+    GtkEntry* walking_speed = (GtkEntry *) application->get_object("WalkingSpeed");
+    
+    std::string walkSpeedText = gtk_entry_get_text(walking_speed);
+    
+    GtkEntry* walking_limit = (GtkEntry *) application->get_object("WalkingLimit");
+    
+    std::string walkLimitText = gtk_entry_get_text(walking_limit);
     
     std::vector<int> streetMatches1, streetMatches2, streetMatches3, streetMatches4;
     std::pair<int, int> foundStreets1, foundStreets2;
@@ -376,6 +393,17 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     application->change_canvas_world_coordinates("MainCanvas", new_world);
     application->refresh_drawing();
     
+    
+}
+
+void findSwitch(GtkWidget *widget){
+    GtkButton* switch_button = (GtkButton *) widget;
+    if (findType == false){
+        findType = true;
+    }
+    else{
+        findType = false;
+    }
     
 }
 

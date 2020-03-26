@@ -22,7 +22,7 @@
   <object class="GtkWindow" id="MainWindow">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="title">EZGL Example Application</property>
+    <property name="title">Commuter Maps</property>
     <property name="default_width">800</property>
     <property name="default_height">600</property>
     <child>
@@ -164,7 +164,52 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
+                <property name="top_attach">9</property>
+                <property name="width">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="WalkingSpeed">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="secondary_icon_stock">gtk-edit</property>
+                <property name="secondary_icon_activatable">False</property>
+                <property name="secondary_icon_tooltip_text" translatable="yes">Please enter a walking speed in meters per second</property>
+                <property name="placeholder_text" translatable="yes">Walking Speed(m/s)</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
                 <property name="top_attach">6</property>
+                <property name="width">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="WalkingLimit">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="secondary_icon_stock">gtk-edit</property>
+                <property name="primary_icon_activatable">False</property>
+                <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">False</property>
+                <property name="secondary_icon_tooltip_text" translatable="yes">Please enter a walking time limit in seconds</property>
+                <property name="placeholder_text" translatable="yes">Walking Time Limit(s)</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">7</property>
+                <property name="width">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="UberPool">
+                <property name="label" translatable="yes">Find Path with Walking</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">8</property>
                 <property name="width">3</property>
               </packing>
             </child>
@@ -235,9 +280,6 @@ All searches are activated by pressing enter</property>
           <placeholder/>
         </child>
       </object>
-    </child>
-    <child type="titlebar">
-      <placeholder/>
     </child>
   </object>
 </interface>
