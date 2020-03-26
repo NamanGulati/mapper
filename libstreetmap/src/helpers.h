@@ -157,8 +157,9 @@ void drawPathStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const 
 TurnType findTurnType(StreetSegmentIndex first, StreetSegmentIndex second);
 void printDirections(std::vector<IntersectionIndex> walkPath);
 std::string getLengthStreet(std::vector<StreetSegmentIndex> path, StreetIndex street_id, int idx);
-std::vector<std::string> getDirections(std::vector<IntersectionIndex> walkPath);
+std::vector<std::string> getDirections(std::vector<IntersectionIndex> walkPath, std::vector<IntersectionIndex> drivePath);
 std::string calcBearing(LatLon A, LatLon B);
 std::string calcDirection(InfoStreetSegment seg1, InfoStreetSegment seg2);
+IntersectionIndex findFirstTurn(std::vector<StreetSegmentIndex> path);
 #endif /* HELPERS_H */
 

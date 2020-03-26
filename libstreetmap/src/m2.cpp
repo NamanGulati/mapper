@@ -167,8 +167,9 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
             intersectionsData[previousIntersections[0]].isHighlighted=false;
             intersectionsData[previousIntersections[1]].isHighlighted=false;
             std::vector<StreetSegmentIndex> path = find_path_between_intersections(lastIntersection,idx,15);
+            std::vector<StreetSegmentIndex> emptyPath;
             //printDirections(path);
-            directions = getDirections(path);
+            directions = getDirections(emptyPath, path);
             highlightedSegs=path;
             previousIntersections.clear();
             previousIntersections.push_back(idx);
@@ -312,8 +313,9 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         intersectionsData[foundIntersects1[0]].isHighlighted = true;
         intersectionsData[foundIntersects2[0]].isHighlighted = true;
         std::vector<StreetSegmentIndex> path = find_path_between_intersections(foundIntersects1[0],foundIntersects2[0],15);
+        std::vector<StreetSegmentIndex> emptyPath;
             //printDirections(path);
-        directions = getDirections(path);
+        directions = getDirections(emptyPath, path);
         highlightedSegs=path;
         application->refresh_drawing();
         //highlighted.clear();
@@ -641,7 +643,7 @@ void drawPOIs(ezgl::renderer *g){
 }
 
 void loadPNGs(ezgl::renderer *g){
-//    if(iconImgs.empty())
-//        for(auto type: poiTypes)
-//            iconImgs.emplace(type, g->load_png(("libstreetmap/resources/"+type+".png").c_str()));
+    if(iconImgs.empty())
+        for(auto type: poiTypes)
+            iconImgs.emplace(type, g->load_png(("libstreetmap/resources/"+type+".png").c_str()));
 }
