@@ -161,5 +161,6 @@ std::vector<std::string> getDirections(std::vector<IntersectionIndex> walkPath, 
 std::string calcBearing(LatLon A, LatLon B);
 std::string calcDirection(InfoStreetSegment seg1, InfoStreetSegment seg2);
 IntersectionIndex findFirstTurn(std::vector<StreetSegmentIndex> path);
+void instructionsPopup(ezgl::application *app);
 #endif /* HELPERS_H */
 

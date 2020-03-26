@@ -340,6 +340,35 @@ void infoPopup(ezgl::application *app, std::vector<int> interId, std::string tra
     );
 }
 
+void instructionsPopup(ezgl::application *app){
+    GObject *window;
+    GtkWidget *content_area;
+    GtkWidget *label1;
+    GtkWidget *dialog;
+    window = app->get_object(app->get_main_window_id().c_str());
+    dialog = gtk_dialog_new_with_buttons(
+    "INSTRUCTIONS: ",
+    (GtkWindow*) window,
+    GTK_DIALOG_MODAL,
+    ("OK"),
+    GTK_RESPONSE_ACCEPT,
+    ("CANCEL"),
+    GTK_RESPONSE_REJECT,
+    NULL);
+
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    label1 = gtk_label_new("To get directions: enter <intersection1> to <intersection2> in the search bar and press enter\nclick on \"Find Path with walking\" for walking+driving directions\nThe green path is the walking path and red is the driving path\n\nYou can also click on two intersections on the map to get directions between them\n\nDirections are shown on the bottom of the window, click Next Direction to iterate through them\n\nFor example you can enter \"college and spadina to front and yonge\" in the search bar\nThe walking speed is in (m/s) and time limit is in (s)");
+    gtk_container_add(GTK_CONTAINER(content_area), label1);
+    gtk_widget_show_all(dialog);
+    g_signal_connect(
+    GTK_DIALOG(dialog),
+    "response",
+    G_CALLBACK(onDialogResponse),
+    NULL
+    );
+}
+
+
 void onDialogResponse(GtkDialog *dialog, gint response_id, gpointer user_data){
     std::cout << "response is ";
     switch(response_id) {

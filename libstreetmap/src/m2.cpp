@@ -66,10 +66,11 @@ bool previouslyHighlighted =false;
 int lastIntersection = -1;
 std::vector<int> previousIntersections(2,0);
 bool findType = false;
-double walkingSpeed=0;
-double walkingLimit=0;
+double walkingSpeed=1.25;
+double walkingLimit=1200;
 std::vector<StreetSegmentIndex> highlightedWalkingSegs;
 std::vector<StreetSegmentIndex> highlightedSegs;
+bool first=true;
 //false means just driving
 //true means walk + drive
 
@@ -112,6 +113,10 @@ void draw_map()
  **/
 void draw_main_canvas(ezgl::renderer *g)
 {       
+    if(first){
+        instructionsPopup(appl);
+        first=false;
+    }
     //loads the pngs for icons
     //loadPNGs(g);
     //sets background colour
