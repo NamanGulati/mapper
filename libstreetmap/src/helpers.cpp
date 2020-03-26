@@ -565,7 +565,7 @@ std::vector<std::string> getDirections(std::vector<StreetSegmentIndex> walkPath 
     if(totalPathDistance > 1000)
         totalDistMsg = std::to_string(int(round(totalPathDistance/1000))) + " km";
     else
-        totalDistMsg = std::to_string(round(totalPathDistance)) + " m";
+        totalDistMsg = std::to_string(int(round(totalPathDistance))) + " m";
     
     if(totalTime > 3600)
         totalTimeMsg = std::to_string(totalTime/3600) + " h. and " +std::to_string(totalTime/60-totalTime/3600*60)+ " min.";
@@ -577,7 +577,9 @@ std::vector<std::string> getDirections(std::vector<StreetSegmentIndex> walkPath 
     
     directions.push_back("Your trip is " +totalDistMsg+ " long and will take " +totalTimeMsg);
     
-    directions.push_back("Go straight on " +getStreetName(getInfoStreetSegment(walkPath[0]).streetID)+ " towards " +getIntersectionName(findIntersectionOfSegments(walkPath[0],walkPath[1]))
+    std::string initDir = calcDirection(getInfoStreetSegment(walkPath[0]) , getInfoStreetSegment(walkPath[1]));
+    
+    directions.push_back("Head " +initDir+ " on "+getStreetName(getInfoStreetSegment(walkPath[0]).streetID)+ " towards " +getIntersectionName(findIntersectionOfSegments(walkPath[0],walkPath[1]))
                 +" for " +initDist);
     
     for(int i = 1; i < walkPath.size(); i++){
@@ -635,4 +637,44 @@ std::string getLengthStreet(std::vector<StreetSegmentIndex> path, StreetIndex st
         return (std::to_string(intLength/1000) + " km.");
     else
         return (std::to_string(intLength - ((intLength % 10)-((intLength%10>=5)?10:0))) + " m.");
+}
+
+std::string calcBearing(LatLon A, LatLon B){
+    float X = cos(A.lat()) * sin(abs(A.lon()-B.lon()));
+    float Y = cos(A.lat())*sin(B.lat()) - sin(A.lat())*cos(B.lat())*cos(abs(A.lon()-B.lon()));
+    
+    double bearing = atan2(X,Y)/DEGREE_TO_RADIAN;
+    if(bearing < 0)
+        return "Negatron";
+    if(bearing > 360)
+        return "Bigga";
+    if((bearing>=337.5 && bearing<=360) || (bearing>=0 && bearing<=22.5))
+        return "North";
+    else if(bearing>=22.5 && bearing<=67.5)
+        return "Northeast";
+    else if(bearing<=112.5 && bearing>=67.5)
+        return "East";
+    else if(bearing>=112.5 && bearing<=157.5)
+        return "Southeast";
+    else if(bearing<=202.5 && bearing>=157.5)
+        return "South";
+    else if(bearing>=202.5 && bearing<=247.5)
+        return "Southwest";
+    else if(bearing>=247.5 && bearing<=292.5)
+        return "West";
+    else if(bearing>=292.5 && bearing <=337.5)
+        return "Northwest";
+    else
+        return "shieeet";
+}
+
+std::string calcDirection(InfoStreetSegment seg1, InfoStreetSegment seg2){
+    if(seg1.from == seg2.from)
+        return calcBearing(getIntersectionPosition(seg1.from),getFirstCurvePoint(seg2.from, seg2));
+    else if(seg1.from == seg2.to)
+        return calcBearing(getIntersectionPosition(seg1.from),getLastCurvePoint(seg2.from, seg2));
+    else if(seg1.to == seg2.from)
+        return calcBearing(getIntersectionPosition(seg1.to),getFirstCurvePoint(seg2.from, seg2));
+    else if(seg1.to == seg2.to)
+        return calcBearing(getIntersectionPosition(seg1.to),getLastCurvePoint(seg2.from, seg2));
 }

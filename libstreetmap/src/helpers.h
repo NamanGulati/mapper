@@ -157,5 +157,7 @@ TurnType findTurnType(StreetSegmentIndex first, StreetSegmentIndex second);
 void printDirections(std::vector<IntersectionIndex> walkPath);
 std::string getLengthStreet(std::vector<StreetSegmentIndex> path, StreetIndex street_id, int idx);
 std::vector<std::string> getDirections(std::vector<IntersectionIndex> walkPath);
+std::string calcBearing(LatLon A, LatLon B);
+std::string calcDirection(InfoStreetSegment seg1, InfoStreetSegment seg2);
 #endif /* HELPERS_H */
 
