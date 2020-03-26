@@ -457,12 +457,12 @@ void findSwitch(GtkWidget *widget){
 }
 
 void nextDirection(GtkWidget *widget, ezgl::application *application){
-    std::cout << "The index is: " << directionIndex << std::endl;
-    std::cout << "Size is : " << directions.size() << std::endl;
+    if (directions.empty()){
+        return;
+    }
     if (directionIndex == directions.size()){
         directionIndex = 0;
     }
-    std::cout << "The index has become: " << directionIndex << std::endl;
     application->update_message(directions[directionIndex]); //maybe refresh drawing
     
     directionIndex ++;
