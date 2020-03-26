@@ -162,6 +162,7 @@ void close_map() {
     highlighted.clear();
     adjacencyList.clear();
     adjacencyListWalking.clear();
+    highlightedSegs.clear();
     iconImgs.clear();
     segmentData.clear();
     highlightedSegs.clear();
