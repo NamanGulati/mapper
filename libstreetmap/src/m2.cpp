@@ -43,6 +43,7 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y);
 void onSearch(GtkWidget *widget, ezgl::application *application);
 void onSetup(ezgl::application *app, bool new_window);
 void findSwitch(GtkWidget *widget);
+void nextDirection(GtkWidget *widget, ezgl::application *application);
 void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const ezgl::color * color);
 void drawSegments(ezgl::renderer *g);
 void drawPOIs(ezgl::renderer *g);
@@ -71,6 +72,8 @@ std::vector<StreetSegmentIndex> highlightedWalkingSegs;
 std::vector<StreetSegmentIndex> highlightedSegs;
 //false means just driving
 //true means walk + drive
+
+int directionIndex = 0;
 
 void draw_map()
 {
@@ -146,6 +149,10 @@ void onSetup(ezgl::application *app, bool new_window){
     ///////////////////TOGGLE BUTTON
     GObject *uberPool = app->get_object("UberPool");
     g_signal_connect(uberPool, "toggled", G_CALLBACK(findSwitch), NULL);
+    
+    ///////////////////Next Direction
+    GObject *nextDir = app->get_object("NextDir");
+    g_signal_connect(nextDir, "clicked", G_CALLBACK(nextDirection), app);
 }
 
 /**
@@ -247,6 +254,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     std::vector<int> foundIntersects1, foundIntersects2;
     std::vector<std::string> toSearch = parse4Streets(text);
     
+    directionIndex = 0;
     if (toSearch.size() == 1){
         std::cout << "No Intersections" << std::endl;
     }
@@ -345,6 +353,8 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         }
         application->refresh_drawing();
         //highlighted.clear();
+        application->update_message(directions[directionIndex]);
+        directionIndex++;
         if(!directions.empty()){
             for(int i = 0; i < directions.size(); i++)
                 std::cout << directions[i] << std::endl;
@@ -433,6 +443,16 @@ void findSwitch(GtkWidget *widget){
         findType = false;
     }
     
+}
+
+void nextDirection(GtkWidget *widget, ezgl::application *application){
+    if (directionIndex >= directions.size()){
+        directionIndex = 0;
+        return;
+    }
+    application->update_message(directions[directionIndex]); //maybe refresh drawing
+    
+    directionIndex ++;
 }
 
 /**

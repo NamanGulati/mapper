@@ -245,6 +245,7 @@
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">2</property>
+            <property name="height">2</property>
           </packing>
         </child>
         <child>
@@ -267,7 +268,12 @@
             <property name="primary_icon_activatable">False</property>
             <property name="primary_icon_sensitive">False</property>
             <property name="primary_icon_tooltip_text" translatable="yes">You can enter a city name to load a new map
-You can enter an intersection to locate it on the given map, this 	feature includes autocomplete
+
+You can enter an intersection to locate it on the given map, this feature includes autocomplete
+
+You can search for two intersections by either purely driving or a mix of walking and driving (toggled on by the "Find Path with Walking" button")
+The walking and driving feature as additional parameters that may be inputted on the right-hand side
+
 All searches are activated by pressing enter</property>
             <property name="placeholder_text" translatable="yes">Search here for city or intersection (mouse over the icon for more info)</property>
             <property name="completion">AutoCompleter</property>
@@ -275,6 +281,19 @@ All searches are activated by pressing enter</property>
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="NextDir">
+            <property name="label" translatable="yes">Next Direction</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="focus_on_click">False</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">3</property>
           </packing>
         </child>
         <child>
