@@ -111,7 +111,7 @@ void draw_main_canvas(ezgl::renderer *g)
     drawSegments(g);
     drawIntersections(g);
     drawPOIs(g);
-    printDirections();
+    //printDirections();
 }
 
 /**
@@ -154,6 +154,7 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
         highlighted.push_back(idx);
         if(previouslyHighlighted){
             std::vector<StreetSegmentIndex> path = find_path_between_intersections(lastIntersection,idx,15);
+            printDirections(path);
             for(int seg : path){
                 //std::cout<<seg<<std::endl;
                 drawPathStreetSegment(app->get_renderer(),segmentData[seg],&ezgl::RED);
