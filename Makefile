@@ -124,25 +124,25 @@ PRODUCTS=$(EXE) $(LIB_STREETMAP_TEST) $(notdir $(LIB_STREETMAP))
 #What warning flags should be passed to the compiler?
 #Turn on lots of warnings, but not signed/unsigned comparison as that
 #produces nuisance warnings if you use int to loop over STL vectors etc.
-WARN_CXXFLAGS = -Wall \
-			 -Wextra \
-			 -Wpedantic \
-			 -Wcast-qual \
-			 -Wcast-align \
-			 -Wformat=2 \
-			 -Wlogical-op \
-			 -Wmissing-declarations \
-			 -Wmissing-include-dirs \
-			 -Wswitch-default \
-			 -Wundef \
-			 -Wunused-variable \
-			 -Woverloaded-virtual \
-			 -Wctor-dtor-privacy \
-			 -Wnon-virtual-dtor \
-			 -Wredundant-decls \
-			 -Wshadow \
-			 -Wno-sign-compare \
-			 -Wold-style-cast \
+WARN_CXXFLAGS = #-Wall \
+# 			 -Wextra \
+# 			 -Wpedantic \
+# 			 -Wcast-qual \
+# 			 -Wcast-align \
+# 			 -Wformat=2 \
+# 			 -Wlogical-op \
+# 			 -Wmissing-declarations \
+# 			 -Wmissing-include-dirs \
+# 			 -Wswitch-default \
+# 			 -Wundef \
+# 			 -Wunused-variable \
+# 			 -Woverloaded-virtual \
+# 			 -Wctor-dtor-privacy \
+# 			 -Wnon-virtual-dtor \
+# 			 -Wredundant-decls \
+# 			 -Wshadow \
+# 			 -Wno-sign-compare \
+# 			 -Wold-style-cast \
 			 #-Wconversion \
 			 #-Wno-sign-conversion
 

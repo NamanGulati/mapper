@@ -218,12 +218,6 @@ void clearHighlights(){
     highlighted.clear();
 }
 
-//char * castToCharArray(std::string s){
-//    int a = s.length();
-//    char charArr[a + 1]; 
-//    strcpy(charArr, s.c_str());
-//    return;
-//}
 
 std::string toLower(std::string s){
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
@@ -339,6 +333,9 @@ void infoPopup(ezgl::application *app, std::vector<int> interId, std::string tra
     );
 }
 
+/**
+ * load popup window of instructions
+ */
 void instructionsPopup(ezgl::application *app){
     GObject *window;
     GtkWidget *content_area;
@@ -393,6 +390,12 @@ void onDialogResponse(GtkDialog *dialog, gint response_id, gpointer user_data){
     gtk_widget_destroy(GTK_WIDGET (dialog));
 }
 
+/**
+ * deterimine if turn has been taken
+ * @param O intermeditary point - point of connecting intersection
+ * @param from from point - point of originating segment
+ * @param to to point - point of destination segment
+ * */
 TurnType determineDirection(LatLon O, LatLon from, LatLon to){
     ezgl::point2d pointA = LatLonTo2d(to);
     ezgl::point2d pointB = LatLonTo2d(from);
@@ -409,17 +412,28 @@ TurnType determineDirection(LatLon O, LatLon from, LatLon to){
     else return TurnType::STRAIGHT_DIFF_STREET;
 
 }
+
+/**
+ * get position of first curve point of @param idx
+ * */
 LatLon getFirstCurvePoint(StreetSegmentIndex idx, InfoStreetSegment seg){
     if(getInfoStreetSegment(idx).curvePointCount>0)
         return getStreetSegmentCurvePoint(0, idx);
     return getIntersectionPosition(seg.to);
 }
+
+/**
+ * get position of last curve point of @param idx
+ * */
 LatLon getLastCurvePoint(StreetSegmentIndex idx, InfoStreetSegment seg){
     if(getInfoStreetSegment(idx).curvePointCount>0)
         return getStreetSegmentCurvePoint(getInfoStreetSegment(idx).curvePointCount-1, idx);
     return getIntersectionPosition(seg.from);
 }
 
+/**
+ * find the TurnType of turn made to get from @param first to @param second
+ * */
 TurnType findTurnType(StreetSegmentIndex first, StreetSegmentIndex second){
 
     InfoStreetSegment seg1 = getInfoStreetSegment(first);
@@ -444,6 +458,9 @@ TurnType findTurnType(StreetSegmentIndex first, StreetSegmentIndex second){
 
 }
 
+/**
+ * get intersection between @param first and @param second
+ * */
 IntersectionIndex findIntersectionOfSegments(StreetSegmentIndex first, StreetSegmentIndex second){
     InfoStreetSegment seg1 = getInfoStreetSegment(first);
     InfoStreetSegment seg2 = getInfoStreetSegment(second);
@@ -456,6 +473,9 @@ IntersectionIndex findIntersectionOfSegments(StreetSegmentIndex first, StreetSeg
         return 0;
 }
 
+/**
+ * get total distance traversed by @param path
+ * */
 int getTotalPathDistance(std::vector<StreetSegmentIndex> path){
     int totalDist = 0;
     for(int i = 0; i < path.size(); i++){
@@ -464,6 +484,11 @@ int getTotalPathDistance(std::vector<StreetSegmentIndex> path){
     return totalDist;
 }
 
+/**
+ * draw path street segment
+ * @param segDat segmentData of segment to be drawn
+ * @param color  color of segment to be drawn - white if none provided
+ * */
 void drawPathStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const ezgl::color * color = nullptr){
             g->set_color(ezgl::WHITE);
 
@@ -478,6 +503,9 @@ void drawPathStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const 
             }
 }
 
+/**
+ * get walking directions for @param walkPath and driving directions @param drivePath
+ * */
 std::vector<std::string> getDirections(std::vector<StreetSegmentIndex> walkPath, std::vector<StreetSegmentIndex> drivePath, int walkingSpeed){
     
     std::vector<std::string> directions; 
@@ -597,6 +625,12 @@ std::vector<std::string> getDirections(std::vector<StreetSegmentIndex> walkPath,
     directions.push_back("You have arrived at your destination!");
     return directions;
 }
+
+/**
+ * gets rounded traveled on @param street)id in path
+ * @param path path being taken
+ * @param idx  index of segment in path
+ * */
 std::string getLengthStreet(std::vector<StreetSegmentIndex> path, StreetIndex street_id, int idx){
     double length = 0;
     for(int i = idx; i < path.size(); i++){
@@ -612,6 +646,9 @@ std::string getLengthStreet(std::vector<StreetSegmentIndex> path, StreetIndex st
         return (std::to_string(intLength - ((intLength % 10)-((intLength%10>=5)?10:0)/*rounding*/)) + " m.");
 }
 
+/**
+ * find first turn in @param path
+ * */
 IntersectionIndex findFirstTurn(std::vector<StreetSegmentIndex> path){
     TurnType turn = TurnType::STRAIGHT_SAME_STREET;
     if(path.empty())

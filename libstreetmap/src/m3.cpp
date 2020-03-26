@@ -102,6 +102,11 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
 
 }
 
+/**
+ * returns euclidian distance between current intersectiona and destination
+ * @param current intersection id of current intersection
+ * @param destination intersection id of destination intersection
+ * */
 
 double heuristic(IntersectionIndex current, IntersectionIndex destination){
     //return find_distance_between_two_points(std::make_pair(getIntersectionPosition(current),getIntersectionPosition(destination)));
@@ -109,18 +114,20 @@ double heuristic(IntersectionIndex current, IntersectionIndex destination){
    ezgl::point2d dest (LatLonTo2d(getIntersectionPosition(destination)));
    return std::hypot(dest.x - cur.x, dest.y - cur.y)*EARTH_RADIUS_METERS;
 }
+
+/**
+ * get travel time to go from previous intersection to current
+ * 
+ * @param current StreetSegmentIndex of segment taken to reach current intersection
+ * @param next StreetSegmentIndex of segment being explored
+ * @param turn_penalty penalty added if turn is made (if street of last seg != street of current seg) 
+ * */
 double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next, const double turn_penalty){
     if(current==-1)
         return find_street_segment_travel_time(next);
     return  find_street_segment_travel_time(next) + ((getInfoStreetSegment(current).streetID!=getInfoStreetSegment(next).streetID)?turn_penalty:0);
 }
 
-
-    
-void delay (int milliseconds) {  // Pause for milliseconds
-    std::chrono::milliseconds duration(milliseconds);
-    std::this_thread::sleep_for(duration);
-}
 
 std::pair<std::vector<StreetSegmentIndex>, std::vector<StreetSegmentIndex>> //check units
          find_path_with_walk_to_pick_up(
@@ -223,6 +230,10 @@ std::pair<std::vector<StreetSegmentIndex>, std::vector<StreetSegmentIndex>> //ch
     return result;
 }
 
+/**
+ * get driving path for all intersections within walking distance
+ * 
+ * */
 std::vector<StreetSegmentIndex> drive(const std::vector<IntersectionIndex> intersect_id_start, const IntersectionIndex intersect_id_end, const double turn_penalty){
     std::priority_queue<segIntersectionData,std::vector<segIntersectionData>, segIntersectionDataComparator> openSet;
     std::vector<StreetSegmentIndex>cameFrom(getNumStreetSegments());
@@ -278,11 +289,22 @@ std::vector<StreetSegmentIndex> drive(const std::vector<IntersectionIndex> inter
 
 }
 
-
+/**
+ *  get walking time of @param seg
+ *  @param walking_speed walking speed
+ * */
 double compute_segment_walking_time(StreetSegmentIndex seg, const double walking_speed){
     return find_street_segment_length(seg)/walking_speed;
 }
 
+/**
+ * get travel time to go from previous intersection to current
+ * 
+ * @param current StreetSegmentIndex of segment taken to reach current intersection
+ * @param next StreetSegmentIndex of segment being explored
+ * @param turn_penalty penalty added if turn is made (if street of last seg != street of current seg) 
+ * @param walking_speed speed of walking
+ * */
 double get_segment_walk_cost(StreetSegmentIndex current, StreetSegmentIndex next, const double turn_penalty, const double walking_speed){
     if(current==-1)
         return compute_segment_walking_time(next, walking_speed);

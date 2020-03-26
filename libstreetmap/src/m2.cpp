@@ -447,6 +447,9 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     
 }
 
+/**
+ * call back for walking directions button
+ * */
 void findSwitch(GtkWidget *widget){
     GtkButton* switch_button = (GtkButton *) widget;
     if (findType == false){
@@ -457,6 +460,7 @@ void findSwitch(GtkWidget *widget){
     }
     
 }
+
 
 void nextDirection(GtkWidget *widget, ezgl::application *application){
     if (directions.empty()){
@@ -591,6 +595,7 @@ bool drawStreetName(ezgl::renderer *g,StreetSegmentData segDat){
     return done;
 }
 
+
 void getDiff(float &diffX, float &diffY){
     
     if(min_x*max_x > 0 && min_y*max_y > 0){
@@ -604,7 +609,9 @@ void getDiff(float &diffX, float &diffY){
         diffY = max_y - min_y;
 }
 
-
+/**
+ * draw highlighted sements to display path
+ * */
 void drawHighlightedSegs(ezgl::renderer *g){
     for(int seg:highlightedSegs)
         drawPathStreetSegment(g,segmentData[seg],&ezgl::RED);
@@ -622,6 +629,9 @@ void drawPOIText(ezgl::renderer * g,POIIndex idx){
     g->draw_text(LatLonTo2d(pois[idx].position),pois[idx].name);
 }
 
+/**
+ * draw map features
+ * */
 void drawFeatures(ezgl::renderer *g){
     float MIN_RENDER = 0.07;
     float MAX_RENDER = 0.3;
@@ -663,6 +673,9 @@ void drawFeatures(ezgl::renderer *g){
     }
 }
 
+/**
+ * draw all map street segments
+ * */
 void drawSegments(ezgl::renderer *g){
     for (size_t i = 0; i < streetSegData.size(); i++)
     {
@@ -691,6 +704,9 @@ void drawSegments(ezgl::renderer *g){
     }
 }
 
+/**
+ * draw all map intersections
+ * */
 void drawIntersections(ezgl::renderer *g){
     for (int i = 0; i < intersectionsData.size(); i++)
     {
@@ -709,12 +725,18 @@ void drawPOIs(ezgl::renderer *g){
     }
 }
 
+/**
+ * load PNG of icons
+ * */
 void loadPNGs(ezgl::renderer *g){
     if(iconImgs.empty())
         for(auto type: poiTypes)
             iconImgs.emplace(type, g->load_png(("libstreetmap/resources/"+type+".png").c_str()));
 }
 
+/**
+ * load walking speed and time limit from text boxes
+ * */
 void getTimesFromTextBoxes(ezgl::application * application){
     GtkEntry* walking_speed = (GtkEntry *) application->get_object("WalkingSpeed");
     
