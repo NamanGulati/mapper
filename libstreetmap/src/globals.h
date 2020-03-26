@@ -85,5 +85,13 @@ extern float maxSpeedLim;
 
 extern std::vector<StreetSegmentIndex> highlightedWalkingSegs;
 
+extern IntersectionIndex finalIntersection;
+
+constexpr int DEFAULT_TURN_PEN = 15;
+
+constexpr int MIN_TO_SEC = 60;
+
+constexpr int HOUR_TO_SEC = 3600;
+
 #endif /* GLOBALS_H */
 

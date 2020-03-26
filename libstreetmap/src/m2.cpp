@@ -60,14 +60,19 @@ void loadPNGs(ezgl::renderer *g);
 std::vector<std::string> directions;
 void drawHighlightedSegs(ezgl::renderer *g);
 void getTimesFromTextBoxes(ezgl::application * application);
-
 ezgl::application * appl;
 bool previouslyHighlighted =false;
 int lastIntersection = -1;
 std::vector<int> previousIntersections(2,0);
 bool findType = false;
+<<<<<<< Updated upstream
 double walkingSpeed=1.25;
 double walkingLimit=1200;
+=======
+double walkingSpeed=0;
+double walkingLimit=0;
+IntersectionIndex finalIntersection;
+>>>>>>> Stashed changes
 std::vector<StreetSegmentIndex> highlightedWalkingSegs;
 std::vector<StreetSegmentIndex> highlightedSegs;
 bool first=true;
@@ -92,11 +97,11 @@ void draw_map()
         intersectionsData[i].position = getIntersectionPosition(i);
         intersectionsData[i].name = getIntersectionName(i);
     }
-
+    
     ezgl::application * application = new ezgl::application(settings);
 
     ezgl::rectangle initial_world({min_x, min_y}, {max_x, max_y});
-
+        
     application->add_canvas("MainCanvas",
                            draw_main_canvas,
                            initial_world);
@@ -169,7 +174,6 @@ void onSetup(ezgl::application *app, bool new_window){
 void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 {   
     getTimesFromTextBoxes(app);
-    std::cout<<"BUtton: "<<event->button<<std::endl;
     if(event->button == middle_mouse_button)
         return;
     if(event->button == 1){
@@ -185,13 +189,15 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 
             if(!findType){
                 std::vector<StreetSegmentIndex> path = find_path_between_intersections(lastIntersection,idx,15);
-                directions = getDirections(std::vector<int>(0),path);
+                finalIntersection = lastIntersection;
+                directions = getDirections(std::vector<int>(0),path,walkingSpeed);
                 highlightedSegs=path;
                 drawHighlightedSegs(app->get_renderer());
 
             }
             else{
                 std::cout<<"inside here"<<std::endl;
+                finalIntersection = lastIntersection;
                 std::pair<std::vector<StreetSegmentIndex>,std::vector<StreetSegmentIndex>> path = find_path_with_walk_to_pick_up(lastIntersection, idx, 15, walkingSpeed,walkingLimit);
                 highlightedSegs = path.second;
                 highlightedWalkingSegs = path.first;
@@ -200,7 +206,7 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
                 if(path.first.empty()&&path.second.empty())
                     directions.clear();
                 else
-                    directions = getDirections(path.first, path.second);
+                    directions = getDirections(path.first, path.second, walkingSpeed);
             }
             previousIntersections.clear();
             previousIntersections.push_back(idx);
@@ -342,6 +348,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         intersectionsData[foundIntersects1[0]].isHighlighted = true;
         intersectionsData[foundIntersects2[0]].isHighlighted = true;
         
+        finalIntersection = foundIntersects2[0];
         if(!findType){
             std::vector<StreetSegmentIndex> path = find_path_between_intersections(foundIntersects1[0],foundIntersects2[0],15);
             highlightedWalkingSegs.clear();
@@ -349,7 +356,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
             if(path.empty())
                 directions.clear();
             else
-                directions = getDirections(std::vector<int>(0),path);
+                directions = getDirections(std::vector<int>(0),path, walkingSpeed);
             highlightedSegs=path;
         }
         else{
@@ -360,7 +367,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
             if(result.first.empty()&&result.second.empty())
                 directions.clear();
             else
-                directions = getDirections(result.first, result.second);
+                directions = getDirections(result.first, result.second, walkingSpeed);
         }
         application->refresh_drawing();
         //highlighted.clear();

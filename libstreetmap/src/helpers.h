@@ -155,11 +155,8 @@ int getTotalPathDistance(std::vector<StreetSegmentIndex> path);
 int findTotalPathDistance(std::vector<StreetSegmentIndex> path);
 void drawPathStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const ezgl::color * color);
 TurnType findTurnType(StreetSegmentIndex first, StreetSegmentIndex second);
-void printDirections(std::vector<IntersectionIndex> walkPath);
 std::string getLengthStreet(std::vector<StreetSegmentIndex> path, StreetIndex street_id, int idx);
-std::vector<std::string> getDirections(std::vector<IntersectionIndex> walkPath, std::vector<IntersectionIndex> drivePath);
-std::string calcBearing(LatLon A, LatLon B);
-std::string calcDirection(InfoStreetSegment seg1, InfoStreetSegment seg2);
+std::vector<std::string> getDirections(std::vector<IntersectionIndex> walkPath, std::vector<IntersectionIndex> drivePath, int walkingSpeed);
 IntersectionIndex findFirstTurn(std::vector<StreetSegmentIndex> path);
 void instructionsPopup(ezgl::application *app);
 #endif /* HELPERS_H */

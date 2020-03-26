@@ -165,6 +165,8 @@ void close_map() {
     iconImgs.clear();
     segmentData.clear();
     highlightedSegs.clear();
+    highlightedWalkingSegs.clear();
+    directions.clear();
 }
 
 
