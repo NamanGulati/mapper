@@ -55,10 +55,12 @@ void drawPOIText(ezgl::renderer * g,POIIndex idx);
 float diff_x, diff_y;
 void loadPNGs(ezgl::renderer *g);
 std::vector<std::string> directions;
+void drawHighlightedSegs(ezgl::renderer *g);
 
 ezgl::application * appl;
 bool previouslyHighlighted =false;
 int lastIntersection = -1;
+std::vector<int> previousIntersections(2,0);
 
 void draw_map()
 {
@@ -88,6 +90,7 @@ void draw_map()
     appl=application;
 
     application->run(onSetup, onClick, NULL, NULL);
+        find_path_between_intersections(114780, 26866, 15);
 
     delete appl;
 }
@@ -154,19 +157,26 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
         intersectionsData[idx].isHighlighted = true;
         highlighted.push_back(idx);
         if(previouslyHighlighted){
+            intersectionsData[previousIntersections[0]].isHighlighted=false;
+            intersectionsData[previousIntersections[1]].isHighlighted=false;
             std::vector<StreetSegmentIndex> path = find_path_between_intersections(lastIntersection,idx,15);
             //printDirections(path);
             directions = getDirections(path);
-            for(int seg : path){
-                //std::cout<<seg<<std::endl;
-                drawPathStreetSegment(app->get_renderer(),segmentData[seg],&ezgl::RED);
-            }
-            app->flush_drawing();
+            highlightedSegs=path;
+            previousIntersections.clear();
+            previousIntersections.push_back(idx);
+            previousIntersections.push_back(lastIntersection);        
             previouslyHighlighted=false;
             highlighted.clear();
+
+            drawHighlightedSegs(app->get_renderer());
+            app->flush_drawing();
+            app->refresh_drawing();
         }else{
             lastIntersection=idx;
             previouslyHighlighted=true;
+            drawIntersections(app->get_renderer());
+            app->flush_drawing();
         }
         if(!directions.empty()){
             for(int i = 0; i < directions.size(); i++)
@@ -216,6 +226,7 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         
         streetMatches1 = find_street_ids_from_partial_street_name(toSearch[0]);
         streetMatches2 = find_street_ids_from_partial_street_name(toSearch[1]);
+
         bool breakLoop = 0;
 
         if (!streetMatches1.empty() && !streetMatches2.empty()){
@@ -286,11 +297,8 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         std::vector<StreetSegmentIndex> path = find_path_between_intersections(foundIntersects1[0],foundIntersects2[0],15);
             //printDirections(path);
         directions = getDirections(path);
-        for(int seg : path){
-            //std::cout<<seg<<std::endl;
-            drawPathStreetSegment(application->get_renderer(),segmentData[seg],&ezgl::RED);
-        }
-        application->flush_drawing();
+        highlightedSegs=path;
+        application->refresh_drawing();
         //highlighted.clear();
         if(!directions.empty()){
             for(int i = 0; i < directions.size(); i++)
@@ -388,7 +396,6 @@ void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const ezgl
                 g->set_color(ezgl::YELLOW);
             }
             else if(segDat.type == StreetType::CITY_ROAD){
-                
                 lineWidth=((segDat.lanes!=-1)&&zoomLevel>=RENDER_POIS_STREET?segDat.lanes:4)*(zoomLevel/CITY_ROAD_ADJUST);
             }
             else {//if(segDat.type==StreetType::RESIDENTIAL){
@@ -399,6 +406,7 @@ void drawStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const ezgl
            // segDat.drawHieght=lineWidth;
            if(color!=nullptr)
                 g->set_color(*color);
+            
             g->set_line_width(lineWidth);
             g->set_line_cap(ezgl::line_cap::round);
             for (int k = 0; k < segDat.curvePts.size() - 1; k++)
@@ -505,6 +513,11 @@ void getDiff(float &diffX, float &diffY){
         diffY = max_y - min_y;
 }
 
+
+void drawHighlightedSegs(ezgl::renderer *g){
+    for(int seg:highlightedSegs)
+        drawPathStreetSegment(g,segmentData[seg],&ezgl::RED);
+}
 /**
  * @param g ezgl renderer
  * @param idx index of poi to render
@@ -577,7 +590,7 @@ void drawSegments(ezgl::renderer *g){
         }
     }
     for(int i=0;i<highlightedSegs.size();i++){
-        std::cout<<highlightedSegs[i]<<std::endl;
+        drawPathStreetSegment(g,segmentData[highlightedSegs[i]],&ezgl::RED);
     }
 }
 

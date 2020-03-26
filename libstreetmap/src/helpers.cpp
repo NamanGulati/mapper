@@ -32,7 +32,7 @@ std::pair<Cartesian, Cartesian>  convertLatLonToCartesian(std::pair<LatLon, LatL
     double lon2 = points.second.lon()*DEGREE_TO_RADIAN;
     double lat1 = points.first.lat()*DEGREE_TO_RADIAN;
     double lat2 = points.second.lat()*DEGREE_TO_RADIAN;
-    //double lat_avg = (lat1 + lat2)/2;
+    double lat_avg = (lat1 + lat2)/2;
     convertedPoints.first.xCoord = lon1*cos(lat_avg);
     convertedPoints.second.xCoord = lon2*cos(lat_avg);
     convertedPoints.first.yCoord = lat1;
@@ -438,24 +438,6 @@ int getTotalPathDistance(std::vector<StreetSegmentIndex> path){
 
 void drawPathStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const ezgl::color * color = nullptr){
             g->set_color(ezgl::WHITE);
-
-            double lineWidth = 4;
-            int CITY_ROAD_ADJUST = 3;
-            int RESIDENTIAL_ADJUST = 6;
-            if(segDat.type==StreetType::EXPRESSWAY){
-                    lineWidth=((segDat.lanes!=-1)&&zoomLevel>=RENDER_POIS_STREET?segDat.lanes:5)*zoomLevel;
-                //g->set_line_width(20);
-                g->set_color(ezgl::YELLOW);
-            }
-            else if(segDat.type == StreetType::CITY_ROAD){
-                
-                lineWidth=((segDat.lanes!=-1)&&zoomLevel>=RENDER_POIS_STREET?segDat.lanes:4)*(zoomLevel/CITY_ROAD_ADJUST);
-            }
-            else {//if(segDat.type==StreetType::RESIDENTIAL){
-                //if(zoomLevel<6)
-                //    return;
-                lineWidth=((segDat.lanes!=-1)?segDat.lanes:2)*(zoomLevel-RESIDENTIAL_ADJUST);
-            }
 
            if(color!=nullptr)
                 g->set_color(*color);

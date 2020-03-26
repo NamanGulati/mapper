@@ -103,7 +103,10 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
 
 
 double heuristic(IntersectionIndex current, IntersectionIndex destination){
-    return find_distance_between_two_points(std::make_pair(getIntersectionPosition(current),getIntersectionPosition(destination)));
+    //return find_distance_between_two_points(std::make_pair(getIntersectionPosition(current),getIntersectionPosition(destination)));
+   ezgl::point2d cur (LatLonTo2d(getIntersectionPosition(current)));
+   ezgl::point2d dest (LatLonTo2d(getIntersectionPosition(destination)));
+   return std::hypot(dest.x - cur.x, dest.y - cur.y)*EARTH_RADIUS_METERS;
 }
 double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next, const double turn_penalty){
     if(current==-1)
