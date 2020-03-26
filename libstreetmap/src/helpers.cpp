@@ -526,6 +526,83 @@ void printDirections(std::vector<StreetSegmentIndex> walkPath /*IntersectionInde
     std::cout << "You have arrived at your destination!";
 }
 
+std::vector<std::string> getDirections(std::vector<StreetSegmentIndex> walkPath /*IntersectionIndex start, IntersectionIndex end/*std::vector<StreetSegmentIndex> drivePath*/){
+    
+    //std::vector<StreetSegmentIndex> walkPath = find_path_with_walk_to_pick_up(end, start, 15);
+    //std::vector<StreetSegmentIndex> drivePath = find_path_between_intersection(parameters);
+    
+//    std::vector<StreetSegmentIndex> walkPath = {149809, 149810, 146888, 183222, 146882, 146883, 146884, 146885,
+//                                                146886, 146887, 31051, 31050, 289, 288, 287, 286, 15178, 15177,
+//                                                15176, 97581, 4098, 136817, 97737, 52359, 97740, 107073, 46533, 
+//                                                46532, 46531, 181005, 46535, 176570, 18199, 1589, 211978, 85375};
+    std::vector<std::string> directions;                                          
+    double totalPathDistance = getTotalPathDistance(walkPath)/* + getTotalPathDistance(drivePath)*/;
+    std::string initDist = getLengthStreet(walkPath, getInfoStreetSegment(walkPath[0]).streetID, 0);
+    int walkTime =  int(compute_path_walking_time(walkPath, 1.25 /*km/h*/, 15));
+    //int driveTime = int(compute_path_travel_time(drivePath, 15));
+    int totalTime = walkTime ;//+ driveTime;
+    std::string totalDistMsg, totalTimeMsg;
+
+    if(totalPathDistance > 1000)
+        totalDistMsg = std::to_string(int(round(totalPathDistance/1000))) + " km";
+    else
+        totalDistMsg = std::to_string(round(totalPathDistance)) + " m";
+    
+    if(totalTime > 3600)
+        totalTimeMsg = std::to_string(totalTime/3600) + " h. and " +std::to_string(totalTime/60-totalTime/3600*60)+ " min.";
+    else if(totalTime > 60){
+        totalTimeMsg = std::to_string(totalTime/60) + " min.";
+    }
+    else
+        totalTimeMsg = std::to_string(totalTime) + " sec.";
+    
+    directions.push_back("Your trip is " +totalDistMsg+ " long and will take " +totalTimeMsg);
+    
+    directions.push_back("Go straight on " +getStreetName(getInfoStreetSegment(walkPath[0]).streetID)+ " towards " +getIntersectionName(findIntersectionOfSegments(walkPath[0],walkPath[1]))
+                +" for " +initDist);
+    
+    for(int i = 1; i < walkPath.size(); i++){
+        TurnType turn = findTurnType(walkPath[i-1], walkPath[i]);
+        std::string streetName = getStreetName(getInfoStreetSegment(walkPath[i]).streetID);
+        int dist = segLen[walkPath[i]];
+        
+        if(turn == TurnType::STRAIGHT_SAME_STREET || turn == TurnType::NONE){
+           ;
+        }
+        else if(turn == TurnType::STRAIGHT_DIFF_STREET){
+            directions.push_back("Go straight on " + streetName + "for " +getLengthStreet(walkPath, getInfoStreetSegment(walkPath[i]).streetID, i));
+        }
+        else if(turn == TurnType::LEFT){
+            directions.push_back("Turn left on " + streetName + " and go straight for " + getLengthStreet(walkPath, getInfoStreetSegment(walkPath[i]).streetID, i));
+        }
+        else if(turn == TurnType::RIGHT){
+            directions.push_back("Turn right on " + streetName + " and go straight for " +getLengthStreet(walkPath, getInfoStreetSegment(walkPath[i]).streetID, i));
+        }
+    }
+    
+    directions.push_back("You have arrived at the pickup destination \n Driving Instructions Follow:");
+      
+//    for(int i = 1; i < drivePath.size(); i++){
+//        TurnType turn = findTurnType(drivePath[i-1], drivePath[i]);
+//        std::string streetName = getStreetName(getInfoStreetSegment(drivePath[i]).streetID);
+//        int dist = segLen[drivePath[i]];
+//        
+//        if(turn == TurnType::STRAIGHT_SAME_STREET || turn == TurnType::NONE){
+//           ;
+//        }
+//        else if(turn == TurnType::STRAIGHT_DIFF_STREET){
+//            std::cout << "Go straight on " << streetName << "for " << getLengthStreet(drivePath, getInfoStreetSegment(drivePath[i]).streetID, i) <<std::endl;
+//        }
+//        else if(turn == TurnType::LEFT){
+//            std::cout << "Turn left on " << streetName << " and go straight for " << getLengthStreet(drivePath, getInfoStreetSegment(drivePath[i]).streetID, i) <<std::endl;
+//        }
+//        else if(turn == TurnType::RIGHT){
+//            std::cout << "Turn right on " << streetName << " and go straight for " << getLengthStreet(drivePath, getInfoStreetSegment(drivePath[i]).streetID, i) <<std::endl;
+//        }
+//    }
+    directions.push_back("You have arrived at your destination!");
+    return directions;
+}
 std::string getLengthStreet(std::vector<StreetSegmentIndex> path, StreetIndex street_id, int idx){
     double length = 0;
     for(int i = idx; i < path.size(); i++){

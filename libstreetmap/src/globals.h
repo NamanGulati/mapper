@@ -62,6 +62,8 @@ const std::string mapPathSuf = ".streets.bin";
 
 extern int zoomLevel;
 
+extern std::vector<std::string> directions;
+
 const std::string locos[19] = {"beijing,china", "cairo,egypt", "cape-town,south-africa","golden-horseshoe,canada", "hamilton,canada", "hong-kong,china", "iceland", 
                             "interlaken,switzerland", "london,england", "moscow,russia", "new-delhi,india", "new-york,usa", "rio-de-janeiro,brazil", "saint-helena", 
                             "singapore", "sydney,australia", "tehran,iran", "tokyo,japan", "toronto,canada"};

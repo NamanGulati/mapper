@@ -54,6 +54,7 @@ bool drawStreetName(ezgl::renderer *g,StreetSegmentData segDat);
 void drawPOIText(ezgl::renderer * g,POIIndex idx);
 float diff_x, diff_y;
 void loadPNGs(ezgl::renderer *g);
+std::vector<std::string> directions;
 
 ezgl::application * appl;
 bool previouslyHighlighted =false;
@@ -102,7 +103,7 @@ void draw_main_canvas(ezgl::renderer *g)
     intersectionsData[26866].isHighlighted=true;
     highlighted.push_back(26866);
     //loads the pngs for icons
-    loadPNGs(g);
+    //loadPNGs(g);
     //sets background colour
     g->set_color(211, 211, 211, 255);
     g->fill_rectangle(g->get_visible_world());
@@ -110,7 +111,7 @@ void draw_main_canvas(ezgl::renderer *g)
     drawFeatures(g);
     drawSegments(g);
     drawIntersections(g);
-    drawPOIs(g);
+    //drawPOIs(g);
     //printDirections();
 }
 
@@ -154,7 +155,8 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
         highlighted.push_back(idx);
         if(previouslyHighlighted){
             std::vector<StreetSegmentIndex> path = find_path_between_intersections(lastIntersection,idx,15);
-            printDirections(path);
+            //printDirections(path);
+            directions = getDirections(path);
             for(int seg : path){
                 //std::cout<<seg<<std::endl;
                 drawPathStreetSegment(app->get_renderer(),segmentData[seg],&ezgl::RED);
@@ -182,7 +184,8 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
     highlighted.push_back(idx);
     zoomOnIntersection(app, idx);
     std::vector<int> inter{idx};
-    infoPopup(app, inter, transitInfo);
+    //infoPopup(app, inter, transitInfo);
+    infoPopup(app, inter, directions[0]);
     
     app->refresh_drawing();
 }

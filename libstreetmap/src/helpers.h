@@ -155,5 +155,6 @@ void drawPathStreetSegment(ezgl::renderer * g, StreetSegmentData& segDat, const 
 TurnType findTurnType(StreetSegmentIndex first, StreetSegmentIndex second);
 void printDirections(std::vector<IntersectionIndex> walkPath);
 std::string getLengthStreet(std::vector<StreetSegmentIndex> path, StreetIndex street_id, int idx);
+std::vector<std::string> getDirections(std::vector<IntersectionIndex> walkPath);
 #endif /* HELPERS_H */
 
