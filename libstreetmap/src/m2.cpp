@@ -65,17 +65,12 @@ bool previouslyHighlighted =false;
 int lastIntersection = -1;
 std::vector<int> previousIntersections(2,0);
 bool findType = false;
-<<<<<<< Updated upstream
 double walkingSpeed=1.25;
 double walkingLimit=1200;
-=======
-double walkingSpeed=0;
-double walkingLimit=0;
-IntersectionIndex finalIntersection;
->>>>>>> Stashed changes
 std::vector<StreetSegmentIndex> highlightedWalkingSegs;
 std::vector<StreetSegmentIndex> highlightedSegs;
 bool first=true;
+IntersectionIndex finalIntersection;
 //false means just driving
 //true means walk + drive
 
@@ -189,7 +184,7 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
 
             if(!findType){
                 std::vector<StreetSegmentIndex> path = find_path_between_intersections(lastIntersection,idx,15);
-                finalIntersection = lastIntersection;
+                finalIntersection = idx;
                 directions = getDirections(std::vector<int>(0),path,walkingSpeed);
                 highlightedSegs=path;
                 drawHighlightedSegs(app->get_renderer());
@@ -197,7 +192,7 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
             }
             else{
                 std::cout<<"inside here"<<std::endl;
-                finalIntersection = lastIntersection;
+                finalIntersection = idx;
                 std::pair<std::vector<StreetSegmentIndex>,std::vector<StreetSegmentIndex>> path = find_path_with_walk_to_pick_up(lastIntersection, idx, 15, walkingSpeed,walkingLimit);
                 highlightedSegs = path.second;
                 highlightedWalkingSegs = path.first;
