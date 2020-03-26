@@ -169,6 +169,25 @@ std::vector<std::string> parse2Streets(std::string textInput){
     return the2Streets;
 }
 
+std::vector<std::string> parse4Streets(std::string textInput){
+    std::vector<std::string> the4Streets;
+    std::vector<std::string> twoStreetOne;
+    std::vector<std::string> twoStreetTwo;
+    if (textInput.find(" to ") != std::string::npos){
+        twoStreetOne = parse2Streets(textInput.substr(0, textInput.find(" to ")));
+        twoStreetTwo = parse2Streets(textInput.substr(textInput.find(" to ") + 4));
+        the4Streets.push_back(twoStreetOne[0]);
+        the4Streets.push_back(twoStreetOne[1]);
+        the4Streets.push_back(twoStreetTwo[0]);
+        the4Streets.push_back(twoStreetTwo[1]);
+    }
+    else{
+        the4Streets = parse2Streets(textInput);
+    }
+    
+    return the4Streets;
+}
+
 
 bool sortFeatures(FeatureData first, FeatureData second){
     return (first.area > second.area);
@@ -538,7 +557,7 @@ std::vector<std::string> getDirections(std::vector<StreetSegmentIndex> walkPath 
     std::vector<std::string> directions;                                          
     double totalPathDistance = getTotalPathDistance(walkPath)/* + getTotalPathDistance(drivePath)*/;
     std::string initDist = getLengthStreet(walkPath, getInfoStreetSegment(walkPath[0]).streetID, 0);
-    int walkTime =  int(compute_path_walking_time(walkPath, 1.25 /*km/h*/, 15));
+    int walkTime =  int(compute_path_walking_time(walkPath, 1.25 /*m/s*/, 15));
     //int driveTime = int(compute_path_travel_time(drivePath, 15));
     int totalTime = walkTime ;//+ driveTime;
     std::string totalDistMsg, totalTimeMsg;
@@ -617,4 +636,3 @@ std::string getLengthStreet(std::vector<StreetSegmentIndex> path, StreetIndex st
     else
         return (std::to_string(intLength - ((intLength % 10)-((intLength%10>=5)?10:0))) + " m.");
 }
-

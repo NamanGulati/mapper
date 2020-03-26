@@ -168,6 +168,10 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
             lastIntersection=idx;
             previouslyHighlighted=true;
         }
+        if(!directions.empty()){
+            for(int i = 0; i < directions.size(); i++)
+                std::cout << directions[i] << std::endl;
+        }
         return;
     }
     LatLon clickPos(lat_from_y(y),lon_from_x(x));
@@ -184,8 +188,8 @@ void onClick(ezgl::application *app, GdkEventButton *event, double x, double y)
     highlighted.push_back(idx);
     zoomOnIntersection(app, idx);
     std::vector<int> inter{idx};
-    //infoPopup(app, inter, transitInfo);
-    infoPopup(app, inter, directions[0]);
+    infoPopup(app, inter, transitInfo);
+    //infoPopup(app, inter, directions[0]);
     
     app->refresh_drawing();
 }
@@ -200,15 +204,15 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
     //Retrieve the text from the search entry
     const char* text = gtk_entry_get_text(search_entry);
     
-    std::vector<int> streetMatches1, streetMatches2;
-    std::pair<int, int> foundStreets;
-    std::vector<int> foundIntersects;
-    std::vector<std::string> toSearch = parse2Streets(text);
+    std::vector<int> streetMatches1, streetMatches2, streetMatches3, streetMatches4;
+    std::pair<int, int> foundStreets1, foundStreets2;
+    std::vector<int> foundIntersects1, foundIntersects2;
+    std::vector<std::string> toSearch = parse4Streets(text);
     
     if (toSearch.size() == 1){
         std::cout << "No Intersections" << std::endl;
     }
-    else{
+    else if(toSearch.size() == 2){
         
         streetMatches1 = find_street_ids_from_partial_street_name(toSearch[0]);
         streetMatches2 = find_street_ids_from_partial_street_name(toSearch[1]);
@@ -217,11 +221,11 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
         if (!streetMatches1.empty() && !streetMatches2.empty()){
             std::cout << "I have entered" << std::endl;
             for (int x = 0; x < streetMatches1.size(); x ++){
-                foundStreets.first = streetMatches1[x];
+                foundStreets1.first = streetMatches1[x];
                 for (int y = 0; y < streetMatches2.size(); y ++){
-                    foundStreets.second = streetMatches2[y];
-                    foundIntersects = find_intersections_of_two_streets(foundStreets);
-                    if (!foundIntersects.empty()){
+                    foundStreets1.second = streetMatches2[y];
+                    foundIntersects1 = find_intersections_of_two_streets(foundStreets1);
+                    if (!foundIntersects1.empty()){
                         breakLoop = 1;
                         break;
                     }
@@ -231,24 +235,89 @@ void onSearch(GtkWidget *widget, ezgl::application *application){
                     break;
             }
         }
+    }else if(toSearch.size() == 4){
+        streetMatches1 = find_street_ids_from_partial_street_name(toSearch[0]);
+        streetMatches2 = find_street_ids_from_partial_street_name(toSearch[1]);
+        bool breakLoop = 0;
+
+        if (!streetMatches1.empty() && !streetMatches2.empty()){
+            std::cout << "I have entered" << std::endl;
+            for (int x = 0; x < streetMatches1.size(); x ++){
+                foundStreets1.first = streetMatches1[x];
+                for (int y = 0; y < streetMatches2.size(); y ++){
+                    foundStreets1.second = streetMatches2[y];
+                    foundIntersects1 = find_intersections_of_two_streets(foundStreets1);
+                    if (!foundIntersects1.empty()){
+                        breakLoop = 1;
+                        break;
+                    }
+                }
+                if (breakLoop)
+                    break;
+            }
+        }
+        streetMatches3 = find_street_ids_from_partial_street_name(toSearch[2]);
+        streetMatches4 = find_street_ids_from_partial_street_name(toSearch[3]);
+        breakLoop = 0;
+        
+        if (!streetMatches3.empty() && !streetMatches4.empty()){
+            for (int x = 0; x < streetMatches3.size(); x ++){
+                foundStreets2.first = streetMatches3[x];
+                for (int y = 0; y < streetMatches4.size(); y ++){
+                    foundStreets2.second = streetMatches4[y];
+                    foundIntersects2 = find_intersections_of_two_streets(foundStreets2);
+                    if (!foundIntersects2.empty()){
+                        breakLoop = 1;
+                        break;
+                    }
+
+                }
+                if (breakLoop)
+                    break;
+            }
+        }
+        
+        if(foundIntersects1.empty() || foundIntersects2.empty()){
+            std::cout << "At least one pair of intersections input is invalid." << std::endl;
+            return;
+        }
+        intersectionsData[foundIntersects1[0]].isHighlighted = true;
+        intersectionsData[foundIntersects2[0]].isHighlighted = true;
+        std::vector<StreetSegmentIndex> path = find_path_between_intersections(foundIntersects1[0],foundIntersects2[0],15);
+            //printDirections(path);
+        directions = getDirections(path);
+        for(int seg : path){
+            //std::cout<<seg<<std::endl;
+            drawPathStreetSegment(application->get_renderer(),segmentData[seg],&ezgl::RED);
+        }
+        application->flush_drawing();
+        //highlighted.clear();
+        if(!directions.empty()){
+            for(int i = 0; i < directions.size(); i++)
+                std::cout << directions[i] << std::endl;
+        }
+        
+        return;
+
     }
     
     clearHighlights();
     
-    for (int x = 0; x < foundIntersects.size(); x ++){
-        std::cout << getIntersectionName(foundIntersects[x]) << std::endl;
-        intersectionsData[foundIntersects[x]].isHighlighted = true;
-        highlighted.push_back(foundIntersects[x]);
+    for (int x = 0; x < foundIntersects1.size(); x ++){
+        std::cout << getIntersectionName(foundIntersects1[x]) << std::endl;
+        intersectionsData[foundIntersects1[x]].isHighlighted = true;
+        highlighted.push_back(foundIntersects1[x]);
     }
-    if(!foundIntersects.empty()){
-        LatLon foundPos(getIntersectionPosition(foundIntersects[0]).lat(),getIntersectionPosition(foundIntersects[0]).lon());
+    
+    if(!foundIntersects1.empty()){
+        LatLon foundPos(getIntersectionPosition(foundIntersects1[0]).lat(),getIntersectionPosition(foundIntersects1[0]).lon());
         std::stringstream ss (curlData(foundPos));
         std::string transit = parseTransitInfo(ss);
         
 
-        zoomOnIntersection(application, foundIntersects[0]);
+        zoomOnIntersection(application, foundIntersects1[0]);
         
-        infoPopup(application, foundIntersects, transit);
+        infoPopup(application, foundIntersects1, transit);
         
         return;
     }    
