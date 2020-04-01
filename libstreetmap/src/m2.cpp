@@ -27,7 +27,7 @@
 #include <sstream>
 #include <gdk/gdk.h>
 #include <regex>
-
+#include "m4.h"
 
 #define  HIGH_LEVEL_DRAW_LIM  8.05723e-05 //expressway and small highway
 #define  SECONDARY_LEVEL_DRAW_LIM  2.9006e-05 //city road 
@@ -158,6 +158,17 @@ void onSetup(ezgl::application *app, bool new_window){
     ///////////////////Next Direction
     GObject *nextDir = app->get_object("NextDir");
     g_signal_connect(nextDir, "clicked", G_CALLBACK(nextDirection), app);
+    std::vector<DeliveryInfo> deliveries;
+        std::vector<IntersectionIndex> depots;
+        std::vector<CourierSubpath> result_path;
+        float turn_penalty;
+        float truck_capacity;
+
+        deliveries = {DeliveryInfo(8961, 25655, 68.27714), DeliveryInfo(146720, 111130, 5.74371), DeliveryInfo(139180, 109292, 54.44788), DeliveryInfo(611, 97791, 53.46008), DeliveryInfo(115131, 136402, 171.11781)};
+        depots = {137819, 130433, 98839};
+        turn_penalty = 15.000000000;
+        truck_capacity = 8434.584960938;
+        result_path = traveling_courier(deliveries, depots, turn_penalty, truck_capacity);
 }
 
 /**
