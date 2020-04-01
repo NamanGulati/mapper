@@ -83,6 +83,7 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
 
                 #ifdef drawAlgos
                     drawPathStreetSegment(g,segmentData[neighbor.segment],&ezgl::BLUE);
+                    delay(1);
                     appl->flush_drawing();
                 #endif
 
@@ -91,7 +92,7 @@ std::vector<StreetSegmentIndex> find_path_between_intersections(const Intersecti
                 if(tentative_gScore < gScore[neighbor.intersection]){
                     cameFrom[neighbor.segment] = current.segment;
                     gScore[neighbor.intersection]= tentative_gScore + (heuristic(neighbor.intersection, intersect_id_end)*3.6/maxSpeedLim);
-                    neighbor.distance = tentative_gScore;
+                    neighbor.distance = tentative_gScore /*+ (heuristic(neighbor.intersection, intersect_id_end)*3.6/maxSpeedLim)*/;
                     openSet.push(neighbor);
                 }
             }
@@ -127,6 +128,12 @@ double get_segment_cost(StreetSegmentIndex current, StreetSegmentIndex next, con
         return find_street_segment_travel_time(next);
     return  find_street_segment_travel_time(next) + ((getInfoStreetSegment(current).streetID!=getInfoStreetSegment(next).streetID)?turn_penalty:0);
 }
+
+void delay (int milliseconds) {  // Pause for milliseconds
+    std::chrono::milliseconds duration(milliseconds);
+    std::this_thread::sleep_for(duration);
+}
+
 
 
 std::pair<std::vector<StreetSegmentIndex>, std::vector<StreetSegmentIndex>> //check units

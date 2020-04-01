@@ -18,16 +18,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <iostream>
-#include <unittest++/UnitTest++.h>
+#pragma once
+#include "StreetsDatabaseAPI.h"
 
-/*
- * This is the main that drives running
- * unit tests.
- */
-int main(int /*argc*/, char** /*argv*/) {
-    //Run the unit tests
-    int num_failures = UnitTest::RunAllTests();
+namespace ece297test {
 
-    return num_failures;
+    bool path_is_legal(const IntersectionIndex start_intersection, const IntersectionIndex end_intersection, 
+                const std::vector<StreetSegmentIndex>& path);
+
+    bool path_is_legal(const IntersectionIndex start_intersection, const std::vector<IntersectionIndex>& end_intersections, 
+                    const std::vector<StreetSegmentIndex>& path);
+    
+    bool path_is_legal(const IntersectionIndex start_intersection, const IntersectionIndex end_intersection,
+                    const double turn_penalty, const double walking_speed, const double walking_time_limit,
+                    const std::pair<std::vector<StreetSegmentIndex>, std::vector<StreetSegmentIndex>> & path);
 }
+
