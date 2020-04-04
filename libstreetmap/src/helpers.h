@@ -80,7 +80,12 @@ struct POIData{
     std::string name;
     LatLon position;
     //ezgl::point2d location;
-    const OSMNode * node;
+    const OSMNode * node; 
+};
+
+struct PathData{
+    std::vector<StreetSegmentIndex> path;
+    double travelTIme;
 };
 
 class segIntersectionData{

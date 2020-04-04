@@ -8,8 +8,16 @@
 #include <queue>
 #include <list>
 #include <iostream>
+#include "helpers.h"
+#include "courier_verify.h"
 
 //#define drawAlgos
+
+struct pickDrop{
+        int packageIndex=-1;
+        IntersectionIndex intersection=-1;
+        bool pickOrDrop=true; //true = pickup
+};
 
 double get_seg_cost(StreetSegmentIndex current, StreetSegmentIndex next, const double turn_penalty);
 
@@ -22,7 +30,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         deliveryPoints.push_back(deliveries[i].pickUp);
     }
     deliveryPoints.insert(deliveryPoints.end(), depots.begin(), depots.end());
-    std::unordered_map<IntersectionIndex, std::unordered_map<IntersectionIndex, double>> travelTimes;
+    std::unordered_map<IntersectionIndex, std::unordered_map<IntersectionIndex, PathData>> travelTimes;
 
     for (int intersect_id_start : deliveryPoints)
     {
@@ -34,7 +42,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
 
         openSet.emplace(intersect_id_start, -1, 0);
         #ifdef drawAlgos
-            ezgl::renderer *g = appl->get_renderer();
+            ezgl::renderer * g = appl->get_renderer();
         #endif
 
         while (!openSet.empty())
@@ -51,7 +59,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
                     temp = cameFrom[temp];
                 }
                 std::reverse(path.begin(), path.end());
-                travelTimes[intersect_id_start][current.intersection] = compute_path_travel_time(path, turn_penalty);
+                travelTimes[intersect_id_start][current.intersection] = {path,compute_path_travel_time(path, turn_penalty)};
             }
 
             openSet.pop();
@@ -91,7 +99,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         for (int j = 0; j < deliveries.size(); j++)
         {
             DeliveryInfo d = deliveries[j];
-            double time = travelTimes[depots[i]][d.pickUp];
+            double time = travelTimes[depots[i]][d.pickUp].travelTIme;
             if (time < minPackageTravelTime)
             {
                 minPackageInternal = j;
@@ -106,11 +114,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         }
     }
 
-    struct pickDrop{
-        int packageIndex=-1;
-        IntersectionIndex intersection=-1;
-        bool pickOrDrop=true;
-    };
+
     std::vector<pickDrop> picksAndDrops; //true  = pickup
     picksAndDrops.push_back({minPackage,deliveries[minPackage].pickUp,true});
     std::list<int> canPickUp;
@@ -134,7 +138,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         {
             if (truckWeight + deliveries[package].itemWeight > truck_capacity)
                 continue;
-            double time = travelTimes[picksAndDrops.back().intersection][deliveries[package].pickUp];
+            double time = travelTimes[picksAndDrops.back().intersection][deliveries[package].pickUp].travelTIme;
             if (time < nextTravelTime)
             {
                 nextPackage = package;
@@ -145,7 +149,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         }
         for (int package : canDropOff)
         {
-            double time = travelTimes[picksAndDrops.back().intersection][deliveries[package].dropOff];
+            double time = travelTimes[picksAndDrops.back().intersection][deliveries[package].dropOff].travelTIme;
             if (time < nextTravelTime)
             {
                 nextPackage = package;
@@ -187,13 +191,15 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
     double depotDist = DBL_MAX;
     for (int depot : depots)
     {
-        double time = travelTimes[picksAndDrops.back().intersection][depot];
+        double time = travelTimes[picksAndDrops.back().intersection][depot].travelTIme;
         if (time < depotDist)
         {
             depotDist = time;
             dropOffDepot = depot;
         }
     }
+
+
 
     std::vector<CourierSubpath> result;
     #ifdef drawAlgos
@@ -221,12 +227,12 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
             subpth.end_intersection= picksAndDrops[i+1].intersection;
             subpth.subpath=find_path_between_intersections(subpth.start_intersection,subpth.end_intersection,turn_penalty);
             int j=i;
-           /* while(j<picksAndDrops.size()&&picksAndDrops[j].intersection==subpth.start_intersection&&picksAndDrops[j].pickOrDrop){
-                std::cout<<subpth.start_intersection<<std::endl;
-                subpth.pickUp_indices.push_back(picksAndDrops[j].packageIndex);
-                i=j;
-                j++;
-            }*/
+            // while(j<picksAndDrops.size()&&picksAndDrops[j].intersection==subpth.start_intersection&&picksAndDrops[j].pickOrDrop){
+            //     std::cout<<subpth.start_intersection<<std::endl;
+            //     subpth.pickUp_indices.push_back(picksAndDrops[j].packageIndex);
+            //     i=j;
+            //     j++;
+            // }
             if(picksAndDrops[i].pickOrDrop)
                 subpth.pickUp_indices.push_back(picksAndDrops[j].packageIndex);
             result.push_back(subpth);
@@ -246,4 +252,12 @@ double get_seg_cost(StreetSegmentIndex current, StreetSegmentIndex next, const d
     if (current == -1)
         return find_street_segment_travel_time(next);
     return find_street_segment_travel_time(next) + ((getInfoStreetSegment(current).streetID != getInfoStreetSegment(next).streetID) ? turn_penalty : 0);
+}
+
+std::vector<pickDrop> swap(std::vector<pickDrop> couriers, int index1, int index2){
+    //Swap the tings
+    //check if legal
+    //reverse until legal
+    //return the mandem
+
 }
