@@ -7,6 +7,7 @@
 #include "m1.h"
 #include <queue>
 #include <list>
+#include <iostream>
 
 //#define drawAlgos
 
@@ -212,19 +213,22 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         //appl->refresh_drawing();
     #endif
     #ifndef drawAlgos
-        CourierSubpath sub = {minDepot,picksAndDrops.front().intersection,find_path_between_intersections(minDepot,picksAndDrops.front().intersection,turn_penalty),std::vector<unsigned>(1,picksAndDrops.front().packageIndex)};
+        CourierSubpath sub = {minDepot,picksAndDrops.front().intersection,find_path_between_intersections(minDepot,picksAndDrops.front().intersection,turn_penalty),std::vector<unsigned>(0)};
         result.push_back(sub);  
         for(int i=0;i<picksAndDrops.size()-1;i++){
             CourierSubpath subpth;
             subpth.start_intersection=picksAndDrops[i].intersection;
             subpth.end_intersection= picksAndDrops[i+1].intersection;
             subpth.subpath=find_path_between_intersections(subpth.start_intersection,subpth.end_intersection,turn_penalty);
-            int j=i+1;
-            while(j<picksAndDrops.size()&&picksAndDrops[j].intersection==subpth.end_intersection&&picksAndDrops[j].pickOrDrop){
+            int j=i;
+           /* while(j<picksAndDrops.size()&&picksAndDrops[j].intersection==subpth.start_intersection&&picksAndDrops[j].pickOrDrop){
+                std::cout<<subpth.start_intersection<<std::endl;
                 subpth.pickUp_indices.push_back(picksAndDrops[j].packageIndex);
-                i=j-1;
+                i=j;
                 j++;
-            }
+            }*/
+            if(picksAndDrops[i].pickOrDrop)
+                subpth.pickUp_indices.push_back(picksAndDrops[j].packageIndex);
             result.push_back(subpth);
         }
         sub={picksAndDrops.back().intersection,dropOffDepot,find_path_between_intersections(picksAndDrops.back().intersection,dropOffDepot,turn_penalty),std::vector<unsigned>(0)};
