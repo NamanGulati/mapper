@@ -12,9 +12,12 @@
 #include "helpers.h"
 #include "courier_verify.h"
 #include <chrono>
+#include <thread>
+#include <mutex>
 
 //#define drawAlgos
 std::unordered_map<IntersectionIndex, std::unordered_map<IntersectionIndex, PathData>> travelTimes;
+std::mutex travelTimes_mutex;
 
 struct pickDrop{
         int packageIndex=-1;
@@ -28,9 +31,11 @@ double computeTravelTime(std::vector<pickDrop> deliveryOrder);
 bool isLegal(std::vector<pickDrop> deliveryOrder, const float truck_capacity);
 std::vector<pickDrop> twoOptSwap(std::vector<pickDrop> deliveryOrder, int first, int second);
 std::vector<pickDrop> simpleSwap(std::vector<pickDrop> deliveryOrder, int first, int second);
+double multiDestDijkstra(int intersect_id_start, std::vector<int>deliveryPoints, float turn_penalty);
 
 std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &deliveries, const std::vector<int> &depots, const float turn_penalty, const float truck_capacity)
 {
+    travelTimes.clear();
     auto startTime = std::chrono::high_resolution_clock::now();
     bool timeOut = false;
     
@@ -42,61 +47,10 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
     }
     deliveryPoints.insert(deliveryPoints.end(), depots.begin(), depots.end());
 
-    for (int intersect_id_start : deliveryPoints)
+    #pragma omp parallel for
+    for (int i =0;i<deliveryPoints.size();i++)
     {
-
-        std::priority_queue<segIntersectionData, std::vector<segIntersectionData>, segIntersectionDataComparator> openSet;
-        std::vector<StreetSegmentIndex> cameFrom(getNumStreetSegments());
-        std::vector<double> gScore(adjacencyList.size(), DBL_MAX);
-        gScore[intersect_id_start] = 0;
-
-        openSet.emplace(intersect_id_start, -1, 0);
-        #ifdef drawAlgos
-            ezgl::renderer * g = appl->get_renderer();
-        #endif
-
-        while (!openSet.empty())
-        {
-            segIntersectionData current = openSet.top();
-
-            if (std::count(deliveryPoints.begin(), deliveryPoints.end(), current.intersection))
-            {
-                int temp = current.segment;
-                std::vector<StreetSegmentIndex> path;
-                while (temp != -1)
-                {
-                    path.push_back(temp);
-                    temp = cameFrom[temp];
-                }
-                std::reverse(path.begin(), path.end());
-                travelTimes[intersect_id_start][current.intersection] = {path,compute_path_travel_time(path, turn_penalty)};
-            }
-
-            openSet.pop();
-            if (current.distance <= gScore[current.intersection])
-            {
-                gScore[current.intersection] = current.distance;
-
-                for (segIntersectionData neighbor : adjacencyList[current.intersection])
-                {
-
-                    #ifdef drawAlgos
-                        //drawPathStreetSegment(g, segmentData[neighbor.segment], &ezgl::BLUE);
-                        //appl->flush_drawing();
-                    #endif
-
-                    double tentative_gScore = gScore[current.intersection] + get_seg_cost(current.segment, neighbor.segment, turn_penalty);
-
-                    if (tentative_gScore < gScore[neighbor.intersection])
-                    {
-                        cameFrom[neighbor.segment] = current.segment;
-                        gScore[neighbor.intersection] = tentative_gScore;
-                        neighbor.distance = tentative_gScore;
-                        openSet.push(neighbor);
-                    }
-                }
-            }
-        }
+        multiDestDijkstra(deliveryPoints[i],deliveryPoints,turn_penalty);        
     }
 
     int minDepot = depots[0];
@@ -205,11 +159,11 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
     std::vector<pickDrop> newRoute;
     std::vector<pickDrop> bestRoute;
     double newTime;
-    double bestTime = computeTravelTime(picksAndDrops);
+    double bestTime = computeTravelTime(picksAndDrops);    
     while(!timeOut){        
         for(int i = 1; i < picksAndDrops.size()-1; i++){
             for(int k = i+1; k < picksAndDrops.size(); k++){
-                newRoute = simpleSwap(picksAndDrops, i, k);
+                newRoute = twoOptSwap(picksAndDrops, i, k);
                 newTime = computeTravelTime(newRoute);
                 if(newTime < bestTime && isLegal(newRoute, truck_capacity)){
                     bestTime = newTime;
@@ -220,10 +174,12 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         }
         auto currentTime = std::chrono::high_resolution_clock::now();
         auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime - startTime);
-        
+        //std::cout<<"wallClock: "<<wallClock.count()<<std::endl;
         if(wallClock.count() > 40.5)
             timeOut = true;
         prev++;
+        if(prev == curr)
+            break;
     }
     
     int dropOffDepot = 0;
@@ -259,13 +215,13 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         //appl->refresh_drawing();
     #endif
     #ifndef drawAlgos
-        CourierSubpath sub = {minDepot,picksAndDrops.front().intersection,find_path_between_intersections(minDepot,picksAndDrops.front().intersection,turn_penalty),std::vector<unsigned>(0)};
+        CourierSubpath sub = {minDepot,picksAndDrops.front().intersection,travelTimes[minDepot][picksAndDrops.front().intersection].path,std::vector<unsigned>(0)};
         result.push_back(sub);  
         for(int i=0;i<picksAndDrops.size()-1;i++){
             CourierSubpath subpth;
             subpth.start_intersection=picksAndDrops[i].intersection;
             subpth.end_intersection= picksAndDrops[i+1].intersection;
-            subpth.subpath=find_path_between_intersections(subpth.start_intersection,subpth.end_intersection,turn_penalty);
+            subpth.subpath=travelTimes[subpth.start_intersection][subpth.end_intersection].path;
             int j=i;
             // while(j<picksAndDrops.size()&&picksAndDrops[j].intersection==subpth.start_intersection&&picksAndDrops[j].pickOrDrop){
             //     std::cout<<subpth.start_intersection<<std::endl;
@@ -277,7 +233,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
                 subpth.pickUp_indices.push_back(picksAndDrops[j].packageIndex);
             result.push_back(subpth);
         }
-        sub={picksAndDrops.back().intersection,dropOffDepot,find_path_between_intersections(picksAndDrops.back().intersection,dropOffDepot,turn_penalty),std::vector<unsigned>(0)};
+        sub={picksAndDrops.back().intersection,dropOffDepot,travelTimes[picksAndDrops.back().intersection][dropOffDepot].path};//,///std::vector<unsigned>(0)};
         result.push_back(sub);  
 
     #endif
@@ -294,14 +250,6 @@ double get_seg_cost(StreetSegmentIndex current, StreetSegmentIndex next, const d
     return find_street_segment_travel_time(next) + ((getInfoStreetSegment(current).streetID != getInfoStreetSegment(next).streetID) ? turn_penalty : 0);
 }
 
-std::vector<pickDrop> swap(std::vector<pickDrop> couriers, int index1, int index2){
-    //Swap the tings
-    //check if legal
-    //reverse until legal
-    //return the mandem
-
-}
-
 std::vector<pickDrop> twoOptSwap(std::vector<pickDrop> deliveryOrder, int first, int second){
     std::vector<pickDrop> newPath;
     
@@ -314,7 +262,29 @@ std::vector<pickDrop> twoOptSwap(std::vector<pickDrop> deliveryOrder, int first,
     for(int i = second+1; i < deliveryOrder.size(); i++)
         newPath.push_back(deliveryOrder[i]);
     
+
     return newPath;
+}
+
+
+std::vector<pickDrop> anothaTwoOptSwap(std::vector<pickDrop> deliveryOrder, int first, int second){
+    // std::vector<pickDrop> newPath;
+    // std::vector<pickDrop> part1 (deliveryOrder.begin(),deliveryOrder.begin()+first+1);
+    // std::vector<pickDrop> part2 (deliveryOrder.begin()+first+1,deliveryOrder.begin()+second+1);
+    // std::vector<pickDrop> part3 (deliveryOrder.begin()+second+1,deliveryOrder.begin()+second+1);
+
+   
+    // double b1_e3 = travelTimes[part1.front().intersection][part3.back().intersection].travelTime;
+    // double b1_b3 = travelTimes[part1.front().intersection][part3.front().intersection].travelTime;
+    // double b1_e2 = travelTimes[part1.front().intersection][part2.back().intersection].travelTime;
+    // double b1_b2 = travelTimes[part1.front().intersection][part2.front().intersection].travelTime;
+    // double e1_b3 = travelTimes[part1.back().intersection][part3.front().intersection].travelTime;
+    // double e1_e3 = travelTimes[part1.back().intersection][part3.front().intersection].travelTime;
+    // double e1_e2 = travelTimes[part1.back().intersection][part2.back().intersection].travelTime;
+    
+    
+
+    // return newPath;
 }
 
 std::vector<pickDrop> simpleSwap(std::vector<pickDrop> deliveryOrder, int first, int second){
@@ -352,4 +322,60 @@ double computeTravelTime(std::vector<pickDrop> deliveryOrder){
         travelTime += travelTimes[deliveryOrder[i-1].intersection][deliveryOrder[i].intersection].travelTime;
     }
     return travelTime;
+}
+
+double multiDestDijkstra(int intersect_id_start, std::vector<int>deliveryPoints, float turn_penalty){
+    std::priority_queue<segIntersectionData, std::vector<segIntersectionData>, segIntersectionDataComparator> openSet;
+        std::vector<StreetSegmentIndex> cameFrom(getNumStreetSegments());
+        std::vector<double> gScore(adjacencyList.size(), DBL_MAX);
+        gScore[intersect_id_start] = 0;
+
+        openSet.emplace(intersect_id_start, -1, 0);
+        #ifdef drawAlgos
+            ezgl::renderer * g = appl->get_renderer();
+        #endif
+
+        while (!openSet.empty())
+        {
+            segIntersectionData current = openSet.top();
+
+            if (std::count(deliveryPoints.begin(), deliveryPoints.end(), current.intersection))
+            {
+                int temp = current.segment;
+                std::vector<StreetSegmentIndex> path;
+                while (temp != -1)
+                {
+                    path.push_back(temp);
+                    temp = cameFrom[temp];
+                }
+                std::reverse(path.begin(), path.end());
+                std::lock_guard<std::mutex> guard(travelTimes_mutex);
+                travelTimes[intersect_id_start][current.intersection] = {path,compute_path_travel_time(path, turn_penalty)};
+            }
+
+            openSet.pop();
+            if (current.distance <= gScore[current.intersection])
+            {
+                gScore[current.intersection] = current.distance;
+
+                for (segIntersectionData neighbor : adjacencyList[current.intersection])
+                {
+
+                    #ifdef drawAlgos
+                        //drawPathStreetSegment(g, segmentData[neighbor.segment], &ezgl::BLUE);
+                        //appl->flush_drawing();
+                    #endif
+
+                    double tentative_gScore = gScore[current.intersection] + get_seg_cost(current.segment, neighbor.segment, turn_penalty);
+
+                    if (tentative_gScore < gScore[neighbor.intersection])
+                    {
+                        cameFrom[neighbor.segment] = current.segment;
+                        gScore[neighbor.intersection] = tentative_gScore;
+                        neighbor.distance = tentative_gScore;
+                        openSet.push(neighbor);
+                    }
+                }
+            }
+        }
 }
