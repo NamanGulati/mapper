@@ -1,0 +1,19 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "g++ build debug active file",
+            "command": "make",
+            "args": [
+                "CONF=debug"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "g++ build active file",
+            "command": "make",
+            "args": []
+        },
+    ],
+    "version": "2.0.0"
+}
