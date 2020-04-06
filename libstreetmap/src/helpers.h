@@ -85,7 +85,7 @@ struct POIData{
 
 struct PathData{
     std::vector<StreetSegmentIndex> path;
-    double travelTIme;
+    double travelTime;
 };
 
 class segIntersectionData{

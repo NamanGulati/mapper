@@ -7,22 +7,33 @@
 #include "m1.h"
 #include <queue>
 #include <list>
+#include <set>
 #include <iostream>
 #include "helpers.h"
 #include "courier_verify.h"
+#include <chrono>
 
 //#define drawAlgos
+std::unordered_map<IntersectionIndex, std::unordered_map<IntersectionIndex, PathData>> travelTimes;
 
 struct pickDrop{
         int packageIndex=-1;
         IntersectionIndex intersection=-1;
         bool pickOrDrop=true; //true = pickup
+        float itemWeight;
 };
 
 double get_seg_cost(StreetSegmentIndex current, StreetSegmentIndex next, const double turn_penalty);
+double computeTravelTime(std::vector<pickDrop> deliveryOrder);
+bool isLegal(std::vector<pickDrop> deliveryOrder, const float truck_capacity);
+std::vector<pickDrop> twoOptSwap(std::vector<pickDrop> deliveryOrder, int first, int second);
+std::vector<pickDrop> simpleSwap(std::vector<pickDrop> deliveryOrder, int first, int second);
 
 std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &deliveries, const std::vector<int> &depots, const float turn_penalty, const float truck_capacity)
 {
+    auto startTime = std::chrono::high_resolution_clock::now();
+    bool timeOut = false;
+    
     std::vector<int> deliveryPoints;
     for (int i = 0; i < deliveries.size(); i++)
     {
@@ -30,7 +41,6 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         deliveryPoints.push_back(deliveries[i].pickUp);
     }
     deliveryPoints.insert(deliveryPoints.end(), depots.begin(), depots.end());
-    std::unordered_map<IntersectionIndex, std::unordered_map<IntersectionIndex, PathData>> travelTimes;
 
     for (int intersect_id_start : deliveryPoints)
     {
@@ -99,7 +109,8 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         for (int j = 0; j < deliveries.size(); j++)
         {
             DeliveryInfo d = deliveries[j];
-            double time = travelTimes[depots[i]][d.pickUp].travelTIme;
+            
+            double time = travelTimes[depots[i]][d.pickUp].travelTime;
             if (time < minPackageTravelTime)
             {
                 minPackageInternal = j;
@@ -116,7 +127,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
 
 
     std::vector<pickDrop> picksAndDrops; //true  = pickup
-    picksAndDrops.push_back({minPackage,deliveries[minPackage].pickUp,true});
+    picksAndDrops.push_back({minPackage,deliveries[minPackage].pickUp,true, deliveries[minPackage].itemWeight});
     std::list<int> canPickUp;
     std::vector<int> packagesCompleted;
     std::list<int> canDropOff;
@@ -138,7 +149,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         {
             if (truckWeight + deliveries[package].itemWeight > truck_capacity)
                 continue;
-            double time = travelTimes[picksAndDrops.back().intersection][deliveries[package].pickUp].travelTIme;
+            double time = travelTimes[picksAndDrops.back().intersection][deliveries[package].pickUp].travelTime;
             if (time < nextTravelTime)
             {
                 nextPackage = package;
@@ -149,7 +160,8 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         }
         for (int package : canDropOff)
         {
-            double time = travelTimes[picksAndDrops.back().intersection][deliveries[package].dropOff].travelTIme;
+
+            double time = travelTimes[picksAndDrops.back().intersection][deliveries[package].dropOff].travelTime;
             if (time < nextTravelTime)
             {
                 nextPackage = package;
@@ -184,14 +196,42 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
             packagesCompleted.push_back(nextPackage);
             truckWeight -= deliveries[nextPackage].itemWeight;
         }
-        picksAndDrops.push_back({nextPackage,intersect, pickOrDrop});
+
+        picksAndDrops.push_back({nextPackage,intersect, pickOrDrop, deliveries[nextPackage].itemWeight});
     }
 
+    int prev = 0;
+    int curr = 1;
+    std::vector<pickDrop> newRoute;
+    std::vector<pickDrop> bestRoute;
+    double newTime;
+    double bestTime = computeTravelTime(picksAndDrops);
+    while(!timeOut){        
+        for(int i = 1; i < picksAndDrops.size()-1; i++){
+            for(int k = i+1; k < picksAndDrops.size(); k++){
+                newRoute = simpleSwap(picksAndDrops, i, k);
+                newTime = computeTravelTime(newRoute);
+                if(newTime < bestTime && isLegal(newRoute, truck_capacity)){
+                    bestTime = newTime;
+                    picksAndDrops = newRoute;
+                    curr++;
+                }
+            }
+        }
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime - startTime);
+        
+        if(wallClock.count() > 40.5)
+            timeOut = true;
+        prev++;
+    }
+    
     int dropOffDepot = 0;
     double depotDist = DBL_MAX;
     for (int depot : depots)
     {
-        double time = travelTimes[picksAndDrops.back().intersection][depot].travelTIme;
+
+        double time = travelTimes[picksAndDrops.back().intersection][depot].travelTime;
         if (time < depotDist)
         {
             depotDist = time;
@@ -260,4 +300,56 @@ std::vector<pickDrop> swap(std::vector<pickDrop> couriers, int index1, int index
     //reverse until legal
     //return the mandem
 
+}
+
+std::vector<pickDrop> twoOptSwap(std::vector<pickDrop> deliveryOrder, int first, int second){
+    std::vector<pickDrop> newPath;
+    
+    for(int i = 0; i < first; i++)
+        newPath.push_back(deliveryOrder[i]);
+    
+    for(int i = second; i >=first; i--)
+        newPath.push_back(deliveryOrder[i]);
+    
+    for(int i = second+1; i < deliveryOrder.size(); i++)
+        newPath.push_back(deliveryOrder[i]);
+    
+    return newPath;
+}
+
+std::vector<pickDrop> simpleSwap(std::vector<pickDrop> deliveryOrder, int first, int second){
+    auto temp = deliveryOrder[first];
+    deliveryOrder[first] = deliveryOrder[second];
+    deliveryOrder[second] = temp;
+    return deliveryOrder;
+}
+
+bool isLegal(std::vector<pickDrop> deliveryOrder, const float truck_capacity){
+    float curr_truck_wgt = 0;
+    std::vector<int> pickedUp;
+    std::vector<int> droppedOff;
+    int completedPackages = 0;
+    
+    for(int idx = 0; idx < deliveryOrder.size(); idx++){
+        if(deliveryOrder[idx].pickOrDrop){
+            pickedUp.push_back(deliveryOrder[idx].packageIndex);
+            curr_truck_wgt += deliveryOrder[idx].itemWeight;
+            if(curr_truck_wgt > truck_capacity) return false;
+        }
+        else if(std::count(pickedUp.begin(), pickedUp.end(), deliveryOrder[idx].packageIndex)){
+            droppedOff.push_back(deliveryOrder[idx].packageIndex);
+            completedPackages++;
+            curr_truck_wgt -= deliveryOrder[idx].itemWeight;
+        }  
+    }
+    if(completedPackages == deliveryOrder.size()/2) return true;
+    else return false;
+}
+
+double computeTravelTime(std::vector<pickDrop> deliveryOrder){
+    double travelTime = 0;
+    for(int i = 1; i < deliveryOrder.size(); i++){
+        travelTime += travelTimes[deliveryOrder[i-1].intersection][deliveryOrder[i].intersection].travelTime;
+    }
+    return travelTime;
 }
