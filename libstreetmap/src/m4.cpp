@@ -10,7 +10,6 @@
 #include <set>
 #include <iostream>
 #include "helpers.h"
-#include "courier_verify.h"
 #include <chrono>
 #include <thread>
 #include <mutex>
