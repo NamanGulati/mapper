@@ -172,24 +172,23 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
 
         #pragma omp parallel for 
         for(int i = 1; i < picksAndDrops.size()-1; i++){
+            #pragma omp parallel for 
             for(int k = i+1; k < picksAndDrops.size(); k++){
-                std::vector<pickDrop> newRoute = twoOptSwap(picksAndDrops, i, k);
-                double newTime = computeTravelTime(newRoute);
-                if(newTime < bestTime && isLegal(newRoute, truck_capacity)){
-                    #pragma omp critical
-                    bestTime = newTime;
-                    #pragma omp critical
-                    picksAndDrops = newRoute;
-                    #pragma omp critical
-                    curr++;
-                }
+                // std::vector<pickDrop> newRoute = twoOptSwap(picksAndDrops, i, k);
+                // double newTime = computeTravelTime(newRoute);
+                // if(newTime < bestTime && isLegal(newRoute, truck_capacity)){
+                //     #pragma omp critical
+                //     bestTime = newTime;
+                //     #pragma omp critical
+                //     picksAndDrops = newRoute;
+                //     #pragma omp critical
+                //     curr++;
+                // }
                 std::pair<double,std::vector<pickDrop>> res = anothaTwoOptSwap(picksAndDrops,i,k,truck_capacity);
+                #pragma omp critical
                 if(res.first>0&&res.first<bestTime){
-                    #pragma omp critical
                     bestTime = res.first;
-                    #pragma omp critical
                     picksAndDrops = res.second;
-                    #pragma omp critical
                     curr++;
                 }
             }
