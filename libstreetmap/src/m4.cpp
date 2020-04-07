@@ -35,6 +35,7 @@ double multiDestDijkstra(int intersect_id_start, std::vector<int>deliveryPoints,
 template<typename T,typename Y, typename Z>
 void combineVectors(std::vector<pickDrop> & dest, std::pair<T,T> v1, std::pair<Y,Y> v2, std::pair<Z,Z> v3);
 std::pair<double,std::vector<pickDrop>> anothaTwoOptSwap(std::vector<pickDrop> & deliveryOrder, int first, int second, float truck_capacity);
+
 std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &deliveries, const std::vector<int> &depots, const float turn_penalty, const float truck_capacity)
 {
     travelTimes.clear();
@@ -55,7 +56,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         multiDestDijkstra(deliveryPoints[i],deliveryPoints,turn_penalty);        
     }
 
-    int minDepot = depots[0];
+    /*int minDepot = depots[0];
     double minDepotTravelTime = DBL_MAX;
     int minPackage = 0;
     for (int i = 0; i < depots.size(); i++)
@@ -79,83 +80,93 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
             minDepot = depots[i];
             minPackage = minPackageInternal;
         }
-    }
+    }*/
 
+    std::vector<pickDrop> picksAndDrops;
+    double pdTime=DBL_MAX;
 
-    std::vector<pickDrop> picksAndDrops; //true  = pickup
-    picksAndDrops.push_back({minPackage,deliveries[minPackage].pickUp,true, deliveries[minPackage].itemWeight});
-    std::list<int> canPickUp;
-    std::vector<int> packagesCompleted;
-    std::list<int> canDropOff;
-    canDropOff.push_back(minPackage);
+    #pragma omp parallel for
+    for(int minPackage=0;minPackage<deliveries.size();minPackage++){
+        std::vector<pickDrop> picksAndDropsLocal; //true  = pickup
+        picksAndDropsLocal.push_back({minPackage,deliveries[minPackage].pickUp,true, deliveries[minPackage].itemWeight});
+        std::list<int> canPickUp;
+        std::vector<int> packagesCompleted;
+        std::list<int> canDropOff;
+        canDropOff.push_back(minPackage);
 
-    for (size_t i = 0; i < deliveries.size(); i++)
-    {
-        if (i != minPackage)
-            canPickUp.push_back(i);
-    }
-    float truckWeight = deliveries[minPackage].itemWeight;
-    while (packagesCompleted.size() < deliveries.size())
-    {
-        int nextPackage = 0;
-        bool pickOrDrop = true;
-        double nextTravelTime = DBL_MAX;
-        IntersectionIndex intersect=-1;
-        for (int package : canPickUp)
+        for (size_t i = 0; i < deliveries.size(); i++)
         {
-            if (truckWeight + deliveries[package].itemWeight > truck_capacity)
-                continue;
-            double time = travelTimes[picksAndDrops.back().intersection][deliveries[package].pickUp].travelTime;
-            if (time < nextTravelTime)
-            {
-                nextPackage = package;
-                pickOrDrop = true;
-                nextTravelTime = time;
-                intersect = deliveries[package].pickUp;
-            }
+            if (i != minPackage)
+                canPickUp.push_back(i);
         }
-        for (int package : canDropOff)
+        float truckWeight = deliveries[minPackage].itemWeight;
+        while (packagesCompleted.size() < deliveries.size())
         {
-
-            double time = travelTimes[picksAndDrops.back().intersection][deliveries[package].dropOff].travelTime;
-            if (time < nextTravelTime)
+            int nextPackage = 0;
+            bool pickOrDrop = true;
+            double nextTravelTime = DBL_MAX;
+            IntersectionIndex intersect=-1;
+            for (int package : canPickUp)
             {
-                nextPackage = package;
-                pickOrDrop = false;
-                nextTravelTime = time;
-                intersect=deliveries[package].dropOff;
-            }
-        }
-        if (pickOrDrop)
-        {
-            for (auto i = canPickUp.begin();i!=canPickUp.end(); i++)
-            {
-                if (*i == nextPackage)
+                if (truckWeight + deliveries[package].itemWeight > truck_capacity)
+                    continue;
+                double time = travelTimes[picksAndDropsLocal.back().intersection][deliveries[package].pickUp].travelTime;
+                if (time < nextTravelTime)
                 {
-                    canPickUp.erase(i);
-                    break;
+                    nextPackage = package;
+                    pickOrDrop = true;
+                    nextTravelTime = time;
+                    intersect = deliveries[package].pickUp;
                 }
             }
-            canDropOff.push_back(nextPackage);
-            truckWeight += deliveries[nextPackage].itemWeight;
-        }
-        else
-        {
-            for (auto i = canDropOff.begin(); i != canDropOff.end(); i++)
+            for (int package : canDropOff)
             {
-                if (*i == nextPackage)
+
+                double time = travelTimes[picksAndDropsLocal.back().intersection][deliveries[package].dropOff].travelTime;
+                if (time < nextTravelTime)
                 {
-                    canDropOff.erase(i);
-                    break;
+                    nextPackage = package;
+                    pickOrDrop = false;
+                    nextTravelTime = time;
+                    intersect=deliveries[package].dropOff;
                 }
             }
-            packagesCompleted.push_back(nextPackage);
-            truckWeight -= deliveries[nextPackage].itemWeight;
+            if (pickOrDrop)
+            {
+                for (auto i = canPickUp.begin();i!=canPickUp.end(); i++)
+                {
+                    if (*i == nextPackage)
+                    {
+                        canPickUp.erase(i);
+                        break;
+                    }
+                }
+                canDropOff.push_back(nextPackage);
+                truckWeight += deliveries[nextPackage].itemWeight;
+            }
+            else
+            {
+                for (auto i = canDropOff.begin(); i != canDropOff.end(); i++)
+                {
+                    if (*i == nextPackage)
+                    {
+                        canDropOff.erase(i);
+                        break;
+                    }
+                }
+                packagesCompleted.push_back(nextPackage);
+                truckWeight -= deliveries[nextPackage].itemWeight;
+            }
+
+            picksAndDropsLocal.push_back({nextPackage,intersect, pickOrDrop, deliveries[nextPackage].itemWeight});
         }
-
-        picksAndDrops.push_back({nextPackage,intersect, pickOrDrop, deliveries[nextPackage].itemWeight});
+        double time = computeTravelTime(picksAndDropsLocal);
+        #pragma omp critical
+        if(time<pdTime){
+            pdTime=time;
+            picksAndDrops = picksAndDropsLocal;
+        }
     }
-
  
     int prev = 0;
  
@@ -191,14 +202,16 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
             }
         }
         prev++;
-        //if(prev == curr)
-        //   break;
+        if(prev == curr)
+           break;
     }
     
     
     
     int dropOffDepot = 0;
     double depotDist = DBL_MAX;
+    int minDepot=0;
+    double minDepotTravelTime = DBL_MAX;
     for (int depot : depots)
     {
 
