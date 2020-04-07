@@ -18,6 +18,8 @@
 //#define drawAlgos
 std::unordered_map<IntersectionIndex, std::unordered_map<IntersectionIndex, PathData>> travelTimes;
 std::mutex travelTimes_mutex;
+int illegal = 0;
+int legal = 0;
 
 struct pickDrop{
         int packageIndex=-1;
@@ -30,7 +32,7 @@ double get_seg_cost(StreetSegmentIndex current, StreetSegmentIndex next, const d
 double computeTravelTime(std::vector<pickDrop> deliveryOrder);
 bool isLegal(std::vector<pickDrop> deliveryOrder, const float truck_capacity);
 std::vector<pickDrop> twoOptSwap(std::vector<pickDrop> deliveryOrder, int first, int second);
-std::vector<pickDrop> simpleSwap(std::vector<pickDrop> deliveryOrder, int first, int second);
+std::pair<double,std::vector<pickDrop>> simpleSwap(std::vector<pickDrop> deliveryOrder, int first, int second, const float truck_capacity);
 double multiDestDijkstra(int intersect_id_start, std::vector<int>deliveryPoints, float turn_penalty);
 template<typename T,typename Y, typename Z>
 void combineVectors(std::vector<pickDrop> & dest, std::pair<T,T> v1, std::pair<Y,Y> v2, std::pair<Z,Z> v3);
@@ -169,11 +171,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
     }
  
     int prev = 0;
- 
     int curr = 1;
-
-    
-    
     std::vector<pickDrop> bestRoute;
     double bestTime = computeTravelTime(picksAndDrops); 
     //std::cout<<"wallClock before while loop: "<<wallClock.count()<<std::endl;
@@ -205,7 +203,38 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         if(prev == curr)
            break;
     }
-    
+
+    prev = 0;
+    curr = 1;
+    while(!timeOut){
+        #pragma omp parallel for 
+        for(int i = 1; i < picksAndDrops.size()-1; i++){
+            #pragma omp parallel for 
+            for(int k = i+1; k < picksAndDrops.size(); k++){
+                std::pair<double,std::vector<pickDrop>> res = simpleSwap(picksAndDrops,i,k, truck_capacity);
+                #pragma omp critical
+                if(res.first>0&&res.first<bestTime){
+                    bestTime = res.first;
+                    picksAndDrops = res.second;
+                    curr++;
+                }
+            }
+
+            auto currentTime = std::chrono::high_resolution_clock::now();
+            auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime - startTime);
+            if(wallClock.count() > 40.5){
+                timeOut = true;
+                i=picksAndDrops.size();
+            }
+        }
+        prev++;
+        if(prev == curr)
+           break;
+
+
+    }
+    std::cout << "legal: "<< legal << std::endl;
+    std::cout << "illegal: " << illegal << std::endl;
     
     
     int dropOffDepot = 0;
@@ -367,7 +396,8 @@ std::pair<double,std::vector<pickDrop>> anothaTwoOptSwap(std::vector<pickDrop> &
                         best_time = time;
                         best = std::make_pair(time,result);
                     }
-                }
+                    legal++;
+                }else illegal++;
             }
         }
     }
@@ -392,11 +422,15 @@ void combineVectors(std::vector<pickDrop> & dest, std::pair<T,T> v1,
     dest.insert(dest.end(),v3.first, v3.second);
 }
 
-std::vector<pickDrop> simpleSwap(std::vector<pickDrop> deliveryOrder, int first, int second){
+std::pair<double,std::vector<pickDrop>> simpleSwap(std::vector<pickDrop> deliveryOrder, int first, int second, const float truck_capacity){
     auto temp = deliveryOrder[first];
     deliveryOrder[first] = deliveryOrder[second];
     deliveryOrder[second] = temp;
-    return deliveryOrder;
+
+    double time = computeTravelTime(deliveryOrder);
+    
+    if(isLegal(deliveryOrder, truck_capacity)) return std::make_pair(time,deliveryOrder);
+    else return std::make_pair(-1, std::vector<pickDrop>(0));
 }
 
 bool isLegal(std::vector<pickDrop> deliveryOrder, const float truck_capacity){
