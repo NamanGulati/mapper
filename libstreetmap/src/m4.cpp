@@ -174,16 +174,6 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         for(int i = 1; i < picksAndDrops.size()-1; i++){
             #pragma omp parallel for 
             for(int k = i+1; k < picksAndDrops.size(); k++){
-                // std::vector<pickDrop> newRoute = twoOptSwap(picksAndDrops, i, k);
-                // double newTime = computeTravelTime(newRoute);
-                // if(newTime < bestTime && isLegal(newRoute, truck_capacity)){
-                //     #pragma omp critical
-                //     bestTime = newTime;
-                //     #pragma omp critical
-                //     picksAndDrops = newRoute;
-                //     #pragma omp critical
-                //     curr++;
-                // }
                 std::pair<double,std::vector<pickDrop>> res = anothaTwoOptSwap(picksAndDrops,i,k,truck_capacity);
                 #pragma omp critical
                 if(res.first>0&&res.first<bestTime){
@@ -200,16 +190,12 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
                 i=picksAndDrops.size();
             }
         }
-        auto currentTime = std::chrono::high_resolution_clock::now();
-        auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime - startTime);
-        auto wallClockInternal = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime - startTimeInternal);
-        //std::cout<<"wallClock: "<<wallClock.count()<<" internal time: "<<wallClockInternal.count()<<" picksDrops: "<<picksAndDrops.size()<<std::endl;
-        if(wallClock.count() > 45)
-            timeOut = true;
         prev++;
         //if(prev == curr)
         //   break;
     }
+    
+    
     
     int dropOffDepot = 0;
     double depotDist = DBL_MAX;
@@ -221,6 +207,11 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         {
             depotDist = time;
             dropOffDepot = depot;
+        }
+        time = travelTimes[depot][picksAndDrops.front().intersection].travelTime;
+        if(time<minDepotTravelTime){
+            minDepotTravelTime = time;
+            minDepot = depot;
         }
     }
 
