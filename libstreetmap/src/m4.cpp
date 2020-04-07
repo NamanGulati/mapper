@@ -233,8 +233,8 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
 
 
     }
-    std::cout << "legal: "<< legal << std::endl;
-    std::cout << "illegal: " << illegal << std::endl;
+    //std::cout << "legal: "<< legal << std::endl;
+    //std::cout << "illegal: " << illegal << std::endl;
     
     
     int dropOffDepot = 0;
@@ -396,8 +396,8 @@ std::pair<double,std::vector<pickDrop>> anothaTwoOptSwap(std::vector<pickDrop> &
                         best_time = time;
                         best = std::make_pair(time,result);
                     }
-                    legal++;
-                }else illegal++;
+                    //legal++;
+                }//else illegal++;
             }
         }
     }
