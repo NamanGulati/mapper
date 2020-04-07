@@ -11,13 +11,10 @@
 #include <iostream>
 #include "helpers.h"
 #include <chrono>
-#include <thread>
-#include <mutex>
 #include <boost/variant.hpp>
 
 //#define drawAlgos
 std::unordered_map<IntersectionIndex, std::unordered_map<IntersectionIndex, PathData>> travelTimes;
-std::mutex travelTimes_mutex;
 int illegal = 0;
 int legal = 0;
 
@@ -488,7 +485,7 @@ double multiDestDijkstra(int intersect_id_start, std::vector<int>deliveryPoints,
                     temp = cameFrom[temp];
                 }
                 std::reverse(path.begin(), path.end());
-                std::lock_guard<std::mutex> guard(travelTimes_mutex);
+                #pragma omp critical
                 travelTimes[intersect_id_start][current.intersection] = {path,compute_path_travel_time(path, turn_penalty)};
             }
 
