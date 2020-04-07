@@ -185,7 +185,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
 
             auto currentTime = std::chrono::high_resolution_clock::now();
             auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime - startTime);
-            if(wallClock.count() > 45){
+            if(wallClock.count() > 40.5){
                 timeOut = true;
                 i=picksAndDrops.size();
             }
