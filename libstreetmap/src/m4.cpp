@@ -11,7 +11,7 @@
 #include <iostream>
 #include "helpers.h"
 #include <chrono>
-#include <boost/variant.hpp>
+#include <cmath>
 
 //#define drawAlgos
 std::unordered_map<IntersectionIndex, std::unordered_map<IntersectionIndex, PathData>> travelTimes;
@@ -37,6 +37,7 @@ std::pair<double,std::vector<pickDrop>> anothaTwoOptSwap(std::vector<pickDrop> &
 
 std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &deliveries, const std::vector<int> &depots, const float turn_penalty, const float truck_capacity)
 {
+    srand(time(NULL));
     travelTimes.clear();
     auto startTime = std::chrono::high_resolution_clock::now();
     bool timeOut = false;
@@ -177,10 +178,10 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         {
             int prev = 0;
             int curr = 1;
-            while(!timeOut){
+
+            while(!timeOut&&prev!=curr){
                 auto startTimeInternal = std::chrono::high_resolution_clock::now();
                 for(int i = 1; i < picksAndDrops.size()-1; i++){
-                    
                     for(int k = i+1; k < picksAndDrops.size(); k++){
                         std::pair<double,std::vector<pickDrop>> res = anothaTwoOptSwap(picksAndDrops,i,k,truck_capacity);
                         #pragma omp critical
@@ -193,15 +194,14 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
 
                     auto currentTime = std::chrono::high_resolution_clock::now();
                     auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime - startTime);
-                    if(wallClock.count() > 40.5){
+                    if(wallClock.count() > 45){
                         #pragma omp critical
                         timeOut = true;
                         i=picksAndDrops.size();
                     }
                 }
+
                 prev++;
-                if(prev == curr)
-                break;
             }
         }
         #pragma omp section
@@ -221,7 +221,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
                             curr++;
                         }
                     }
-
+                    
                     auto currentTime = std::chrono::high_resolution_clock::now();
                     auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime - startTime);
                     if(wallClock.count() > 40.5){
@@ -231,8 +231,6 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
                     }
                 }
                 prev++;
-                if(prev == curr)
-                break;
             }
         }
     }
@@ -351,11 +349,13 @@ std::pair<double,std::vector<pickDrop>> anothaTwoOptSwap(std::vector<pickDrop> &
     
     std::pair<double,std::vector<pickDrop>> best;
     
-    for(int i=0;i<6;i++){
+    for(int i=0;i<5;i++){
         for(int j=0;j<6;j++){
             if(i==j||abs(i-j)==3)
                 continue;
             for(int k=0;k<6;k++){
+                if(k==3)
+                    continue;
                 if(k==i||k==j||abs(i-k)==3||abs(j-k)==3)
                     continue;
                 if(i==0&&j==1&&k==2)
