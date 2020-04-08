@@ -167,68 +167,74 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
         }
     }
  
-    int prev = 0;
-    int curr = 1;
+    
     std::vector<pickDrop> bestRoute;
-    double bestTime = computeTravelTime(picksAndDrops); 
-    //std::cout<<"wallClock before while loop: "<<wallClock.count()<<std::endl;
-   
-    while(!timeOut){
-        auto startTimeInternal = std::chrono::high_resolution_clock::now();
+    double bestTime = computeTravelTime(picksAndDrops);
+    #pragma omp parallel sections
+    {
 
-        #pragma omp parallel for 
-        for(int i = 1; i < picksAndDrops.size()-1; i++){
-            #pragma omp parallel for 
-            for(int k = i+1; k < picksAndDrops.size(); k++){
-                std::pair<double,std::vector<pickDrop>> res = anothaTwoOptSwap(picksAndDrops,i,k,truck_capacity);
-                #pragma omp critical
-                if(res.first>0&&res.first<bestTime){
-                    bestTime = res.first;
-                    picksAndDrops = res.second;
-                    curr++;
+        #pragma omp section
+        {
+            int prev = 0;
+            int curr = 1;
+            while(!timeOut){
+                auto startTimeInternal = std::chrono::high_resolution_clock::now();
+                for(int i = 1; i < picksAndDrops.size()-1; i++){
+                    
+                    for(int k = i+1; k < picksAndDrops.size(); k++){
+                        std::pair<double,std::vector<pickDrop>> res = anothaTwoOptSwap(picksAndDrops,i,k,truck_capacity);
+                        #pragma omp critical
+                        if(res.first>0&&res.first<bestTime){
+                            bestTime = res.first;
+                            picksAndDrops = res.second;
+                            curr++;
+                        }
+                    }
+
+                    auto currentTime = std::chrono::high_resolution_clock::now();
+                    auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime - startTime);
+                    if(wallClock.count() > 40.5){
+                        #pragma omp critical
+                        timeOut = true;
+                        i=picksAndDrops.size();
+                    }
                 }
-            }
-
-            auto currentTime = std::chrono::high_resolution_clock::now();
-            auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime - startTime);
-            if(wallClock.count() > 40.5){
-                timeOut = true;
-                i=picksAndDrops.size();
+                prev++;
+                if(prev == curr)
+                break;
             }
         }
-        prev++;
-        if(prev == curr)
-           break;
-    }
+        #pragma omp section
+        {
+            int prev = 0;
+            int curr = 1;
+            while(!timeOut&&prev!=curr){
+                //#pragma omp parallel for 
+                for(int i = 1; i < picksAndDrops.size()-1; i++){
+                 //   #pragma omp parallel for 
+                    for(int k = i+1; k < picksAndDrops.size(); k++){
+                        std::pair<double,std::vector<pickDrop>> res = simpleSwap(picksAndDrops,i,k, truck_capacity);
+                        #pragma omp critical
+                        if(res.first>0&&res.first<bestTime) {
+                            bestTime = res.first;
+                            picksAndDrops = res.second;
+                            curr++;
+                        }
+                    }
 
-    prev = 0;
-    curr = 1;
-    while(!timeOut){
-        #pragma omp parallel for 
-        for(int i = 1; i < picksAndDrops.size()-1; i++){
-            #pragma omp parallel for 
-            for(int k = i+1; k < picksAndDrops.size(); k++){
-                std::pair<double,std::vector<pickDrop>> res = simpleSwap(picksAndDrops,i,k, truck_capacity);
-                #pragma omp critical
-                if(res.first>0&&res.first<bestTime){
-                    bestTime = res.first;
-                    picksAndDrops = res.second;
-                    curr++;
+                    auto currentTime = std::chrono::high_resolution_clock::now();
+                    auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime - startTime);
+                    if(wallClock.count() > 40.5){
+                        #pragma omp critical
+                        timeOut = true;
+                        i=picksAndDrops.size();
+                    }
                 }
-            }
-
-            auto currentTime = std::chrono::high_resolution_clock::now();
-            auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime - startTime);
-            if(wallClock.count() > 40.5){
-                timeOut = true;
-                i=picksAndDrops.size();
+                prev++;
+                if(prev == curr)
+                break;
             }
         }
-        prev++;
-        if(prev == curr)
-           break;
-
-
     }
     //std::cout << "legal: "<< legal << std::endl;
     //std::cout << "illegal: " << illegal << std::endl;
@@ -324,11 +330,6 @@ std::vector<pickDrop> twoOptSwap(std::vector<pickDrop> deliveryOrder, int first,
 
     return newPath;
 }
-class pickDropPairCompare{
-    bool operator() (std::pair<double,std::vector<pickDrop>> & lhs, std::pair<double,std::vector<pickDrop>> & rhs){
-        return lhs.first>rhs.first;
-    }
-};
 
 std::pair<double,std::vector<pickDrop>> anothaTwoOptSwap(std::vector<pickDrop> & deliveryOrder, int first, int second, float truck_capacity){
     auto startTime = std::chrono::high_resolution_clock::now();
