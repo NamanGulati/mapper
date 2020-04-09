@@ -26,8 +26,8 @@ struct pickDrop{
 };
 
 double get_seg_cost(StreetSegmentIndex current, StreetSegmentIndex next, const double turn_penalty);
-double computeTravelTime(std::vector<pickDrop> deliveryOrder);
-bool isLegal(std::vector<pickDrop> deliveryOrder, const float truck_capacity);
+double computeTravelTime(std::vector<pickDrop>& deliveryOrder);
+bool isLegal(std::vector<pickDrop>& deliveryOrder, const float truck_capacity);
 std::vector<pickDrop> twoOptSwap(std::vector<pickDrop> deliveryOrder, int first, int second);
 std::pair<double,std::vector<pickDrop>> simpleSwap(std::vector<pickDrop> deliveryOrder, int first, int second, const float truck_capacity);
 double multiDestDijkstra(int intersect_id_start, std::vector<int>deliveryPoints, float turn_penalty);
@@ -37,24 +37,21 @@ std::pair<double,std::vector<pickDrop>> anothaTwoOptSwap(std::vector<pickDrop> &
 
 std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &deliveries, const std::vector<int> &depots, const float turn_penalty, const float truck_capacity)
 {
-    srand(time(NULL));
+    if (truck_capacity == 0){
+        return std::vector<CourierSubpath>();
+    }
     travelTimes.clear();
     auto startTime = std::chrono::high_resolution_clock::now();
     bool timeOut = false;
-    int itemWeightMax = 0;
-
-    if(truck_capacity == 0)
-        return std::vector<CourierSubpath>();
         
     std::vector<int> deliveryPoints;
     for (int i = 0; i < deliveries.size(); i++)
     {
-        if(deliveries[i].itemWeight > itemWeightMax)
-            itemWeightMax = deliveries[i].itemWeight;
-        if(itemWeightMax > truck_capacity)
-            return std::vector<CourierSubpath>();
         deliveryPoints.push_back(deliveries[i].dropOff);
         deliveryPoints.push_back(deliveries[i].pickUp);
+        if (deliveries[i].itemWeight > truck_capacity){
+            return std::vector<CourierSubpath>();
+        }
     }
     deliveryPoints.insert(deliveryPoints.end(), depots.begin(), depots.end());
 
@@ -234,7 +231,7 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
                     
                     auto currentTime = std::chrono::high_resolution_clock::now();
                     auto wallClock = std::chrono::duration_cast<std::chrono::duration<double>> (currentTime - startTime);
-                    if(wallClock.count() > 40.5){
+                    if(wallClock.count() > 45){
                         #pragma omp critical
                         timeOut = true;
                         i=picksAndDrops.size();
@@ -441,7 +438,7 @@ std::pair<double,std::vector<pickDrop>> simpleSwap(std::vector<pickDrop> deliver
     else return std::make_pair(-1, std::vector<pickDrop>(0));
 }
 
-bool isLegal(std::vector<pickDrop> deliveryOrder, const float truck_capacity){
+bool isLegal(std::vector<pickDrop>& deliveryOrder, const float truck_capacity){
     float curr_truck_wgt = 0;
     std::vector<int> pickedUp;
     std::vector<int> droppedOff;
@@ -463,7 +460,7 @@ bool isLegal(std::vector<pickDrop> deliveryOrder, const float truck_capacity){
     else return false;
 }
 
-double computeTravelTime(std::vector<pickDrop> deliveryOrder){
+double computeTravelTime(std::vector<pickDrop>& deliveryOrder){
     double travelTime = 0;
     for(int i = 1; i < deliveryOrder.size(); i++){
         travelTime += travelTimes[deliveryOrder[i-1].intersection][deliveryOrder[i].intersection].travelTime;
