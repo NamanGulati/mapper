@@ -41,14 +41,24 @@ std::vector<CourierSubpath> traveling_courier(const std::vector<DeliveryInfo> &d
     travelTimes.clear();
     auto startTime = std::chrono::high_resolution_clock::now();
     bool timeOut = false;
-    
+    int itemWeightMax = 0;
+
+    if(truck_capacity == 0)
+        return std::vector<CourierSubpath>();
+        
     std::vector<int> deliveryPoints;
     for (int i = 0; i < deliveries.size(); i++)
     {
+        if(deliveries[i].itemWeight > itemWeightMax)
+            itemWeightMax = deliveries[i].itemWeight;
+        if(itemWeightMax > truck_capacity)
+            return std::vector<CourierSubpath>();
         deliveryPoints.push_back(deliveries[i].dropOff);
         deliveryPoints.push_back(deliveries[i].pickUp);
     }
     deliveryPoints.insert(deliveryPoints.end(), depots.begin(), depots.end());
+
+    
 
     #pragma omp parallel for
     for (int i =0;i<deliveryPoints.size();i++)
